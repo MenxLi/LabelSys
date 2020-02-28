@@ -2,7 +2,6 @@ from glob import glob
 import numpy as np
 import pydicom
 import os
-from config import *
 
 # Pydicom reading reference: https://pydicom.github.io/pydicom/stable/tutorials/dataset_basics.html
 
@@ -58,15 +57,11 @@ class DicomLoader:
 
 class FolderLoader:
     """load a folder of different patients' MRI images"""
-    global SERIES, DicomLoader
-    def __init__(self, parent_dir, entry = SERIES):
+    def __init__(self, parent_dir):
         self.paths = []
         self.parent_dir = parent_dir # folder that contains folders of dicom file
         self.curr_patient = None
-        self.curr_imgs = None
-        self.curr_SOPInstanceUIDs = None
         self.ptr = 0
-        self.entry = entry
         for i in os.listdir(parent_dir):
             curr_path = os.path.join(parent_dir, i)
             if os.path.isdir(curr_path):
@@ -74,8 +69,6 @@ class FolderLoader:
         self.loadDicom(self.ptr)
     def loadDicom(self, id):
         self.curr_patient = DicomLoader(self.paths[id])
-        self.curr_imgs, self.curr_SOPInstanceUIDs = self.curr_patient.getSeriesImg(self.entry)
-        return self.curr_imgs
     def next(self):
         if self.ptr < len(self.paths)-1:
             self.ptr += 1
