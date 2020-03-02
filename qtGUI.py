@@ -25,7 +25,8 @@ class MainWindow(QMainWindow):
         sys.stdout = EmittingStream(textWritten = self.slotPutOnConsole)
 
     def _initMenuAct(self):
-        self.act_imp.triggered.connect(self._loadPatients)
+        self.act_open.triggered.connect(self._loadPatients)
+        self.act_fullscreen.triggered.connect(self._changeScreenMode)
 
     def _loadPatients(self):
         """Load patients folder, and call _initPanelAct() to initialize the panel""" 
@@ -38,6 +39,10 @@ class MainWindow(QMainWindow):
         self.fl = FolderLoader(file_path)
         self._initPanelAct()
         return 0
+
+    def _changeScreenMode(self):
+        """Change screen mode between Maximized and full screen"""
+        pass
 
     def _initPanelAct(self):
         """Init the whole panel, will be called on loading the patients""" 
@@ -54,7 +59,7 @@ class MainWindow(QMainWindow):
         print(entry)
         
     def slotPutOnConsole(self, text):
-       self.tb_console.append(text) 
+        self.tb_console.append(text) 
 
     def _updateComboSeries(self):
         """Update the series combobox with image series get from self.fl.curr_patient"""
