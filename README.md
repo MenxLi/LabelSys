@@ -1,29 +1,14 @@
 # README #
 
-This README would normally document whatever steps are necessary to get your application up and running.
+## How to use
 
-### What is this repository for? ###
+$ python main.py  
 
-* Quick summary
-* Version
-* [Learn Markdown](https://bitbucket.org/tutorials/markdowndemo)
+**To start with specific folder of patients:**  
 
-### How do I get set up? ###
+$ python main.py -df /path/to/the/folder 
 
-* Summary of set up
-* Configuration
-* Dependencies
-* Database configuration
-* How to run tests
-* Deployment instructions
 
-### Contribution guidelines ###
 
-* Writing tests
-* Code review
-* Other guidelines
+Module requirement are in ***Requirement.txt***
 
-### Who do I talk to? ###
-
-* Repo owner or admin
-* Other community or team contact

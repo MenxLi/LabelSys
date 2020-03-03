@@ -8,6 +8,7 @@ from pathlib import Path
 import os,sys
 from vtkClass import VtkWidget
 import myFuncs as F
+from config import *
 
 LOCAL_DIR = os.path.dirname(os.path.realpath(__file__))
 
@@ -18,8 +19,7 @@ class MainWindow(QMainWindow):
         ui_path = os.path.join(LOCAL_DIR, "mainWindow.ui")
         uic.loadUi(ui_path, self)
         self.args = args
-        #sys.stdout = EmittingStream(textWritten = self.slotPutOnConsole)
-        # if dev mode, read from cmd
+        sys.stdout = EmittingStream(textWritten = self.slotPutOnConsole)
         if self.args.dev: 
             print("Developing mode...")
             self.slotLoadPatients()
@@ -63,6 +63,8 @@ class MainWindow(QMainWindow):
     def initPanelAct(self):
         """Init the whole panel, will be called on loading the patients""" 
         self.combo_series.currentTextChanged.connect(self.slotChangeComboSeries)
+        self.combo_label.addItems(LABELS)
+        self.combo_label.currentTextChanged.connect(self.slotChangeComboLabels)
         self.btn_next_slice.clicked.connect(self.slotNextSlice)
         self.btn_prev_slice.clicked.connect(self.slotPrevSlice)
         self.btn_next_patient.clicked.connect(self.slotNextPatient)
@@ -79,6 +81,9 @@ class MainWindow(QMainWindow):
             self.__readSeries()
             self.__updateImg()
         except: pass
+
+    def slotChangeComboLabels(self, entry):
+        pass
 
     def slotNextSlice(self):
         if self.slice_id >= len(self.imgs)-1:
@@ -106,7 +111,11 @@ class MainWindow(QMainWindow):
         self.combo_series.clear()
         series = self.fl.curr_patient.getEntries()
         self.combo_series.addItems(series)
-        self.combo_series.setCurrentText(list(series)[0])
+        # set defult image series
+        if SERIES in series:
+            self.combo_series.setCurrentText(SERIES)
+        else:
+            self.combo_series.setCurrentText(list(series)[0])
 
     def __updatePatient(self):
         """Update current showing patient, will be triggeted when changing patient"""

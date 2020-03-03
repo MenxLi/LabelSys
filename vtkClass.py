@@ -37,11 +37,20 @@ class VtkWidget:
         importer.Update()
         self.im = importer.GetOutput()
 
+        # flip image along y axis
+        flipY_filter = vtk.vtkImageFlip()
+        flipY_filter.SetFilteredAxis(1)
+        flipY_filter.SetInputConnection(importer.GetOutputPort())
+        flipY_filter.Update()
+
         self.actor = vtk.vtkImageActor()
-        self.actor.GetMapper().SetInputConnection(importer.GetOutputPort())
+        self.actor.GetMapper().SetInputConnection(flipY_filter.GetOutputPort())
         
         # Add actor to renderer, reset camera and render
         self.ren.AddActor(self.actor)
         self.ren.ResetCamera()
         self.ren_win.Render()
 
+class MyInteractorStyle(vtk.vtkInteractorStyleTrackballCamera):
+    def __init__(self,parent = None):
+        pass
