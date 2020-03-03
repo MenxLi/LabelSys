@@ -79,7 +79,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="btn_next_slide">
+         <widget class="QPushButton" name="btn_next_slice">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
             <horstretch>0</horstretch>
@@ -99,12 +99,12 @@
            </size>
           </property>
           <property name="text">
-           <string>Next Slide</string>
+           <string>Next Slice</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="btn_prev_slide">
+         <widget class="QPushButton" name="btn_prev_slice">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
             <horstretch>0</horstretch>
@@ -124,7 +124,7 @@
            </size>
           </property>
           <property name="text">
-           <string>Previous Slide</string>
+           <string>Previous Slice</string>
           </property>
          </widget>
         </item>
@@ -270,13 +270,13 @@
     </item>
    </layout>
   </widget>
-  <widget class="QMenuBar" name="menubar">
+  <widget class="QMenuBar" name="menu_bar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
      <width>1024</width>
-     <height>20</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_file">
@@ -296,6 +296,9 @@
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="act_open">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>Open</string>
    </property>
