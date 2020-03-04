@@ -133,6 +133,12 @@ class MainWindow(QMainWindow):
         """update self.imgs and self.SOPInstanceUIDs by current chosen image series"""
         entry = str(self.combo_series.currentText())
         self.imgs, self.SOPInstanceUIDs = self.fl.curr_patient.getSeriesImg(entry)
+    
+    #==============Event Handler================
+    def wheelEvent(self, event):
+        if event.angleDelta().y() < 0:
+            self.slotNextSlice()
+        else: self.slotPrevSlice()
 
 class EmittingStream(QObject):
     """Reference: https://stackoverflow.com/questions/8356336/how-to-capture-output-of-pythons-interpreter-and-show-in-a-text-widget"""

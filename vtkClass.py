@@ -20,6 +20,11 @@ class VtkWidget:
         self.ren_win.Render()
         self.iren.Initialize()
 
+        # change key binding
+        style = MyInteractorStyle()
+        style.SetDefaultRenderer(self.ren)
+        self.iren.SetInteractorStyle(style)
+
         self.colors = vtk.vtkNamedColors()
 
     def readNpArray(self, arr):
@@ -53,4 +58,16 @@ class VtkWidget:
 
 class MyInteractorStyle(vtk.vtkInteractorStyleTrackballCamera):
     def __init__(self,parent = None):
-        pass
+        #self.AddObserver("RightButtonPressEvent", self.rightButtonPressEvent)
+        #self.AddObserver("RightButtonReleaseEvent", self.rightButtonReleaseEvent)
+        self.AddObserver("LeftButtonPressEvent", self.leftButtonPressEvent)
+
+    def rightButtonPressEvent(self, obj, event):
+        self.OnMiddleButtonDown()
+
+    def rightButtonReleaseEvent(self, obj, event):
+        self.OnMiddleButtonUp()
+
+    def leftButtonPressEvent(self, obj, event):
+        click_pos = self.GetInteractor().GetEventPosition()
+        print(click_pos)
