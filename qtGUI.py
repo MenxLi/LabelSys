@@ -29,14 +29,24 @@ class MainWindow(QMainWindow):
         self.showMaximized()
         self.setWindowTitle("LabelSys "+__VERSION__)
 
-        self.initMenuAct()
-        
+        self.initMenu()
+        self.initPanel()
+        # set style sheet
+        # https://doc.qt.io/archives/qt-4.8/stylesheet-reference.html#list-of-properties
+        #self.setStyleSheet("QTextBrowser { background-color: yellow  }")
+        self.tb_console.setStyleSheet("color: white; background-color:black;")
+        # self.setStyleSheet("QPushButton { background-color: #616161;\
+                #border-radius:10px }")
+        #self.setStyleSheet("QWidget { background-color: #3b3b3b; color:white}")
+
+        #raise Exception("Hello")
+
         # data
         # self.imgs = None # current image series of a patient
         # self.SOPInstanceUIDs = None # SOPInstanceUIDs of self.imgs
         # self.slice_id = None  # current slice id
 
-    def initMenuAct(self):
+    def initMenu(self):
         self.act_open.triggered.connect(self.slotLoadPatients)
         self.act_fullscreen.triggered.connect(self.slotChangeScreenMode)
 
@@ -53,14 +63,14 @@ class MainWindow(QMainWindow):
         self.initImageUI()
         self.__updatePatient()
 
-        self.initPanelAct()
+        #self.initPanel()
         return 0
 
     def slotChangeScreenMode(self):
         """Change screen mode between Maximized and full screen"""
         pass
 
-    def initPanelAct(self):
+    def initPanel(self):
         """Init the whole panel, will be called on loading the patients""" 
         self.combo_series.currentTextChanged.connect(self.slotChangeComboSeries)
         self.combo_label.addItems(LABELS)
