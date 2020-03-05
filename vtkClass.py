@@ -21,7 +21,7 @@ class VtkWidget:
         self.iren.Initialize()
 
         # change key binding
-        style = MyInteractorStyle()
+        style = MyInteractorStyle(parent = self.iren)
         style.SetDefaultRenderer(self.ren)
         self.iren.SetInteractorStyle(style)
 
@@ -57,10 +57,14 @@ class VtkWidget:
         self.ren_win.Render()
 
 class MyInteractorStyle(vtk.vtkInteractorStyleTrackballCamera):
-    def __init__(self,parent = None):
-        #self.AddObserver("RightButtonPressEvent", self.rightButtonPressEvent)
-        #self.AddObserver("RightButtonReleaseEvent", self.rightButtonReleaseEvent)
+    def __init__(self,parent):
+        self.parent = parent
+        self.AddObserver("RightButtonPressEvent", self.rightButtonPressEvent)
+        self.AddObserver("RightButtonReleaseEvent", self.rightButtonReleaseEvent)
         self.AddObserver("LeftButtonPressEvent", self.leftButtonPressEvent)
+        self.AddObserver("KeyPressEvent", self.keyPressEvent)
+        self.AddObserver("MouseWheelForwardEvent", None)
+        self.AddObserver("MouseWheelBackwardEvent", None)
 
     def rightButtonPressEvent(self, obj, event):
         self.OnMiddleButtonDown()
@@ -71,3 +75,12 @@ class MyInteractorStyle(vtk.vtkInteractorStyleTrackballCamera):
     def leftButtonPressEvent(self, obj, event):
         click_pos = self.GetInteractor().GetEventPosition()
         print(click_pos)
+
+    def keyPressEvent(self, obj, event):
+        key = self.parent.GetKeySym()
+        if key == "e":
+            self.OnMouseWheelForward()
+        elif key == "q":
+            self.OnMouseWheelBackward()
+        if self.parent.GetControlKey():
+            pass
