@@ -79,13 +79,17 @@ class MainWindow(QMainWindow):
 
     def initPanel(self):
         """Init the whole panel, will be called on loading the patients""" 
-        self.combo_series.currentTextChanged.connect(self.changeComboSeries)
+        self.slider_im.setPageStep(1)        
+        self.slider_im.setEnabled(True)
         self.combo_label.addItems(LABELS)
+
+        self.combo_series.currentTextChanged.connect(self.changeComboSeries)
         self.combo_label.currentTextChanged.connect(self.changComboLabels)
         self.btn_next_slice.clicked.connect(self.nextSlice)
         self.btn_prev_slice.clicked.connect(self.prevSlice)
         self.btn_next_patient.clicked.connect(self.nextPatient)
         self.btn_prev_patient.clicked.connect(self.prevPatient)
+        self.slider_im.valueChanged.connect(self.changeSliderValue)
 
     def initImageUI(self):
         """Put image on to main window, will be called on loading the patients"""
@@ -97,26 +101,34 @@ class MainWindow(QMainWindow):
         try:
             # prevent triggering when changing patient
             self.__readSeries()
-            self.__updateImg()
+            #self.__updateImg()
         except: pass
         finally:
+            self.slider_im.setSliderPosition(self.slice_id)
             self.im_widget.resetCamera()
 
     def changComboLabels(self, entry):
         pass
 
+    def changeSliderValue(self):
+        """Triggered when slider_im changes value"""
+        self.slice_id = self.slider_im.value()
+        self.__updateImg()
+
     def nextSlice(self):
         if self.slice_id >= len(self.imgs)-1:
             return 1
         self.slice_id += 1
-        self.__updateImg()
+        self.slider_im.setSliderPosition(self.slice_id)
+        #self.__updateImg()
         return 0
 
     def prevSlice(self):
-        if self.slice_id <= 1:
+        if self.slice_id < 1:
             return 1
         self.slice_id -= 1
-        self.__updateImg()
+        self.slider_im.setSliderPosition(self.slice_id)
+        #self.__updateImg()
         return 0
 
     def nextPatient(self):
@@ -147,6 +159,8 @@ class MainWindow(QMainWindow):
         self.__updateComboSeries()
         self.__readSeries()
         self.__updateImg()
+        self.slider_im.setSliderPosition(self.slice_id)
+        self.slider_im.setMaximum(len(self.imgs)-1)
 
     def __updateImg(self):
         """update image showing on im_frame"""
@@ -165,12 +179,12 @@ class MainWindow(QMainWindow):
             if modifier == Qt.ControlModifier:
                 self.im_widget.style.OnMouseWheelForward()
             else:
-                self.nextSlice()
+                self.prevSlice()
         else: 
             if modifier == Qt.ControlModifier:
                 self.im_widget.style.OnMouseWheelBackward()
             else:
-                self.prevSlice()
+                self.nextSlice()
     
     def keyPressEvent(self, event):
         key = event.key()
@@ -183,9 +197,9 @@ class MainWindow(QMainWindow):
         if key == Qt.Key_O and modifier == Qt.ControlModifier:
             self.loadPatietns()
         if key == Qt.Key_Up:
-            self.prevSlice()
-        if key == Qt.Key_Down:
             self.nextSlice()
+        if key == Qt.Key_Down:
+            self.prevSlice()
 
 class EmittingStream(QObject):
     """Reference: https://stackoverflow.com/questions/8356336/how-to-capture-output-of-pythons-interpreter-and-show-in-a-text-widget"""

@@ -86,7 +86,3 @@ class FolderLoader:
 
 
 
-
-
-#data_path = "43070000-anon"
-#dl = DicomLoader(data_path)

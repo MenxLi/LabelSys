@@ -37,7 +37,7 @@
      <number>20</number>
     </property>
     <item>
-     <layout class="QHBoxLayout" name="hframe_im_btn" stretch="1,0,5">
+     <layout class="QHBoxLayout" name="hframe_im_btn" stretch="1,0,5,0">
       <item>
        <layout class="QGridLayout" name="grid_btns">
         <property name="sizeConstraint">
@@ -307,6 +307,19 @@
         </property>
         <property name="frameShadow">
          <enum>QFrame::Raised</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QSlider" name="slider_im">
+        <property name="pageStep">
+         <number>1</number>
+        </property>
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="tickPosition">
+         <enum>QSlider::NoTicks</enum>
         </property>
        </widget>
       </item>
