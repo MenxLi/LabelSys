@@ -180,6 +180,8 @@ class MainWindow(QMainWindow):
             self.changeScreenMode()
         if key == Qt.Key_Q and modifier == Qt.ControlModifier:
             self.quitApp()
+        if key == Qt.Key_O and modifier == Qt.ControlModifier:
+            self.loadPatietns()
         if key == Qt.Key_Up:
             self.prevSlice()
         if key == Qt.Key_Down:
