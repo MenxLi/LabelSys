@@ -37,7 +37,7 @@
      <number>20</number>
     </property>
     <item>
-     <layout class="QHBoxLayout" name="hframe_im_btn" stretch="1,5">
+     <layout class="QHBoxLayout" name="hframe_im_btn" stretch="1,0,5">
       <item>
        <layout class="QGridLayout" name="grid_btns">
         <property name="sizeConstraint">
@@ -52,8 +52,43 @@
         <property name="bottomMargin">
          <number>25</number>
         </property>
-        <item row="6" column="0" colspan="2">
-         <widget class="QComboBox" name="combo_label"/>
+        <item row="4" column="1">
+         <widget class="QPushButton" name="btn_prev_patient">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>150</width>
+            <height>50</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>Previous patient</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0">
+         <widget class="QLabel" name="lbl_series">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>Image Series:</string>
+          </property>
+         </widget>
         </item>
         <item row="2" column="0">
          <widget class="QPushButton" name="btn_next_slice">
@@ -80,6 +115,66 @@
           </property>
          </widget>
         </item>
+        <item row="6" column="0" colspan="2">
+         <widget class="QComboBox" name="combo_label"/>
+        </item>
+        <item row="2" column="1">
+         <widget class="QPushButton" name="btn_prev_slice">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>150</width>
+            <height>50</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>Previous Slice</string>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="0">
+         <widget class="QLabel" name="lbl_label">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>Label</string>
+          </property>
+         </widget>
+        </item>
+        <item row="8" column="1">
+         <widget class="QPushButton" name="btn_clear">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>150</width>
+            <height>50</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>Clear</string>
+          </property>
+         </widget>
+        </item>
         <item row="4" column="0">
          <widget class="QPushButton" name="btn_next_patient">
           <property name="sizePolicy">
@@ -102,31 +197,6 @@
           </property>
           <property name="text">
            <string>Next Patient</string>
-          </property>
-         </widget>
-        </item>
-        <item row="4" column="1">
-         <widget class="QPushButton" name="btn_prev_patient">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>0</width>
-            <height>0</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>150</width>
-            <height>50</height>
-           </size>
-          </property>
-          <property name="text">
-           <string>Previous patient</string>
           </property>
          </widget>
         </item>
@@ -183,86 +253,6 @@
           </property>
          </widget>
         </item>
-        <item row="2" column="1">
-         <widget class="QPushButton" name="btn_prev_slice">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>0</width>
-            <height>0</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>150</width>
-            <height>50</height>
-           </size>
-          </property>
-          <property name="text">
-           <string>Previous Slice</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="0">
-         <widget class="QLabel" name="lbl_series">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>Image Series:</string>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="0" colspan="2">
-         <widget class="QComboBox" name="combo_series">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-         </widget>
-        </item>
-        <item row="5" column="0">
-         <widget class="QLabel" name="lbl_label">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>Label</string>
-          </property>
-         </widget>
-        </item>
-        <item row="8" column="1">
-         <widget class="QPushButton" name="btn_clear">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>150</width>
-            <height>50</height>
-           </size>
-          </property>
-          <property name="text">
-           <string>Clear</string>
-          </property>
-         </widget>
-        </item>
         <item row="8" column="0">
          <widget class="QPushButton" name="btn_interp">
           <property name="sizePolicy">
@@ -282,7 +272,33 @@
           </property>
          </widget>
         </item>
+        <item row="1" column="0" colspan="2">
+         <widget class="QComboBox" name="combo_series">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+         </widget>
+        </item>
        </layout>
+      </item>
+      <item>
+       <spacer name="im_btn_spacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeType">
+         <enum>QSizePolicy::Preferred</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>10</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
       </item>
       <item>
        <widget class="QFrame" name="im_frame">
@@ -335,6 +351,7 @@
      <string>File</string>
     </property>
     <addaction name="act_open"/>
+    <addaction name="act_quit"/>
    </widget>
    <widget class="QMenu" name="menu_view">
     <property name="title">
@@ -351,12 +368,17 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Open</string>
+    <string>Open (Ctrl-O)</string>
    </property>
   </action>
   <action name="act_fullscreen">
    <property name="text">
-    <string>FullScreen (Ctrl-F)</string>
+    <string>Change screen mode (Ctrl-F)</string>
+   </property>
+  </action>
+  <action name="act_quit">
+   <property name="text">
+    <string>Exit (Ctrl-Q)</string>
    </property>
   </action>
  </widget>

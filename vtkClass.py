@@ -14,6 +14,7 @@ class VtkWidget:
         self.ren_win = self.vtk_widget.GetRenderWindow()
 
         self.ren = vtk.vtkRenderer()
+        self.camera_set = False
         self.ren_win.AddRenderer(self.ren)
 
         self.iren = self.ren_win.GetInteractor()  
@@ -21,9 +22,9 @@ class VtkWidget:
         self.iren.Initialize()
 
         # change key binding
-        style = MyInteractorStyle(parent = self.iren)
-        style.SetDefaultRenderer(self.ren)
-        self.iren.SetInteractorStyle(style)
+        self.style = MyInteractorStyle(widget = self)
+        self.style.SetDefaultRenderer(self.ren)
+        self.iren.SetInteractorStyle(self.style)
 
         self.colors = vtk.vtkNamedColors()
 
@@ -53,18 +54,25 @@ class VtkWidget:
         
         # Add actor to renderer, reset camera and render
         self.ren.AddActor(self.actor)
+        if not self.camera_set:
+            # Just reset camera once for each patient
+            self.ren.ResetCamera()
+            self.camera_set = True
+        self.ren_win.Render()
+
+    def resetCamera(self):
         self.ren.ResetCamera()
         self.ren_win.Render()
 
-class MyInteractorStyle(vtk.vtkInteractorStyleTrackballCamera):
-    def __init__(self,parent):
-        self.parent = parent
+class MyInteractorStyle(vtk.vtkInteractorStyleImage):
+    def __init__(self,widget):
+        self.widget = widget
         self.AddObserver("RightButtonPressEvent", self.rightButtonPressEvent)
         self.AddObserver("RightButtonReleaseEvent", self.rightButtonReleaseEvent)
         self.AddObserver("LeftButtonPressEvent", self.leftButtonPressEvent)
         self.AddObserver("KeyPressEvent", self.keyPressEvent)
-        self.AddObserver("MouseWheelForwardEvent", None)
-        self.AddObserver("MouseWheelBackwardEvent", None)
+        self.AddObserver("MouseWheelForwardEvent", lambda x, y : None)
+        self.AddObserver("MouseWheelBackwardEvent", lambda x, y : None)
 
     def rightButtonPressEvent(self, obj, event):
         self.OnMiddleButtonDown()
@@ -76,11 +84,15 @@ class MyInteractorStyle(vtk.vtkInteractorStyleTrackballCamera):
         click_pos = self.GetInteractor().GetEventPosition()
         print(click_pos)
 
-    def keyPressEvent(self, obj, event):
-        key = self.parent.GetKeySym()
-        if key == "e":
-            self.OnMouseWheelForward()
-        elif key == "q":
-            self.OnMouseWheelBackward()
-        if self.parent.GetControlKey():
+        if self.widget.iren.GetControlKey():
             pass
+
+    def keyPressEvent(self, obj, event):
+        key = self.widget.iren.GetKeySym()
+        if key == "v": # Zoom in
+            self.OnMouseWheelForward()  
+        elif key == "c": # Zoom out
+            self.OnMouseWheelBackward()
+        elif key == "r": # Reset camera
+            self.widget.ren.ResetCamera()
+            self.widget.ren_win.Render()

@@ -1,0 +1,12 @@
+
+
+# ignored files
+
+# Temp files - will be deleted on final stage
+*_temp.py
+Reference
+
+# cache files
+__pycache__
+*.swp
+.vscode

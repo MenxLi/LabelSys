@@ -1,4 +1,4 @@
-# from PyQt5.QtWidgets import QMainWindow, QWidget, QAction, QFileDialog, QComboBox, QFrame, Qsplitter, QVBoxLayout
+from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import Qt, pyqtSignal, QObject
 from PyQt5 import uic
@@ -26,20 +26,16 @@ class MainWindow(QMainWindow):
         else:
             print("Normal mode")
 
-        self.showMaximized()
+        self.showFullScreen(); self.__screen_mode = 2
         self.setWindowTitle("LabelSys "+__VERSION__)
+        self.setFocus()
+        self.setFocusPolicy(Qt.StrongFocus)
 
         self.initMenu()
         self.initPanel()
         # set style sheet
-        # https://doc.qt.io/archives/qt-4.8/stylesheet-reference.html#list-of-properties
-        #self.setStyleSheet("QTextBrowser { background-color: yellow  }")
         self.tb_console.setStyleSheet("color: white; background-color:black;")
-        # self.setStyleSheet("QPushButton { background-color: #616161;\
-                #border-radius:10px }")
-        #self.setStyleSheet("QWidget { background-color: #3b3b3b; color:white}")
 
-        #raise Exception("Hello")
 
         # data
         # self.imgs = None # current image series of a patient
@@ -48,6 +44,7 @@ class MainWindow(QMainWindow):
 
     def initMenu(self):
         self.act_open.triggered.connect(self.slotLoadPatients)
+        self.act_quit.triggered.connect(self.slotQuit)
         self.act_fullscreen.triggered.connect(self.slotChangeScreenMode)
 
     def slotLoadPatients(self):
@@ -66,9 +63,19 @@ class MainWindow(QMainWindow):
         #self.initPanel()
         return 0
 
+    def slotQuit(self):
+        self.close()
+        return 0
+
     def slotChangeScreenMode(self):
-        """Change screen mode between Maximized and full screen"""
-        pass
+        """Change screen mode between Normal Maximized and full screen"""
+        self.__screen_mode = (self.__screen_mode+1)%3
+        if self.__screen_mode == 0:
+            self.showNormal()
+        elif self.__screen_mode == 1: 
+            self.showMaximized()
+        elif self.__screen_mode == 2:
+            self.showFullScreen()
 
     def initPanel(self):
         """Init the whole panel, will be called on loading the patients""" 
@@ -78,6 +85,7 @@ class MainWindow(QMainWindow):
         self.btn_next_slice.clicked.connect(self.slotNextSlice)
         self.btn_prev_slice.clicked.connect(self.slotPrevSlice)
         self.btn_next_patient.clicked.connect(self.slotNextPatient)
+        self.btn_prev_patient.clicked.connect(self.slotPrevPatient)
 
     def initImageUI(self):
         """Put image on to main window, will be called on loading the patients"""
@@ -91,6 +99,8 @@ class MainWindow(QMainWindow):
             self.__readSeries()
             self.__updateImg()
         except: pass
+        finally:
+            self.im_widget.resetCamera()
 
     def slotChangeComboLabels(self, entry):
         pass
@@ -113,6 +123,10 @@ class MainWindow(QMainWindow):
         if self.fl.next():
             self.__updatePatient()
         
+    def slotPrevPatient(self):
+        if self.fl.previous():
+            self.__updatePatient()
+
     def slotPutOnConsole(self, text):
         self.tb_console.append(text) 
 
@@ -146,9 +160,30 @@ class MainWindow(QMainWindow):
     
     #==============Event Handler================
     def wheelEvent(self, event):
+        modifier = QtWidgets.QApplication.keyboardModifiers() 
         if event.angleDelta().y() < 0:
+            if modifier == Qt.ControlModifier:
+                self.im_widget.style.OnMouseWheelForward()
+            else:
+                self.slotNextSlice()
+        else: 
+            if modifier == Qt.ControlModifier:
+                self.im_widget.style.OnMouseWheelBackward()
+            else:
+                self.slotPrevSlice()
+    
+    def keyPressEvent(self, event):
+        key = event.key()
+        modifier = QtWidgets.QApplication.keyboardModifiers() 
+        if key == Qt.Key_F and modifier == Qt.ControlModifier:
+            print("Change screen mode")
+            self.slotChangeScreenMode()
+        if key == Qt.Key_Q and modifier == Qt.ControlModifier:
+            self.slotQuit()
+        if key == Qt.Key_Up:
+            self.slotPrevSlice()
+        if key == Qt.Key_Down:
             self.slotNextSlice()
-        else: self.slotPrevSlice()
 
 class EmittingStream(QObject):
     """Reference: https://stackoverflow.com/questions/8356336/how-to-capture-output-of-pythons-interpreter-and-show-in-a-text-widget"""
