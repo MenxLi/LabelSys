@@ -94,5 +94,4 @@ class MyInteractorStyle(vtk.vtkInteractorStyleImage):
         elif key == "c": # Zoom out
             self.OnMouseWheelBackward()
         elif key == "r": # Reset camera
-            self.widget.ren.ResetCamera()
-            self.widget.ren_win.Render()
+            self.widget.resetCamera()

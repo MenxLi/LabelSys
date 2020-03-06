@@ -19,10 +19,10 @@ class MainWindow(QMainWindow):
         ui_path = os.path.join(LOCAL_DIR, "mainWindow.ui")
         uic.loadUi(ui_path, self)
         self.args = args
-        sys.stdout = EmittingStream(textWritten = self.slotPutOnConsole)
+        sys.stdout = EmittingStream(textWritten = self.putOnConsole)
         if self.args.dev: 
             print("Developing mode...")
-            self.slotLoadPatients()
+            self.loadPatietns()
         else:
             print("Normal mode")
 
@@ -43,11 +43,11 @@ class MainWindow(QMainWindow):
         # self.slice_id = None  # current slice id
 
     def initMenu(self):
-        self.act_open.triggered.connect(self.slotLoadPatients)
-        self.act_quit.triggered.connect(self.slotQuit)
-        self.act_fullscreen.triggered.connect(self.slotChangeScreenMode)
+        self.act_open.triggered.connect(self.loadPatietns)
+        self.act_quit.triggered.connect(self.quitApp)
+        self.act_fullscreen.triggered.connect(self.changeScreenMode)
 
-    def slotLoadPatients(self):
+    def loadPatietns(self):
         """Load patients folder, and call initPanelAct() to initialize the panel""" 
         if self.args.dev: 
             fname = self.args.file
@@ -63,11 +63,11 @@ class MainWindow(QMainWindow):
         #self.initPanel()
         return 0
 
-    def slotQuit(self):
+    def quitApp(self):
         self.close()
         return 0
 
-    def slotChangeScreenMode(self):
+    def changeScreenMode(self):
         """Change screen mode between Normal Maximized and full screen"""
         self.__screen_mode = (self.__screen_mode+1)%3
         if self.__screen_mode == 0:
@@ -79,19 +79,19 @@ class MainWindow(QMainWindow):
 
     def initPanel(self):
         """Init the whole panel, will be called on loading the patients""" 
-        self.combo_series.currentTextChanged.connect(self.slotChangeComboSeries)
+        self.combo_series.currentTextChanged.connect(self.changeComboSeries)
         self.combo_label.addItems(LABELS)
-        self.combo_label.currentTextChanged.connect(self.slotChangeComboLabels)
-        self.btn_next_slice.clicked.connect(self.slotNextSlice)
-        self.btn_prev_slice.clicked.connect(self.slotPrevSlice)
-        self.btn_next_patient.clicked.connect(self.slotNextPatient)
-        self.btn_prev_patient.clicked.connect(self.slotPrevPatient)
+        self.combo_label.currentTextChanged.connect(self.changComboLabels)
+        self.btn_next_slice.clicked.connect(self.nextSlice)
+        self.btn_prev_slice.clicked.connect(self.prevSlice)
+        self.btn_next_patient.clicked.connect(self.nextPatient)
+        self.btn_prev_patient.clicked.connect(self.prevPatient)
 
     def initImageUI(self):
         """Put image on to main window, will be called on loading the patients"""
         self.im_widget = VtkWidget(self.im_frame) 
 
-    def slotChangeComboSeries(self, entry):
+    def changeComboSeries(self, entry):
         """Triggered when self.combo_series change the entry"""
         self.slice_id = 0
         try:
@@ -102,32 +102,32 @@ class MainWindow(QMainWindow):
         finally:
             self.im_widget.resetCamera()
 
-    def slotChangeComboLabels(self, entry):
+    def changComboLabels(self, entry):
         pass
 
-    def slotNextSlice(self):
+    def nextSlice(self):
         if self.slice_id >= len(self.imgs)-1:
             return 1
         self.slice_id += 1
         self.__updateImg()
         return 0
 
-    def slotPrevSlice(self):
+    def prevSlice(self):
         if self.slice_id <= 1:
             return 1
         self.slice_id -= 1
         self.__updateImg()
         return 0
 
-    def slotNextPatient(self):
+    def nextPatient(self):
         if self.fl.next():
             self.__updatePatient()
         
-    def slotPrevPatient(self):
+    def prevPatient(self):
         if self.fl.previous():
             self.__updatePatient()
 
-    def slotPutOnConsole(self, text):
+    def putOnConsole(self, text):
         self.tb_console.append(text) 
 
     def __updateComboSeries(self):
@@ -165,25 +165,25 @@ class MainWindow(QMainWindow):
             if modifier == Qt.ControlModifier:
                 self.im_widget.style.OnMouseWheelForward()
             else:
-                self.slotNextSlice()
+                self.nextSlice()
         else: 
             if modifier == Qt.ControlModifier:
                 self.im_widget.style.OnMouseWheelBackward()
             else:
-                self.slotPrevSlice()
+                self.prevSlice()
     
     def keyPressEvent(self, event):
         key = event.key()
         modifier = QtWidgets.QApplication.keyboardModifiers() 
         if key == Qt.Key_F and modifier == Qt.ControlModifier:
             print("Change screen mode")
-            self.slotChangeScreenMode()
+            self.changeScreenMode()
         if key == Qt.Key_Q and modifier == Qt.ControlModifier:
-            self.slotQuit()
+            self.quitApp()
         if key == Qt.Key_Up:
-            self.slotPrevSlice()
+            self.prevSlice()
         if key == Qt.Key_Down:
-            self.slotNextSlice()
+            self.nextSlice()
 
 class EmittingStream(QObject):
     """Reference: https://stackoverflow.com/questions/8356336/how-to-capture-output-of-pythons-interpreter-and-show-in-a-text-widget"""
