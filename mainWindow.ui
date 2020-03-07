@@ -282,6 +282,13 @@
           </property>
          </widget>
         </item>
+        <item row="5" column="1">
+         <widget class="QCheckBox" name="check_crv">
+          <property name="text">
+           <string>Open curve</string>
+          </property>
+         </widget>
+        </item>
        </layout>
       </item>
       <item>

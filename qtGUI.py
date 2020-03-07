@@ -101,7 +101,7 @@ class MainWindow(QMainWindow):
         try:
             # prevent triggering when changing patient
             self.__readSeries()
-            #self.__updateImg()
+            self.__updateImg()
         except: pass
         finally:
             self.slider_im.setSliderPosition(self.slice_id)
@@ -165,7 +165,12 @@ class MainWindow(QMainWindow):
     def __updateImg(self):
         """update image showing on im_frame"""
         im = F.map_mat_255(self.imgs[self.slice_id])
-        self.im_widget.readNpArray(im)
+
+        slice_info = "Slice: "+ str(self.slice_id+1)+"/"+str(len(self.imgs))
+        img_info = "Image size: {} x {}".format(*im.shape)
+        txt = slice_info + "\n" + img_info
+
+        self.im_widget.readNpArray(im, txt)
 
     def __readSeries(self):
         """update self.imgs and self.SOPInstanceUIDs by current chosen image series"""
@@ -200,6 +205,9 @@ class MainWindow(QMainWindow):
             self.nextSlice()
         if key == Qt.Key_Down:
             self.prevSlice()
+
+    def mouseMoveEvent(self, event):
+        print(event.localPos())
 
 class EmittingStream(QObject):
     """Reference: https://stackoverflow.com/questions/8356336/how-to-capture-output-of-pythons-interpreter-and-show-in-a-text-widget"""
