@@ -21,4 +21,5 @@ if __name__ == "__main__":
     with open("QTDark.stylesheet") as f:
         app.setStyleSheet(f.read())
     w = MainWindow(args)
+    app.installEventFilter(w)
     sys.exit(app.exec_())

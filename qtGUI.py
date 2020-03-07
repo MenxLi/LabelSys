@@ -1,6 +1,6 @@
 from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtWidgets import *
-from PyQt5.QtCore import Qt, pyqtSignal, QObject
+from PyQt5.QtCore import Qt, pyqtSignal, QObject, QEvent
 from PyQt5 import uic
 from version import __VERSION__, __DESCRIPTION__
 from dicomFileReader import FolderLoader
@@ -178,6 +178,33 @@ class MainWindow(QMainWindow):
         self.imgs, self.SOPInstanceUIDs = self.fl.curr_patient.getSeriesImg(entry)
     
     #==============Event Handler================
+    def eventFilter(self, receiver, event):
+        """Globally defined event"""
+        modifier = QtWidgets.QApplication.keyboardModifiers() 
+        if(event.type() == QEvent.KeyPress):
+            """KeyBoard shortcut"""
+            key = event.key()
+            if key == Qt.Key_F and modifier == Qt.ControlModifier:
+                # Ctrl-F : change screen mode
+                self.changeScreenMode()
+            if key == Qt.Key_Q and modifier == Qt.ControlModifier:
+                # Ctrl-Q : quit Program
+                self.quitApp()
+            if key == Qt.Key_O and modifier == Qt.ControlModifier:
+                # Ctrl-O : open file
+                self.loadPatietns()
+            if key == Qt.Key_Up:
+                # Up : next slice
+                self.nextSlice()
+            if key == Qt.Key_Down:
+                # Down : previous slice
+                self.prevSlice()
+        if(event.type() == QEvent.MouseMove):
+            """vtk seems difficult in recognizing mouse dragging, so 
+            implimented With Qt"""
+            self.im_widget.style.mouseMoveEvent(None, None)
+        return super().eventFilter(receiver, event)
+
     def wheelEvent(self, event):
         modifier = QtWidgets.QApplication.keyboardModifiers() 
         if event.angleDelta().y() < 0:
@@ -191,20 +218,20 @@ class MainWindow(QMainWindow):
             else:
                 self.nextSlice()
     
-    def keyPressEvent(self, event):
-        key = event.key()
-        modifier = QtWidgets.QApplication.keyboardModifiers() 
-        if key == Qt.Key_F and modifier == Qt.ControlModifier:
-            print("Change screen mode")
-            self.changeScreenMode()
-        if key == Qt.Key_Q and modifier == Qt.ControlModifier:
-            self.quitApp()
-        if key == Qt.Key_O and modifier == Qt.ControlModifier:
-            self.loadPatietns()
-        if key == Qt.Key_Up:
-            self.nextSlice()
-        if key == Qt.Key_Down:
-            self.prevSlice()
+    #def keyPressEvent(self, event):
+        #key = event.key()
+        #modifier = QtWidgets.QApplication.keyboardModifiers() 
+        #if key == Qt.Key_F and modifier == Qt.ControlModifier:
+            #print("Change screen mode")
+            #self.changeScreenMode()
+        #if key == Qt.Key_Q and modifier == Qt.ControlModifier:
+            #self.quitApp()
+        #if key == Qt.Key_O and modifier == Qt.ControlModifier:
+            #self.loadPatietns()
+        #if key == Qt.Key_Up:
+            #self.nextSlice()
+        #if key == Qt.Key_Down:
+            #self.prevSlice()
 
     def mouseMoveEvent(self, event):
         print(event.localPos())

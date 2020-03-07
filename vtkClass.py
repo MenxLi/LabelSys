@@ -1,18 +1,18 @@
 import vtk
 from vtk.util import vtkImageImportFromArray
 from vtk.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
+#from vtk.qt.QVTKOpenGLWidget import QVTKOpenGLWidget
 from PyQt5.QtWidgets import *
 
-class VtkWidget(QWidget):
+class VtkWidget(QVTKRenderWindowInteractor):
     def __init__(self, frame):
-        super().__init__()
-        self.frame = frame
-        self.layout = QGridLayout()
-        self.vtk_widget = QVTKRenderWindowInteractor(self.frame) 
-        self.layout.addWidget(self.vtk_widget, 0, 0)
-        self.frame.setLayout(self.layout)
+        super().__init__(frame)
+        self.master = frame
+        layout = QGridLayout()
+        layout.addWidget(self, 0, 0)
+        self.master.setLayout(layout)
 
-        self.ren_win = self.vtk_widget.GetRenderWindow()
+        self.ren_win = self.GetRenderWindow()
 
         self.ren = vtk.vtkRenderer()
         self.camera_set = False
@@ -101,10 +101,10 @@ class VtkWidget(QWidget):
         
         return contour_widget
 
-    def drawLine(pt0, pt1, color = [1,0,0], lw = 4):
+    def drawLine(self, pt0, pt1, color = [1,0,0], lw = 4):
         line_source = vtk.vtkLineSource()
-        line_source.SetPoint1(p0)
-        line_source.SetPoint2(p1)
+        line_source.SetPoint1(pt0)
+        line_source.SetPoint2(pt1)
         line_source.Update()
         mapper = vtk.vtkPolyDataMapper()
         mapper.SetInputConnection(line_source.GetOutputPort())
@@ -135,9 +135,7 @@ class MyInteractorStyle(vtk.vtkInteractorStyleImage):
         self.AddObserver("MiddleButtonReleaseEvent", lambda obj, event: self.OnLeftButtonUp())
 
         # Left button for label
-        #self.AddObserver("LeftButtonPressEvent", self.leftButtonPressEvent)
         self.AddObserver("LeftButtonPressEvent", self.leftButtonPressEvent)
-        #self.AddObserver(self.widget.vtk_widget.DragMoveEvent, self.mouseMoveEvent)
         self.AddObserver("LeftButtonReleaseEvent", self.leftButtonReleaseEvent)
 
         self.AddObserver("KeyPressEvent", self.keyPressEvent)
@@ -151,27 +149,20 @@ class MyInteractorStyle(vtk.vtkInteractorStyleImage):
         alt = self.widget.iren.GetAltKey()
         shift = self.widget.iren.GetShiftKey()
 
-        click_pos = self.GetInteractor().GetEventPosition()
-        #print("Click pos: ", click_pos)
-
-        self.picker.Pick(*click_pos, 0, self.GetDefaultRenderer())
-        pos = self.picker.GetPickPosition()
-        print(pos)
-
-        self.__prev_pt = pos
+        self.__prev_pt = self._getMousePos()
         self.__drawing = True
     
     def mouseMoveEvent(self, obj, event):
-        self.OnRightButtonDown()
-
-    def OnRightButtonDown(self):
-        print("Hello")
-    
-    def OnMouseMove(self, obj, event):
-        print("haha")
+        if not self.__drawing:
+            return 0
+        print(self.__prev_pt, type(self.__prev_pt))
+        now_pt = self._getMousePos()
+        self.widget.drawLine(self.__prev_pt, now_pt)
+        self.__prev_pt = now_pt
 
     def leftButtonReleaseEvent(self, obj, event):
-        pass
+        self.__prev_pt = None
+        self.__drawing = False
 
     def keyPressEvent(self, obj, event):
         key = self.widget.iren.GetKeySym()
@@ -181,3 +172,10 @@ class MyInteractorStyle(vtk.vtkInteractorStyleImage):
             self.OnMouseWheelBackward()
         elif key == "r": # Reset camera
             self.widget.resetCamera()
+    
+    def _getMousePos(self):
+        click_pos = self.GetInteractor().GetEventPosition()
+        self.picker.Pick(*click_pos, 0, self.GetDefaultRenderer())
+        pos = self.picker.GetPickPosition()
+        return pos
+
