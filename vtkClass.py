@@ -34,7 +34,6 @@ class VtkWidget(QVTKRenderWindowInteractor):
         self.lines = []
         self.contour = None
 
-
     def readNpArray(self, arr, txt = ""):
         """
         Read numpy array and display in the window
@@ -177,5 +176,6 @@ class MyInteractorStyle(vtk.vtkInteractorStyleImage):
         click_pos = self.GetInteractor().GetEventPosition()
         self.picker.Pick(*click_pos, 0, self.GetDefaultRenderer())
         pos = self.picker.GetPickPosition()
-        return pos
+        #return pos
+        return (pos[0], pos[1], 0)
 

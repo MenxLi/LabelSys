@@ -20,6 +20,8 @@ class MainWindow(QMainWindow):
         uic.loadUi(ui_path, self)
         self.args = args
         sys.stdout = EmittingStream(textWritten = self.putOnConsole)
+
+        self.DATALOADED = False # Indicate whether there are date loaded in current window
         if self.args.dev: 
             print("Developing mode...")
             self.loadPatietns()
@@ -32,7 +34,6 @@ class MainWindow(QMainWindow):
         self.setFocusPolicy(Qt.StrongFocus)
 
         self.initMenu()
-        self.initPanel()
         # set style sheet
         self.tb_console.setStyleSheet("color: white; background-color:black;")
 
@@ -60,7 +61,8 @@ class MainWindow(QMainWindow):
         self.initImageUI()
         self.__updatePatient()
 
-        #self.initPanel()
+        self.DATALOADED = True
+        self.initPanel()
         return 0
 
     def quitApp(self):
@@ -202,6 +204,8 @@ class MainWindow(QMainWindow):
         if(event.type() == QEvent.MouseMove):
             """vtk seems difficult in recognizing mouse dragging, so 
             implimented With Qt"""
+            if not self.DATALOADED:
+                return False
             self.im_widget.style.mouseMoveEvent(None, None)
         return super().eventFilter(receiver, event)
 
