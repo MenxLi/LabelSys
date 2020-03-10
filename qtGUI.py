@@ -8,6 +8,7 @@ from pathlib import Path
 import os,sys
 from vtkClass import VtkWidget
 import myFuncs as F
+from labelResultHolder import LabelHolder
 from config import *
 
 LOCAL_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -22,11 +23,6 @@ class MainWindow(QMainWindow):
         sys.stdout = EmittingStream(textWritten = self.putOnConsole)
 
         self.DATALOADED = False # Indicate whether there are date loaded in current window
-        if self.args.dev: 
-            print("Developing mode...")
-            self.loadPatietns()
-        else:
-            print("Normal mode")
 
         self.showFullScreen(); self.__screen_mode = 2
         self.setWindowTitle("LabelSys "+__VERSION__)
@@ -37,12 +33,18 @@ class MainWindow(QMainWindow):
         # set style sheet
         self.tb_console.setStyleSheet("color: white; background-color:black;")
 
-
+        self.lbl_holder = LabelHolder() 
         # data
         # self.imgs = None # current image series of a patient
         # self.SOPInstanceUIDs = None # SOPInstanceUIDs of self.imgs
         # self.slice_id = None  # current slice id
+        # self.curr_lbl = None  # current label selected
 
+        if self.args.dev: 
+            print("Developing mode...")
+            self.loadPatietns()
+        else:
+            print("Normal mode")
     def initMenu(self):
         self.act_open.triggered.connect(self.loadPatietns)
         self.act_quit.triggered.connect(self.quitApp)
@@ -58,11 +60,12 @@ class MainWindow(QMainWindow):
             return 1
         file_path = Path(fname)
         self.fl = FolderLoader(file_path)
+
+        self.initPanel()
         self.initImageUI()
         self.__updatePatient()
 
         self.DATALOADED = True
-        self.initPanel()
         return 0
 
     def quitApp(self):
@@ -84,6 +87,7 @@ class MainWindow(QMainWindow):
         self.slider_im.setPageStep(1)        
         self.slider_im.setEnabled(True)
         self.combo_label.addItems(LABELS)
+        self.curr_lbl = str(self.combo_label.currentText())
 
         self.combo_series.currentTextChanged.connect(self.changeComboSeries)
         self.combo_label.currentTextChanged.connect(self.changComboLabels)
@@ -91,11 +95,13 @@ class MainWindow(QMainWindow):
         self.btn_prev_slice.clicked.connect(self.prevSlice)
         self.btn_next_patient.clicked.connect(self.nextPatient)
         self.btn_prev_patient.clicked.connect(self.prevPatient)
+        self.btn_clear.clicked.connect(self.clearCurrentSlice)
+        self.btn_add_cnt.clicked.connect(self.addContour)
         self.slider_im.valueChanged.connect(self.changeSliderValue)
 
     def initImageUI(self):
         """Put image on to main window, will be called on loading the patients"""
-        self.im_widget = VtkWidget(self.im_frame) 
+        self.im_widget = VtkWidget(self.im_frame, self.check_crv, self) 
 
     def changeComboSeries(self, entry):
         """Triggered when self.combo_series change the entry"""
@@ -110,7 +116,8 @@ class MainWindow(QMainWindow):
             self.im_widget.resetCamera()
 
     def changComboLabels(self, entry):
-        pass
+        self.curr_lbl = entry
+        self.__updateImg()
 
     def changeSliderValue(self):
         """Triggered when slider_im changes value"""
@@ -144,6 +151,21 @@ class MainWindow(QMainWindow):
     def putOnConsole(self, text):
         self.tb_console.append(text) 
 
+    def saveCurrentPatient(self):
+        pass
+
+    def clearCurrentSlice(self):
+        self.lbl_holder.data[self.slice_id][self.curr_lbl] = []
+        self.__updateImg()
+    
+    def addContour(self):
+        self.im_widget.style.forceDrawing()
+
+    def saveCurrentSlice(self, cnts_data):
+        self.lbl_holder.data[self.slice_id][self.curr_lbl] = cnts_data
+        self.lbl_holder.data[self.slice_id]["SOPInstanceUID"] = self.SOPInstanceUIDs[self.slice_id]
+        self.lbl_holder.SAVED = False
+
     def __updateComboSeries(self):
         """Update the series combobox when changing patient"""
         self.combo_series.clear()
@@ -173,11 +195,28 @@ class MainWindow(QMainWindow):
         txt = slice_info + "\n" + img_info
 
         self.im_widget.readNpArray(im, txt)
+        self.im_widget.reInitStyle()
+
+        # load contour
+        cnts_data = self.lbl_holder.data[self.slice_id][self.curr_lbl]
+        if cnts_data != []:
+            for cnt in cnts_data:
+                self.im_widget.loadContour(cnt["Points"], cnt["Open"])
+
 
     def __readSeries(self):
         """update self.imgs and self.SOPInstanceUIDs by current chosen image series"""
         entry = str(self.combo_series.currentText())
         self.imgs, self.SOPInstanceUIDs = self.fl.curr_patient.getSeriesImg(entry)
+
+        if self.lbl_holder.SAVED:
+            self.lbl_holder.initialize(LABELS, self.SOPInstanceUIDs) 
+        else:
+            self._alertMsg("Unsaved changes")
+            self.lbl_holder.initialize(LABELS, self.SOPInstanceUIDs) 
+    
+    def _alertMsg(self,msg):
+        print(msg)
     
     #==============Event Handler================
     def eventFilter(self, receiver, event):
@@ -236,9 +275,6 @@ class MainWindow(QMainWindow):
             #self.nextSlice()
         #if key == Qt.Key_Down:
             #self.prevSlice()
-
-    def mouseMoveEvent(self, event):
-        print(event.localPos())
 
 class EmittingStream(QObject):
     """Reference: https://stackoverflow.com/questions/8356336/how-to-capture-output-of-pythons-interpreter-and-show-in-a-text-widget"""
