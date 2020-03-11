@@ -183,7 +183,7 @@ class VtkWidget(QVTKRenderWindowInteractor):
 class MyInteractorStyle(vtk.vtkInteractorStyleImage):
     """Interactor style for vtk widget"""
     HEIGHT = 0 # Z/W position of the curve 
-    SAMPLE_STEP = 15
+    SAMPLE_STEP = 10
     def __init__(self,widget):
         self.widget = widget
         self.picker = vtk.vtkPropPicker()

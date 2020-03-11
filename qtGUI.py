@@ -10,6 +10,7 @@ from vtkClass import VtkWidget
 import myFuncs as F
 from labelResultHolder import LabelHolder
 from config import *
+from previewGUI import PreviewWindow
 
 LOCAL_DIR = os.path.dirname(os.path.realpath(__file__))
 
@@ -30,6 +31,7 @@ class MainWindow(QMainWindow):
         self.setFocusPolicy(Qt.StrongFocus)
 
         self.initMenu()
+        self.output_path = os.getcwd()
         # set style sheet
         self.tb_console.setStyleSheet("color: white; background-color:black;")
 
@@ -45,10 +47,37 @@ class MainWindow(QMainWindow):
             self.loadPatietns()
         else:
             print("Normal mode")
+
     def initMenu(self):
         self.act_open.triggered.connect(self.loadPatietns)
         self.act_quit.triggered.connect(self.quitApp)
         self.act_fullscreen.triggered.connect(self.changeScreenMode)
+        self.act_load.triggered.connect(self.loadLabeledFile)
+        self.act_set_path.triggered.connect(self.setOutputPath)
+
+    def initPanel(self):
+        """Init the whole panel, will be called on loading the patients""" 
+        self.slider_im.setPageStep(1)        
+        self.slider_im.setEnabled(True)
+        self.combo_label.addItems(LABELS)
+        self.curr_lbl = str(self.combo_label.currentText())
+        self.__updateQLabelText()
+
+        self.combo_series.currentTextChanged.connect(self.changeComboSeries)
+        self.combo_label.currentTextChanged.connect(self.changComboLabels)
+        self.btn_next_slice.clicked.connect(self.nextSlice)
+        self.btn_prev_slice.clicked.connect(self.prevSlice)
+        self.btn_next_patient.clicked.connect(self.nextPatient)
+        self.btn_prev_patient.clicked.connect(self.prevPatient)
+        self.btn_save.clicked.connect(self.saveCurrentPatient)
+        self.btn_clear.clicked.connect(self.clearCurrentSlice)
+        self.btn_preview.clicked.connect(self.previewLabels)
+        self.btn_add_cnt.clicked.connect(self.addContour)
+        self.slider_im.valueChanged.connect(self.changeSliderValue)
+
+    def initImageUI(self):
+        """Put image on to main window, will be called on loading the patients"""
+        self.im_widget = VtkWidget(self.im_frame, self.check_crv, self) 
 
     def loadPatietns(self):
         """Load patients folder, and call initPanelAct() to initialize the panel""" 
@@ -82,32 +111,25 @@ class MainWindow(QMainWindow):
         elif self.__screen_mode == 2:
             self.showFullScreen()
 
-    def initPanel(self):
-        """Init the whole panel, will be called on loading the patients""" 
-        self.slider_im.setPageStep(1)        
-        self.slider_im.setEnabled(True)
-        self.combo_label.addItems(LABELS)
-        self.curr_lbl = str(self.combo_label.currentText())
+    def setOutputPath(self):
+        fname = QFileDialog.getExistingDirectory(self, "Select output directory")
+        if fname == "":
+            return 1
+        self.output_path = Path(fname)
+        self.__updateQLabelText()
+        return 0
 
-        self.combo_series.currentTextChanged.connect(self.changeComboSeries)
-        self.combo_label.currentTextChanged.connect(self.changComboLabels)
-        self.btn_next_slice.clicked.connect(self.nextSlice)
-        self.btn_prev_slice.clicked.connect(self.prevSlice)
-        self.btn_next_patient.clicked.connect(self.nextPatient)
-        self.btn_prev_patient.clicked.connect(self.prevPatient)
-        self.btn_clear.clicked.connect(self.clearCurrentSlice)
-        self.btn_add_cnt.clicked.connect(self.addContour)
-        self.slider_im.valueChanged.connect(self.changeSliderValue)
-
-    def initImageUI(self):
-        """Put image on to main window, will be called on loading the patients"""
-        self.im_widget = VtkWidget(self.im_frame, self.check_crv, self) 
+    def loadLabeledFile(self):
+        """Load a labeld file for one patient"""
+        pass
 
     def changeComboSeries(self, entry):
         """Triggered when self.combo_series change the entry"""
         self.slice_id = 0
-        try:
-            # prevent triggering when changing patient
+        try: # prevent triggering when changing patient
+            if not self.lbl_holder.SAVED:
+                if not self._alertMsg("Unsaved changes, continue?"):
+                    return 1
             self.__readSeries()
             self.__updateImg()
         except: pass
@@ -141,22 +163,32 @@ class MainWindow(QMainWindow):
         return 0
 
     def nextPatient(self):
+        if not self.lbl_holder.SAVED:
+            if not self._alertMsg("Unsaved changes, continue?"):
+                return 1
         if self.fl.next():
             self.__updatePatient()
+            return 0
         
     def prevPatient(self):
+        if not self.lbl_holder.SAVED:
+            if not self._alertMsg("Unsaved changes, continue?"):
+                return 1
         if self.fl.previous():
             self.__updatePatient()
+            return 0
 
     def putOnConsole(self, text):
         self.tb_console.append(text) 
 
-    def saveCurrentPatient(self):
-        pass
-
     def clearCurrentSlice(self):
         self.lbl_holder.data[self.slice_id][self.curr_lbl] = []
         self.__updateImg()
+
+    def previewLabels(self):
+        self.preview_win = PreviewWindow(self.imgs, self.lbl_holder)
+        self.preview_win.show()
+        self.preview_win.test()
     
     def addContour(self):
         self.im_widget.style.forceDrawing()
@@ -165,6 +197,10 @@ class MainWindow(QMainWindow):
         self.lbl_holder.data[self.slice_id][self.curr_lbl] = cnts_data
         self.lbl_holder.data[self.slice_id]["SOPInstanceUID"] = self.SOPInstanceUIDs[self.slice_id]
         self.lbl_holder.SAVED = False
+
+    def saveCurrentPatient(self):
+        self.lbl_holder.saveToFile(self.output_path, self.imgs)
+        self.lbl_holder.SAVED = True
 
     def __updateComboSeries(self):
         """Update the series combobox when changing patient"""
@@ -203,20 +239,25 @@ class MainWindow(QMainWindow):
             for cnt in cnts_data:
                 self.im_widget.loadContour(cnt["Points"], cnt["Open"])
 
+    def __updateQLabelText(self):
+        self.lbl_wd.setText("Console -- Output path: {}".format(str(self.output_path)))
 
     def __readSeries(self):
         """update self.imgs and self.SOPInstanceUIDs by current chosen image series"""
         entry = str(self.combo_series.currentText())
         self.imgs, self.SOPInstanceUIDs = self.fl.curr_patient.getSeriesImg(entry)
-
-        if self.lbl_holder.SAVED:
-            self.lbl_holder.initialize(LABELS, self.SOPInstanceUIDs) 
-        else:
-            self._alertMsg("Unsaved changes")
-            self.lbl_holder.initialize(LABELS, self.SOPInstanceUIDs) 
+        self.lbl_holder.initialize(LABELS, self.SOPInstanceUIDs) 
     
-    def _alertMsg(self,msg):
-        print(msg)
+    def _alertMsg(self,msg, title = "Alert", func = lambda x : None):
+        msg_box = QMessageBox()
+        msg_box.setText(msg)
+        msg_box.setWindowTitle(title)
+        msg_box.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
+        msg_box.buttonClicked.connect(func)
+        return_value = msg_box.exec()
+        if return_value == QMessageBox.Ok:
+            return True
+        else: return False
     
     #==============Event Handler================
     def eventFilter(self, receiver, event):

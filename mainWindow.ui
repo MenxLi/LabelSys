@@ -396,6 +396,7 @@
      <string>File</string>
     </property>
     <addaction name="act_open"/>
+    <addaction name="act_load"/>
     <addaction name="act_quit"/>
    </widget>
    <widget class="QMenu" name="menu_view">
@@ -404,8 +405,15 @@
     </property>
     <addaction name="act_fullscreen"/>
    </widget>
+   <widget class="QMenu" name="menu_settings">
+    <property name="title">
+     <string>Settings</string>
+    </property>
+    <addaction name="act_set_path"/>
+   </widget>
    <addaction name="menu_file"/>
    <addaction name="menu_view"/>
+   <addaction name="menu_settings"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="act_open">
@@ -424,6 +432,16 @@
   <action name="act_quit">
    <property name="text">
     <string>Exit (Ctrl-Q)</string>
+   </property>
+  </action>
+  <action name="act_load">
+   <property name="text">
+    <string>Load (Ctrl-L)</string>
+   </property>
+  </action>
+  <action name="act_set_path">
+   <property name="text">
+    <string>Set output path</string>
    </property>
   </action>
  </widget>
