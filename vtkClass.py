@@ -4,6 +4,8 @@ from vtk.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 #from vtk.qt.QVTKOpenGLWidget import QVTKOpenGLWidget
 from PyQt5.QtWidgets import *
 import numpy as np
+import cv2 as cv
+import myFuncs as F
 
 class VtkWidget(QVTKRenderWindowInteractor):
     def __init__(self, frame, checkbox, main_UI):
@@ -159,6 +161,11 @@ class VtkWidget(QVTKRenderWindowInteractor):
         data = []
         for contour in self.contours:
             rep = contour.GetContourRepresentation()
+            if rep.GetClosedLoop():
+                mask = self.__getMask(contour, self.im.shape, "Close").astype(np.bool)
+            else: 
+                mask = self.__getMask(contour, self.im.shape, "Open").astype(np.bool)
+
             pts_cnt = []
             point = np.empty((3))
             for pt_id in range(rep.GetNumberOfNodes()):
@@ -166,10 +173,47 @@ class VtkWidget(QVTKRenderWindowInteractor):
                 pts_cnt.append(tuple(point))
             contour_data = {
                     "Open": not rep.GetClosedLoop(),
-                    "Points": pts_cnt[:]
+                    "Points": pts_cnt[:],
+                    "Mask": mask.copy()
                     }
             data.append(contour_data)
         self.main_UI.saveCurrentSlice(data)
+
+    def __getMask(self, contour_widget, img_shape, mode):
+        """
+        -img_shape : (H, W)
+        """
+        mask = np.zeros(img_shape, np.uint8)
+        cnt = contour_widget
+        rep = cnt.GetContourRepresentation()
+        all_pts = []
+        point = np.empty((3))
+        for pt_id in range(rep.GetNumberOfNodes()):
+            rep.GetNthNodeWorldPosition(pt_id, point)
+            all_pts.append(self.__getBackCvCoord(*point[:2], img_shape))
+            for ipt_id in range(rep.GetNumberOfIntermediatePoints(pt_id)):
+                rep.GetIntermediatePointWorldPosition(pt_id, ipt_id, point)
+                all_pts.append(self.__getBackCvCoord(*point[:2], img_shape))
+        all_pts = np.array(all_pts).astype(np.int)
+        if mode == "Close":
+            cv_cnt = np.array([[arr] for arr in F.removeDuplicate2d(all_pts)])
+            cv.fillPoly(mask, pts = [cv_cnt], color = 1)
+        elif mode == "Open":
+            cv_cnt = np.array([arr for arr in F.removeDuplicate2d(all_pts)])
+            cv.polylines(mask,[cv_cnt],False,255)
+        #cv.imshow("Test",mask)
+        #cv.waitKey(0)
+        return mask
+
+    def __getBackNpCoord(self, x, y, img_shape):
+        """Get coordinate in (row, col)
+        - img_shape: (W, H)"""
+        return np.array([img_shape[1]-1-y, x])
+
+    def __getBackCvCoord(self, x, y, img_shape):
+        """Get coordinate in (col, row)
+        - img_shape: (W, H)"""
+        return np.array([x, img_shape[1]-1-y])
 
     def __clearCanvas(self):
         self.contours = []
@@ -310,3 +354,4 @@ class MyInteractorStyle(vtk.vtkInteractorStyleImage):
             if flag: final_list.append(num)
             flag = True
         return final_list
+

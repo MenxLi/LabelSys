@@ -1,3 +1,4 @@
+import numpy as np
 from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import Qt, pyqtSignal, QObject, QEvent
@@ -186,9 +187,8 @@ class MainWindow(QMainWindow):
         self.__updateImg()
 
     def previewLabels(self):
-        self.preview_win = PreviewWindow(self.imgs, self.lbl_holder)
+        self.preview_win = PreviewWindow(self.imgs, self.__getMasks(), spacing = self.spacing)
         self.preview_win.show()
-        self.preview_win.test()
     
     def addContour(self):
         self.im_widget.style.forceDrawing()
@@ -201,6 +201,24 @@ class MainWindow(QMainWindow):
     def saveCurrentPatient(self):
         self.lbl_holder.saveToFile(self.output_path, self.imgs)
         self.lbl_holder.SAVED = True
+
+    def __getMasks(self):
+        im_shape = self.imgs[0].shape
+        for im in self.imgs:
+            if im.shape != im_shape:
+               return None 
+        masks = []
+        for slice_idx in range(len(self.imgs)):
+            mask_data = {}
+            for label in LABELS:
+                mask_data[label] = np.zeros(im_shape[:2], np.bool)
+                cnts_data = self.lbl_holder.data[slice_idx][label]
+                if cnts_data == []:
+                    continue
+                for cnt_data in cnts_data:
+                    mask_data[label] = np.logical_or(mask_data[label], cnt_data["Mask"])
+            masks.append(mask_data) 
+        return masks
 
     def __updateComboSeries(self):
         """Update the series combobox when changing patient"""
@@ -245,7 +263,11 @@ class MainWindow(QMainWindow):
     def __readSeries(self):
         """update self.imgs and self.SOPInstanceUIDs by current chosen image series"""
         entry = str(self.combo_series.currentText())
-        self.imgs, self.SOPInstanceUIDs = self.fl.curr_patient.getSeriesImg(entry)
+        #self.imgs, self.SOPInstanceUIDs = self.fl.curr_patient.getSeriesImg(entry)
+        image_data = self.fl.curr_patient.getSeriesImg(entry)
+        self.imgs = image_data["Images"]
+        self.SOPInstanceUIDs = image_data["SOPInstanceUIDs"]
+        self.spacing = image_data["Spacing"]
         self.lbl_holder.initialize(LABELS, self.SOPInstanceUIDs) 
     
     def _alertMsg(self,msg, title = "Alert", func = lambda x : None):

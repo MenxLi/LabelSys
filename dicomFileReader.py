@@ -2,6 +2,7 @@ from glob import glob
 import numpy as np
 import pydicom
 import os
+import scipy.ndimage
 
 # Pydicom reading reference: https://pydicom.github.io/pydicom/stable/tutorials/dataset_basics.html
 
@@ -47,9 +48,28 @@ class DicomLoader:
         """
         if series == None and self.series != None:
             series = self.series
-        images = np.stack([s.pixel_array for s in series[entry]])
+        scan = series[entry]
+        images = np.stack([s.pixel_array for s in scan])
         SOPInstanceUIDs = [s['SOPInstanceUID'].value for s in series[entry]]
-        return (images, SOPInstanceUIDs)
+        spacing = [scan[0].SliceThickness, *scan[0].PixelSpacing]
+        spacing = [float(s) for s in spacing]
+        data = {
+                "Images": images,
+                "SOPInstanceUIDs": SOPInstanceUIDs,
+                "Spacing": spacing
+                }
+        return data
+    def resampleSpacing(self, imgs, old_spacing, new_spacing = [1,1,1]): 
+        spacing = np.array(old_spacing)
+        resize_factor = spacing / new_spacing
+
+        new_real_shape = imgs.shape * resize_factor
+        new_shape = np.round(new_real_shape)
+        real_resize_factor = new_shape / imgs.shape
+        new_spacing = spacing / real_resize_factor
+        imgs = scipy.ndimage.interpolation.zoom(imgs, real_resize_factor)
+
+        return imgs, new_spacing
 
     def load(self):
         self.patient = self.loadScan(self.path)

@@ -3,19 +3,20 @@ Useful functions
 """
 
 import numpy as np
+import scipy.ndimage
 
 def gray2rgb_(img):
     new_img = np.concatenate((img[:,:,np.newaxis], img[:,:,np.newaxis], img[:,:,np.newaxis]), axis=2)
     return new_img
 def removeDuplicate2d(duplicate):
     final_list = []
+    flag = True
     for num in duplicate:
         for num0 in final_list:
             if num[0] == num0[0] and num[1] == num0[1]:
-                continue
-            final_list.append(num)
-            #print("Appended: ", num)
-            #print("final_list", final_list)
+                flag = False
+        if flag: final_list.append(num)
+        flag = True
     return final_list
 
 def plot_imgs(imgs, n_col = 3, gray = False, titles = None):
@@ -123,4 +124,15 @@ def find_region(mask, value = 1):
     col_end = coord[1].max()
     return((row_start, row_end), (col_start, col_end))
 
+
+def resampleSpacing(imgs, old_spacing, new_spacing = [1,1,1]): 
+    """Resample /dicom/ images"""
+    spacing = np.array(old_spacing)
+    resize_factor = spacing / new_spacing
+    new_real_shape = imgs.shape * resize_factor
+    new_shape = np.round(new_real_shape)
+    real_resize_factor = new_shape / imgs.shape
+    new_spacing = spacing / real_resize_factor
+    imgs = scipy.ndimage.interpolation.zoom(imgs, real_resize_factor)
+    return imgs, new_spacing
 
