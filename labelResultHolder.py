@@ -3,6 +3,9 @@ import os
 import vtk
 import cv2 as cv
 import numpy as np
+import json
+import copy
+from threading import Thread
 
 class LabelHolder:
     """
@@ -28,7 +31,34 @@ class LabelHolder:
         - path: directory to store all the data for current patient
         Note: the x,y coordinate is in vtk coordinate
         """
-        pass
+        if os.path.exists(path):
+            print("Overwriting...", path)
+            for file in os.listdir(path):
+                os.remove(os.path.join(path, file))
+        else:
+            print("Saving to file ", path)
+            os.mkdir(path)
+        thread = Thread(target = self.__threadSaveToFile, args = (path, imgs,))
+        thread.start()
+        #thread.join()
+
+    def __threadSaveToFile(self, path, imgs):
+        for i in range(len(imgs)):
+            print("Saving...{}/{}".format(i+1, len(imgs)))
+            file_name = "Slice"+str(i)+".json"
+            im_string = imgEncodeB64(imgs[i])
+            data_ = copy.deepcopy(self.data[i])
+            for key in data_.keys():
+                if type(data_[key]) == list:
+                    if data_[key] != []:
+                        for id_cnt in range(len(data_[key])):
+                            data_[key][id_cnt]["Contour"] = data_[key][id_cnt]["Contour"].tolist()
+            js_data = {
+                    "Data": self.data,
+                    "Image": im_string
+                    }
+            with open(os.path.join(path, file_name), "w") as f:
+                json.dump(js_data, f)
 
     def __getBackNpCoord(self, x, y, img_shape):
         """Get coordinate in (row, col)

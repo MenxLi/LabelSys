@@ -32,7 +32,7 @@ class Base64_2DImageEncoder:
             max_value = np.max(img)
             max_log = np.log(max_value)/np.log(2)
             bit_len = int(np.floor(max_log) + 1)
-            print("\'bit_len\' not given, using conjectural value: ", bit_len)
+            #print("\'bit_len\' not given, using conjectural value: ", bit_len)
         self.bit = bit_len
 
 

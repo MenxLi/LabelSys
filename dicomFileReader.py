@@ -101,7 +101,7 @@ class FolderLoader:
             self.loadDicom(self.ptr)
             return 1
         else: return 0
-    def get_path(self):
+    def getPath(self):
         return self.paths[self.ptr]
 
 

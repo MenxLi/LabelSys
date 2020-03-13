@@ -12,6 +12,7 @@ import myFuncs as F
 from labelResultHolder import LabelHolder
 from config import *
 from previewGUI import Preview3DWindow, Preview2DWindow
+import cv2 as cv
 
 LOCAL_DIR = os.path.dirname(os.path.realpath(__file__))
 
@@ -83,7 +84,7 @@ class MainWindow(QMainWindow):
 
     def initImageUI(self):
         """Put image on to main window, will be called on loading the patients"""
-        self.im_widget = VtkWidget(self.im_frame, self.check_crv, self) 
+        self.im_widget = VtkWidget(self.im_frame, self.check_crv, self.saveCurrentSlice) 
 
     def loadPatietns(self):
         """Load patients folder, and call initPanelAct() to initialize the panel""" 
@@ -203,7 +204,6 @@ class MainWindow(QMainWindow):
         self.preview_win_2d = Preview2DWindow(self.imgs, self.__getMasks(), self.slice_id) 
         self.preview_win_2d.show()
 
-    
     def addContour(self):
         self.im_widget.style.forceDrawing()
 
@@ -213,7 +213,12 @@ class MainWindow(QMainWindow):
         self.lbl_holder.SAVED = False
 
     def saveCurrentPatient(self):
-        self.lbl_holder.saveToFile(self.output_path, self.imgs)
+        folder_name = "Label-"+Path(self.fl.getPath()).stem
+        file_path = os.path.join(self.output_path, folder_name)
+        if os.path.exists(file_path):
+            if not self._alertMsg("Data exists, overwrite?"):
+                return 
+        self.lbl_holder.saveToFile(file_path, self.imgs)
         self.lbl_holder.SAVED = True
 
     def __getMasks(self):
@@ -225,12 +230,19 @@ class MainWindow(QMainWindow):
         for slice_idx in range(len(self.imgs)):
             mask_data = {}
             for label in LABELS:
-                mask_data[label] = np.zeros(im_shape[:2], np.bool)
+                mask_data[label] = np.zeros(im_shape[:2], np.uint8)
                 cnts_data = self.lbl_holder.data[slice_idx][label]
                 if cnts_data == []:
                     continue
                 for cnt_data in cnts_data:
-                    mask_data[label] = np.logical_or(mask_data[label], cnt_data["Mask"])
+                    all_pts = cnt_data["Contour"] # All the points position on the contour, in CV coordinate
+                    if cnt_data["Open"] == True:
+                        cv_cnt = np.array([arr for arr in F.removeDuplicate2d(all_pts)])
+                        cv.polylines(mask_data[label],[cv_cnt],False,1)
+                    else:
+                        cv_cnt = np.array([[arr] for arr in F.removeDuplicate2d(all_pts)])
+                        cv.fillPoly(mask_data[label], pts = [cv_cnt], color = 1)
+                    mask_data[label] = mask_data[label].astype(np.bool)
             masks.append(mask_data) 
         return masks
 

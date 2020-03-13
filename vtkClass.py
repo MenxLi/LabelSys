@@ -8,14 +8,14 @@ import cv2 as cv
 import myFuncs as F
 
 class VtkWidget(QVTKRenderWindowInteractor):
-    def __init__(self, frame, checkbox, main_UI):
+    def __init__(self, frame, checkbox, save_func):
         """
         - save_func: functions to be triggered when modify the contour
         """
         super().__init__(frame)
         self.master = frame
         self.checkbox = checkbox
-        self.main_UI = main_UI
+        self.save_func = save_func
 
         layout = QGridLayout()
         layout.addWidget(self, 0, 0)
@@ -161,10 +161,11 @@ class VtkWidget(QVTKRenderWindowInteractor):
         data = []
         for contour in self.contours:
             rep = contour.GetContourRepresentation()
-            if rep.GetClosedLoop():
-                mask = self.__getMask(contour, self.im.shape, "Close").astype(np.bool)
-            else: 
-                mask = self.__getMask(contour, self.im.shape, "Open").astype(np.bool)
+            #if rep.GetClosedLoop():
+                #mask = self.__getMask(contour, self.im.shape, "Close").astype(np.bool)
+            #else: 
+                #mask = self.__getMask(contour, self.im.shape, "Open").astype(np.bool)
+            full_cnt = self.__getFullCnt(contour, self.im.shape)
 
             pts_cnt = []
             point = np.empty((3))
@@ -174,10 +175,31 @@ class VtkWidget(QVTKRenderWindowInteractor):
             contour_data = {
                     "Open": not rep.GetClosedLoop(),
                     "Points": pts_cnt[:],
-                    "Mask": mask.copy()
+                    #"Mask": mask.copy()
+                    "Contour": full_cnt
                     }
             data.append(contour_data)
-        self.main_UI.saveCurrentSlice(data)
+        self.save_func(data)
+
+    def __getFullCnt(self, contour_widget, img_shape):
+        """
+        Get all point position in the image
+        return point in (col, row)
+        -img_shape : (H, W)
+        """
+        mask = np.zeros(img_shape, np.uint8)
+        cnt = contour_widget
+        rep = cnt.GetContourRepresentation()
+        all_pts = []
+        point = np.empty((3))
+        for pt_id in range(rep.GetNumberOfNodes()):
+            rep.GetNthNodeWorldPosition(pt_id, point)
+            all_pts.append(self.__getBackCvCoord(*point[:2], img_shape))
+            for ipt_id in range(rep.GetNumberOfIntermediatePoints(pt_id)):
+                rep.GetIntermediatePointWorldPosition(pt_id, ipt_id, point)
+                all_pts.append(self.__getBackCvCoord(*point[:2], img_shape))
+        all_pts = np.array(all_pts).astype(np.int)
+        return all_pts
 
     def __getMask(self, contour_widget, img_shape, mode):
         """
@@ -200,9 +222,7 @@ class VtkWidget(QVTKRenderWindowInteractor):
             cv.fillPoly(mask, pts = [cv_cnt], color = 1)
         elif mode == "Open":
             cv_cnt = np.array([arr for arr in F.removeDuplicate2d(all_pts)])
-            cv.polylines(mask,[cv_cnt],False,255)
-        #cv.imshow("Test",mask)
-        #cv.waitKey(0)
+            cv.polylines(mask,[cv_cnt],False,1)
         return mask
 
     def __getBackNpCoord(self, x, y, img_shape):
