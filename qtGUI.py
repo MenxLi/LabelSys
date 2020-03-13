@@ -23,7 +23,7 @@ class MainWindow(QMainWindow):
         ui_path = os.path.join(LOCAL_DIR, "mainWindow.ui")
         uic.loadUi(ui_path, self)
         self.args = args
-        sys.stdout = EmittingStream(textWritten = self.putOnConsole)
+        sys.stdout = EmittingStream(textWritten = self.stdoutStream)
 
         # set style sheet
         self.tb_console.setStyleSheet("color: white; background-color:black;")
@@ -203,7 +203,7 @@ class MainWindow(QMainWindow):
             self.__updatePatient()
             return 0
 
-    def putOnConsole(self, text):
+    def stdoutStream(self, text):
         self.tb_console.append(text) 
 
     def clearCurrentSlice(self):

@@ -58,18 +58,13 @@ class LabelHolder:
             print("Saving...{}/{}".format(i+1, len(imgs)))
             file_name = "Slice"+str(i)+".json"
             im_string = imgEncodeB64(imgs[i])
-            data_ = copy.deepcopy(self.data[i])
-            for key in data_.keys():
-                if type(data_[key]) == list:
-                    if data_[key] != []:
-                        for id_cnt in range(len(data_[key])):
-                            data_[key][id_cnt]["Contour"] = data_[key][id_cnt]["Contour"].tolist()
             js_data = {
-                    "Data": data_,
+                    "Data": self.data[i],
                     "Image": im_string
                     }
             with open(os.path.join(path, file_name), "w") as f:
                 json.dump(js_data, f)
+        print("Exporting finished!\n Destination: ", path)
 
     def __getBackNpCoord(self, x, y, img_shape):
         """Get coordinate in (row, col)
