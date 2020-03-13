@@ -199,7 +199,7 @@ class VtkWidget(QVTKRenderWindowInteractor):
                 rep.GetIntermediatePointWorldPosition(pt_id, ipt_id, point)
                 all_pts.append(self.__getBackCvCoord(*point[:2], img_shape))
         all_pts = np.array(all_pts).astype(np.int)
-        return all_pts
+        return all_pts.tolist()
 
     def __getMask(self, contour_widget, img_shape, mode):
         """
