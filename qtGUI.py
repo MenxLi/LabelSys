@@ -25,19 +25,23 @@ class MainWindow(QMainWindow):
         self.args = args
         sys.stdout = EmittingStream(textWritten = self.putOnConsole)
 
-        self.DATALOADED = False # Indicate whether there are date loaded in current window
+        # set style sheet
+        self.tb_console.setStyleSheet("color: white; background-color:black;")
 
+        # UI change
         self.showFullScreen(); self.__screen_mode = 2
         self.setWindowTitle("LabelSys "+__VERSION__)
         self.setFocus()
         self.setFocusPolicy(Qt.StrongFocus)
 
         self.initMenu()
-        self.output_path = os.getcwd()
-        # set style sheet
-        self.tb_console.setStyleSheet("color: white; background-color:black;")
 
+        # Attribute init
+        self.DATALOADED = False # Indicate whether there are date loaded in current window
+        self.output_path = Path(os.getcwd()).parent
+        self.labeler_name = "Anonymous"
         self.lbl_holder = LabelHolder() 
+
         # data
         # self.imgs = None # current image series of a patient
         # self.SOPInstanceUIDs = None # SOPInstanceUIDs of self.imgs
@@ -51,20 +55,27 @@ class MainWindow(QMainWindow):
             print("Normal mode")
 
     def initMenu(self):
+        # File
         self.act_open.triggered.connect(self.loadPatietns)
         self.act_open.setShortcut("Ctrl+O")
         self.act_quit.triggered.connect(self.quitApp)
         self.act_quit.setShortcut("Ctrl+Q")
+        self.act_load.triggered.connect(self.loadLabeledFile)
+
+        # View
         self.act_fullscreen.triggered.connect(self.changeScreenMode)
         self.act_fullscreen.setShortcut("Ctrl+F")
-        self.act_load.triggered.connect(self.loadLabeledFile)
-        self.act_set_path.triggered.connect(self.setOutputPath)
-        self.act_set_path.setShortcut("Ctrl+P")
         self.act_3D_preview.triggered.connect(self.previewLabels3D)
+
+        # Settings
+        self.act_set_path.triggered.connect(self.setOutputPath)
+        self.act_set_path.setShortcut("Ctrl+Alt+P")
+        self.act_set_lbler.triggered.connect(self.setLabeler)
+        self.act_set_lbler.setShortcut("Ctrl+Alt+L")
 
     def initPanel(self):
         """Init the whole panel, will be called on loading the patients""" 
-        self.slider_im.setPageStep(1)        
+        self.slider_im.setPageStep(1)
         self.slider_im.setEnabled(True)
         self.combo_label.addItems(LABELS)
         self.curr_lbl = str(self.combo_label.currentText())
@@ -125,6 +136,13 @@ class MainWindow(QMainWindow):
         self.output_path = Path(fname)
         self.__updateQLabelText()
         return 0
+
+    def setLabeler(self):
+        """Set labeler name"""
+        text, ok = QInputDialog.getText(self, "Set labeler", "Enter your name: ")
+        if ok:
+            self.labeler_name = str(text)
+            self.__updateQLabelText()
 
     def loadLabeledFile(self):
         """Load a labeld file for one patient"""
@@ -218,7 +236,7 @@ class MainWindow(QMainWindow):
         if os.path.exists(file_path):
             if not self._alertMsg("Data exists, overwrite?"):
                 return 
-        self.lbl_holder.saveToFile(file_path, self.imgs)
+        self.lbl_holder.saveToFile(file_path, self.imgs, self.labeler_name)
         self.lbl_holder.SAVED = True
 
     def __getMasks(self):
@@ -284,7 +302,8 @@ class MainWindow(QMainWindow):
                 self.im_widget.loadContour(cnt["Points"], cnt["Open"])
 
     def __updateQLabelText(self):
-        self.lbl_wd.setText("Console -- Output path: {}".format(str(self.output_path)))
+        self.lbl_wd.setText("Console -- LABELER: {} --OUTPUT_PATH: {}".\
+                format(self.labeler_name, str(self.output_path)))
 
     def __readSeries(self):
         """update self.imgs and self.SOPInstanceUIDs by current chosen image series"""

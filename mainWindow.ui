@@ -411,6 +411,8 @@
      <string>Settings</string>
     </property>
     <addaction name="act_set_path"/>
+    <addaction name="act_set_lbler"/>
+    <addaction name="act_set_cnt_behav"/>
    </widget>
    <addaction name="menu_file"/>
    <addaction name="menu_view"/>
@@ -445,12 +447,22 @@
   </action>
   <action name="act_set_path">
    <property name="text">
-    <string>Set output path</string>
+    <string>Output path</string>
    </property>
   </action>
   <action name="act_3D_preview">
    <property name="text">
     <string>3D Preview</string>
+   </property>
+  </action>
+  <action name="act_set_lbler">
+   <property name="text">
+    <string>Labeler name</string>
+   </property>
+  </action>
+  <action name="act_set_cnt_behav">
+   <property name="text">
+    <string>Default contour behavior</string>
    </property>
   </action>
  </widget>

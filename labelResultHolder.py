@@ -6,6 +6,7 @@ import numpy as np
 import json
 import copy
 from threading import Thread
+import datetime
 
 class LabelHolder:
     """
@@ -26,7 +27,7 @@ class LabelHolder:
     def loadFile(self, path):
         pass
 
-    def saveToFile(self, path, imgs = None):
+    def saveToFile(self, path, imgs, labeler):
         """
         - path: directory to store all the data for current patient
         Note: the x,y coordinate is in vtk coordinate
@@ -38,6 +39,16 @@ class LabelHolder:
         else:
             print("Saving to file ", path)
             os.mkdir(path)
+
+        head_info = {
+                "Labeler":labeler,
+                "Time":str(datetime.datetime.now())
+                }
+
+        print("Saving head file...")
+        with open(os.path.join(path, "HEAD.json"), "w") as hf:
+            json.dump(head_info, hf)
+
         thread = Thread(target = self.__threadSaveToFile, args = (path, imgs,))
         thread.start()
         #thread.join()
