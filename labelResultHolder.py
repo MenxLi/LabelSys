@@ -54,7 +54,7 @@ class LabelHolder:
                         for id_cnt in range(len(data_[key])):
                             data_[key][id_cnt]["Contour"] = data_[key][id_cnt]["Contour"].tolist()
             js_data = {
-                    "Data": self.data,
+                    "Data": data_,
                     "Image": im_string
                     }
             with open(os.path.join(path, file_name), "w") as f:
