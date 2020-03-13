@@ -38,7 +38,7 @@ class VtkWidget(QVTKRenderWindowInteractor):
         self.colors = vtk.vtkNamedColors()
         self.contours = []
 
-    def readNpArray(self, arr, save_buffer, txt = ""):
+    def readNpArray(self, arr, txt = ""):
         """
         Read numpy array and display in the window
         - txt: text to be shown on the screen

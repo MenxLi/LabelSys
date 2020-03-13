@@ -8,6 +8,7 @@ import scipy.ndimage
 def gray2rgb_(img):
     new_img = np.concatenate((img[:,:,np.newaxis], img[:,:,np.newaxis], img[:,:,np.newaxis]), axis=2)
     return new_img
+
 def removeDuplicate2d(duplicate):
     final_list = []
     flag = True
@@ -79,9 +80,6 @@ def equal_multiChannel(mat, template):
         result = np.logical_and(result, bl)
     return result
 
-
-
-
 def overlap_(fg_img, bg_img, mask):
     """
     按蒙版重叠图像fg_img和bg_img，fg_img在蒙版的白色区bg_img在黑色区
@@ -124,7 +122,6 @@ def find_region(mask, value = 1):
     col_end = coord[1].max()
     return((row_start, row_end), (col_start, col_end))
 
-
 def resampleSpacing(imgs, old_spacing, new_spacing = [1,1,1]): 
     """Resample /dicom/ images"""
     spacing = np.array(old_spacing)
@@ -135,4 +132,16 @@ def resampleSpacing(imgs, old_spacing, new_spacing = [1,1,1]):
     new_spacing = spacing / real_resize_factor
     imgs = scipy.ndimage.interpolation.zoom(imgs, real_resize_factor)
     return imgs, new_spacing
+
+def overlap_mask(img, mask, color = (255,0,0), alpha = 1):
+    if img_channel(img) == 1:
+        img = gray2rgb_(img)
+    if img_channel(mask) == 1:
+        mask = gray2rgb_(mask)
+    im = img.astype(float)
+    channel = np.ones(img.shape[:2], np.float)
+    color_ = np.concatenate((channel[:,:,np.newaxis]*color[0],channel[:,:,np.newaxis]*color[1],channel[:,:,np.newaxis]*color[2]), axis = 2)
+    f_im = im*(1-mask) + im*mask*(1-alpha) + color_*alpha*mask
+    return f_im.astype(np.uint8)
+
 

@@ -11,7 +11,7 @@ from vtkClass import VtkWidget
 import myFuncs as F
 from labelResultHolder import LabelHolder
 from config import *
-from previewGUI import PreviewWindow
+from previewGUI import Preview3DWindow, Preview2DWindow
 
 LOCAL_DIR = os.path.dirname(os.path.realpath(__file__))
 
@@ -51,10 +51,15 @@ class MainWindow(QMainWindow):
 
     def initMenu(self):
         self.act_open.triggered.connect(self.loadPatietns)
+        self.act_open.setShortcut("Ctrl+O")
         self.act_quit.triggered.connect(self.quitApp)
+        self.act_quit.setShortcut("Ctrl+Q")
         self.act_fullscreen.triggered.connect(self.changeScreenMode)
+        self.act_fullscreen.setShortcut("Ctrl+F")
         self.act_load.triggered.connect(self.loadLabeledFile)
         self.act_set_path.triggered.connect(self.setOutputPath)
+        self.act_set_path.setShortcut("Ctrl+P")
+        self.act_3D_preview.triggered.connect(self.previewLabels3D)
 
     def initPanel(self):
         """Init the whole panel, will be called on loading the patients""" 
@@ -72,7 +77,7 @@ class MainWindow(QMainWindow):
         self.btn_prev_patient.clicked.connect(self.prevPatient)
         self.btn_save.clicked.connect(self.saveCurrentPatient)
         self.btn_clear.clicked.connect(self.clearCurrentSlice)
-        self.btn_preview.clicked.connect(self.previewLabels)
+        self.btn_preview.clicked.connect(self.previewLabels2D)
         self.btn_add_cnt.clicked.connect(self.addContour)
         self.slider_im.valueChanged.connect(self.changeSliderValue)
 
@@ -186,9 +191,18 @@ class MainWindow(QMainWindow):
         self.lbl_holder.data[self.slice_id][self.curr_lbl] = []
         self.__updateImg()
 
-    def previewLabels(self):
-        self.preview_win = PreviewWindow(self.imgs, self.__getMasks(), spacing = self.spacing)
-        self.preview_win.show()
+    def previewLabels3D(self):
+        if not self.DATALOADED:
+            pass
+        self.preview_win_3d = Preview3DWindow(self.imgs, self.__getMasks(), spacing = self.spacing)
+        self.preview_win_3d.show()
+
+    def previewLabels2D(self):
+        if not self.DATALOADED:
+            pass
+        self.preview_win_2d = Preview2DWindow(self.imgs, self.__getMasks(), self.slice_id) 
+        self.preview_win_2d.show()
+
     
     def addContour(self):
         self.im_widget.style.forceDrawing()
@@ -288,15 +302,6 @@ class MainWindow(QMainWindow):
         if(event.type() == QEvent.KeyPress):
             """KeyBoard shortcut"""
             key = event.key()
-            if key == Qt.Key_F and modifier == Qt.ControlModifier:
-                # Ctrl-F : change screen mode
-                self.changeScreenMode()
-            if key == Qt.Key_Q and modifier == Qt.ControlModifier:
-                # Ctrl-Q : quit Program
-                self.quitApp()
-            if key == Qt.Key_O and modifier == Qt.ControlModifier:
-                # Ctrl-O : open file
-                self.loadPatietns()
             if key == Qt.Key_Up:
                 # Up : next slice
                 self.nextSlice()
