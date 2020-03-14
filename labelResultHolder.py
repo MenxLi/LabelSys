@@ -1,4 +1,5 @@
 from base64ImageConverter import imgEncodeB64, imgDecodeB64
+from config import *
 import os
 import vtk
 import cv2 as cv
@@ -7,6 +8,7 @@ import json
 import copy
 from threading import Thread
 import datetime
+import re
 
 class LabelHolder:
     """
@@ -25,9 +27,27 @@ class LabelHolder:
             self.data[-1]["SOPInstanceUID"] = ids
 
     def loadFile(self, path):
-        pass
+        imgs = []
+        data = []
+        file_list = [x for x in os.listdir(path) if x.endswith('.json')]
+        for file_name in sorted(file_list, key = lambda x : int(re.findall('\d+|$', x)[0])):
+            # Sort according to slice number "SliceXXX.json"
+            file_path = os.path.join(path, file_name)
+            if file_name == "HEAD_0.json":
+                with open(file_path, "r") as f_:
+                    header_data = json.load(f_)
+            else:
+                with open(file_path, "r") as f_:
+                    slice_data = json.load(f_)
+                img = imgDecodeB64(slice_data["Image"])
+                imgs.append(img)
+                data_ = slice_data["Data"]
+                data.append(data_)
+        self.data = data
+        self.SAVED = True
+        return  header_data, imgs
 
-    def saveToFile(self, path, imgs, labeler):
+    def saveToFile(self, path, imgs, labeler, spacing = [1,1,1], series = "Unknown"):
         """
         - path: directory to store all the data for current patient
         Note: the x,y coordinate is in vtk coordinate
@@ -42,21 +62,23 @@ class LabelHolder:
 
         head_info = {
                 "Labeler":labeler,
-                "Time":str(datetime.datetime.now())
+                "Time":str(datetime.datetime.now()),
+                "Spacing":spacing,
+                "Labels": LABELS, 
+                "Series": series
                 }
 
-        print("Saving head file...")
-        with open(os.path.join(path, "HEAD.json"), "w") as hf:
+        print("Saving header file...")
+        with open(os.path.join(path, "HEAD_0.json"), "w") as hf:
             json.dump(head_info, hf)
 
-        thread = Thread(target = self.__threadSaveToFile, args = (path, imgs,))
+        thread = Thread(target = self.__threadSaveToFile, args = (path, imgs.copy(),))
         thread.start()
-        #thread.join()
 
     def __threadSaveToFile(self, path, imgs):
         for i in range(len(imgs)):
             print("Saving...{}/{}".format(i+1, len(imgs)))
-            file_name = "Slice"+str(i)+".json"
+            file_name = "Slice_"+str(i+1)+".json"
             im_string = imgEncodeB64(imgs[i])
             js_data = {
                     "Data": self.data[i],
@@ -64,7 +86,7 @@ class LabelHolder:
                     }
             with open(os.path.join(path, file_name), "w") as f:
                 json.dump(js_data, f)
-        print("Exporting finished!\n Destination: ", path)
+        print("Exporting finished!\nDestination: ", path)
 
     def __getBackNpCoord(self, x, y, img_shape):
         """Get coordinate in (row, col)
@@ -75,3 +97,10 @@ class LabelHolder:
         """Get coordinate in (col, row)
         - img_shape: (W, H)"""
         return x, img_shape[1]-1-y
+
+    def __creatThreadFunction(self, func, *args, start = False, deamon = False):
+        thread = Thread(target = func, args = args)
+        if start:
+            thread.start()
+        return thread
+

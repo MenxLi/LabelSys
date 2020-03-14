@@ -98,7 +98,7 @@ class VtkWidget(QVTKRenderWindowInteractor):
         
         return contour_widget
 
-    def constructContour(self, pts, open_curve = None):
+    def constructContour(self, pts, open_curve = None, save = True):
         """
         Default behaviour:
         - LeftButtonPressEvent - triggers a Select event
@@ -132,11 +132,14 @@ class VtkWidget(QVTKRenderWindowInteractor):
         contour_widget.Initialize(pd,1)
         contour_widget.Render()
         self.contours.append(contour_widget)
-        self.__saveContour(None, None)
+        if save:
+            # save on drawing contour but not save when loading contour with
+            # self.loadContour
+            self.__saveContour(None, None)
         return 0
 
     def loadContour(self, pts, open_curve):
-        self.constructContour(pts, open_curve)
+        self.constructContour(pts, open_curve, save = False)
         self.style._reinitState()
 
     def drawLine(self, pt0, pt1, color = [0.5,1,1], lw = 4):

@@ -42,11 +42,17 @@ class MainWindow(QMainWindow):
         self.labeler_name = "Anonymous"
         self.lbl_holder = LabelHolder() 
 
+        self.slice_id = 0
         # data
         # self.imgs = None # current image series of a patient
         # self.SOPInstanceUIDs = None # SOPInstanceUIDs of self.imgs
         # self.slice_id = None  # current slice id
         # self.curr_lbl = None  # current label selected
+
+        self.central_widget.setEnabled(False)
+
+        self.initImageUI()
+        self.initPanel()
 
         if self.args.dev: 
             print("Developing mode...")
@@ -61,6 +67,7 @@ class MainWindow(QMainWindow):
         self.act_quit.triggered.connect(self.quitApp)
         self.act_quit.setShortcut("Ctrl+Q")
         self.act_load.triggered.connect(self.loadLabeledFile)
+        self.act_load.setShortcut("Ctrl+L")
 
         # View
         self.act_fullscreen.triggered.connect(self.changeScreenMode)
@@ -76,7 +83,6 @@ class MainWindow(QMainWindow):
     def initPanel(self):
         """Init the whole panel, will be called on loading the patients""" 
         self.slider_im.setPageStep(1)
-        self.slider_im.setEnabled(True)
         self.combo_label.addItems(LABELS)
         self.curr_lbl = str(self.combo_label.currentText())
         self.__updateQLabelText()
@@ -99,6 +105,7 @@ class MainWindow(QMainWindow):
 
     def loadPatietns(self):
         """Load patients folder, and call initPanelAct() to initialize the panel""" 
+        self.central_widget.setEnabled(True)
         if self.args.dev: 
             fname = self.args.file
         else: 
@@ -108,14 +115,45 @@ class MainWindow(QMainWindow):
         file_path = Path(fname)
         self.fl = FolderLoader(file_path)
 
-        self.initPanel()
-        self.initImageUI()
+        #self.initPanel()
+        #self.initImageUI()
         self.__updatePatient()
 
         self.DATALOADED = True
         return 0
 
+    def loadLabeledFile(self):
+        """Load a labeld file for one patient"""
+        fname = QFileDialog.getExistingDirectory(self, "Select loading directory")
+        if fname == "":
+            return 1
+        self.central_widget.setEnabled(True)
+        self.__disableWidgets(
+                self.btn_next_patient, 
+                self.btn_prev_patient,
+                self.combo_series
+                )
+        header, self.imgs = self.lbl_holder.loadFile(Path(fname))
+        self.output_path = Path(fname).parent
+        self.SOPInstanceUIDs = [s["SOPInstanceUID"] for s in self.lbl_holder.data]
+        self.labeler_name = header["Labeler"]
+        self.spacing = header["Spacing"]
+
+        self.combo_label.clear()
+        self.combo_label.addItems(header["Labels"])
+        self.curr_lbl = str(self.combo_label.currentText())
+
+        self.combo_series.clear()
+        self.combo_series.addItem(header["Series"])
+
+        self.DATALOADED = True
+        self.__updateImg()
+        self.__updateQLabelText()
+
     def quitApp(self):
+        if not self.lbl_holder.SAVED and not self.args.dev:
+            if not self._alertMsg("Unsaved changes, quitting?"):
+                return 1
         self.close()
         return 0
 
@@ -144,10 +182,6 @@ class MainWindow(QMainWindow):
             self.labeler_name = str(text)
             self.__updateQLabelText()
 
-    def loadLabeledFile(self):
-        """Load a labeld file for one patient"""
-        pass
-
     def changeComboSeries(self, entry):
         """Triggered when self.combo_series change the entry"""
         self.slice_id = 0
@@ -164,7 +198,9 @@ class MainWindow(QMainWindow):
 
     def changComboLabels(self, entry):
         self.curr_lbl = entry
-        self.__updateImg()
+        try:    # prevent triggering when clear
+            self.__updateImg()
+        except: pass
 
     def changeSliderValue(self):
         """Triggered when slider_im changes value"""
@@ -204,7 +240,9 @@ class MainWindow(QMainWindow):
             return 0
 
     def stdoutStream(self, text):
-        self.tb_console.append(text) 
+        #self.tb_console.append(text) 
+        self.tb_console.insertPlainText(text)
+        self.tb_console.verticalScrollBar().setValue(self.tb_console.verticalScrollBar().maximum())
 
     def clearCurrentSlice(self):
         self.lbl_holder.data[self.slice_id][self.curr_lbl] = []
@@ -231,12 +269,18 @@ class MainWindow(QMainWindow):
         self.lbl_holder.SAVED = False
 
     def saveCurrentPatient(self):
-        folder_name = "Label-"+Path(self.fl.getPath()).stem
+        folder_name = "Label-"+Path(self.fl.getPath()).stem + "-" + self.labeler_name.replace(" ", "_")
         file_path = os.path.join(self.output_path, folder_name)
         if os.path.exists(file_path):
             if not self._alertMsg("Data exists, overwrite?"):
                 return 
-        self.lbl_holder.saveToFile(file_path, self.imgs, self.labeler_name)
+        self.lbl_holder.saveToFile(
+                path = file_path,
+                imgs = self.imgs,
+                labeler = self.labeler_name,
+                spacing = self.spacing,
+                series = str(self.combo_series.currentText())
+                )
         self.lbl_holder.SAVED = True
 
     def __getMasks(self):
@@ -260,7 +304,7 @@ class MainWindow(QMainWindow):
                     else:
                         cv_cnt = np.array([[arr] for arr in F.removeDuplicate2d(all_pts)])
                         cv.fillPoly(mask_data[label], pts = [cv_cnt], color = 1)
-                    mask_data[label] = mask_data[label].astype(np.bool)
+                mask_data[label] = mask_data[label].astype(np.bool)
             masks.append(mask_data) 
         return masks
 
@@ -302,18 +346,21 @@ class MainWindow(QMainWindow):
                 self.im_widget.loadContour(cnt["Points"], cnt["Open"])
 
     def __updateQLabelText(self):
-        self.lbl_wd.setText("Console -- LABELER: {} --OUTPUT_PATH: {}".\
+        self.lbl_wd.setText("Console -- LABELER: {} || OUTPUT_PATH: {}".\
                 format(self.labeler_name, str(self.output_path)))
 
     def __readSeries(self):
         """update self.imgs and self.SOPInstanceUIDs by current chosen image series"""
         entry = str(self.combo_series.currentText())
-        #self.imgs, self.SOPInstanceUIDs = self.fl.curr_patient.getSeriesImg(entry)
         image_data = self.fl.curr_patient.getSeriesImg(entry)
         self.imgs = image_data["Images"]
         self.SOPInstanceUIDs = image_data["SOPInstanceUIDs"]
         self.spacing = image_data["Spacing"]
         self.lbl_holder.initialize(LABELS, self.SOPInstanceUIDs) 
+
+    def __disableWidgets(self, *widgets):
+        for w in widgets:
+            w.setEnabled(False)
     
     def _alertMsg(self,msg, title = "Alert", func = lambda x : None):
         msg_box = QMessageBox()

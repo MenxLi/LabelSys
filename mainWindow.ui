@@ -19,7 +19,7 @@
   <property name="windowTitle">
    <string>LabelSys</string>
   </property>
-  <widget class="QWidget" name="vfame">
+  <widget class="QWidget" name="central_widget">
    <layout class="QVBoxLayout" name="verticalLayout" stretch="6,1">
     <property name="spacing">
      <number>10</number>
