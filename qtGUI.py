@@ -133,6 +133,7 @@ class MainWindow(QMainWindow):
                 self.btn_prev_patient,
                 self.combo_series
                 )
+        self.slice_id = 0
         header, self.imgs = self.lbl_holder.loadFile(Path(fname))
         self.output_path = Path(fname).parent
         self.SOPInstanceUIDs = [s["SOPInstanceUID"] for s in self.lbl_holder.data]
@@ -146,8 +147,11 @@ class MainWindow(QMainWindow):
         self.combo_series.clear()
         self.combo_series.addItem(header["Series"])
 
+        self.slider_im.setSliderPosition(self.slice_id)
+        self.slider_im.setMaximum(len(self.imgs)-1)
+
         self.DATALOADED = True
-        self.__updateImg()
+        #self.__updateImg()
         self.__updateQLabelText()
 
     def quitApp(self):
@@ -194,6 +198,7 @@ class MainWindow(QMainWindow):
         except: pass
         finally:
             self.slider_im.setSliderPosition(self.slice_id)
+            self.slider_im.setMaximum(len(self.imgs)-1)
             self.im_widget.resetCamera()
 
     def changComboLabels(self, entry):
