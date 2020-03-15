@@ -3,6 +3,7 @@ import vtk
 from vtk.util import vtkImageImportFromArray
 from vtk.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 from PyQt5.QtWidgets import *
+from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtGui import QImage, QPixmap
 import numpy as np
 from config import *
@@ -212,6 +213,14 @@ class Preview2DWindow(PreviewWindow):
         layout.addWidget(self.lbl_im)
         self.setLayout(layout)
 
+    def nextSlice(self):
+        self.slice_id = min(self.slice_id +1, len(self.imgs)-1)
+        self.updatePanel()
+
+    def prevSlice(self):
+        self.slice_id = max(self.slice_id -1, 0)
+        self.updatePanel()
+
     def updatePanel(self):
         self.__updateImg()
         self.__updateText()
@@ -234,3 +243,20 @@ class Preview2DWindow(PreviewWindow):
             mask_ = mask == key
             im = F.overlap_mask(im, mask_, color, alpha = 0.4)
         return cv.resize(im, None, fx = PREVIEW2D_MAG, fy = PREVIEW2D_MAG, interpolation = cv.INTER_NEAREST)
+
+    #==============Event Handler================
+    def wheelEvent(self, event):
+        modifier = QtWidgets.QApplication.keyboardModifiers() 
+        if event.angleDelta().y() < 0:
+            if modifier == QtCore.Qt.ControlModifier:
+                #self.im_widget.style.OnMouseWheelForward()
+                pass
+            else:
+                self.prevSlice()
+        else: 
+            if modifier == QtCore.Qt.ControlModifier:
+                #self.im_widget.style.OnMouseWheelBackward()
+                pass
+            else:
+                self.nextSlice()
+
