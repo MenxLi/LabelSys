@@ -39,12 +39,17 @@ class MainWindow(QMainWindow):
         self.initMenu()
 
         # Attribute init
-        self.DATALOADED = False # Indicate whether there are date loaded in current window
         self.output_path = Path(os.getcwd()).parent
         self.labeler_name = "Anonymous"
         self.lbl_holder = LabelHolder() 
 
         self.slice_id = 0
+
+        # store some status indicator and temporary variables
+        self.__cache = {
+                "data_loaded":False, # Indicate whether there are date loaded in main window
+                "prev_combo_series": None # used for decline combo series change with unsaved data
+                }
         # data
         # self.imgs = None # current image series of a patient
         # self.SOPInstanceUIDs = None # SOPInstanceUIDs of self.imgs
@@ -76,6 +81,26 @@ class MainWindow(QMainWindow):
         self.act_fullscreen.setShortcut("Ctrl+F")
         self.act_3D_preview.triggered.connect(self.previewLabels3D)
 
+        # Operation
+        self.act_op_next_slice.triggered.connect(self.nextSlice)
+        self.act_op_next_slice.setShortcut("Up")
+        self.act_op_prev_slice.triggered.connect(self.prevSlice)
+        self.act_op_prev_slice.setShortcut("Down")
+        self.act_op_next_patient.triggered.connect(self.nextPatient)
+        self.act_op_next_patient.setShortcut("Right")
+        self.act_op_prev_patient.triggered.connect(self.prevPatient)
+        self.act_op_prev_patient.setShortcut("Left")
+        self.act_op_change_lbl.triggered.connect(self.switchLabel)
+        self.act_op_change_lbl.setShortcut("Tab")
+        self.act_op_save.triggered.connect(self.saveCurrentPatient)
+        self.act_op_save.setShortcut("Ctrl+S")
+        self.act_op_clear.triggered.connect(self.clearCurrentSlice)
+        self.act_op_clear.setShortcut("Esc")
+        self.act_op_interp.triggered.connect(self.interpCurrentSlice)
+        self.act_op_interp.setShortcut("Ctrl+I")
+        self.act_op_add_cnt.triggered.connect(self.addContour)
+        self.act_op_add_cnt.setShortcut("Ctrl+A")
+
         # Settings
         self.act_set_path.triggered.connect(self.setOutputPath)
         self.act_set_path.setShortcut("Ctrl+Alt+P")
@@ -92,7 +117,7 @@ class MainWindow(QMainWindow):
         self.__updateQLabelText()
 
         self.combo_series.currentTextChanged.connect(self.changeComboSeries)
-        self.combo_label.currentTextChanged.connect(self.changComboLabels)
+        self.combo_label.currentTextChanged.connect(self.changeComboLabels)
         self.check_crv.stateChanged.connect(self.changeCheckCrv)
         self.btn_next_slice.clicked.connect(self.nextSlice)
         self.btn_prev_slice.clicked.connect(self.prevSlice)
@@ -123,7 +148,7 @@ class MainWindow(QMainWindow):
 
         self.__updatePatient()
 
-        self.DATALOADED = True
+        self.__cache["data_loaded"] = True
         return 0
 
     def loadLabeledFile(self):
@@ -154,7 +179,7 @@ class MainWindow(QMainWindow):
         self.slider_im.setSliderPosition(self.slice_id)
         self.slider_im.setMaximum(len(self.imgs)-1)
 
-        self.DATALOADED = True
+        self.__cache["data_loaded"] = True
         #self.__updateImg()
         self.__updateQLabelText()
 
@@ -197,11 +222,15 @@ class MainWindow(QMainWindow):
 
     def changeComboSeries(self, entry):
         """Triggered when self.combo_series change the entry"""
+        if self.__querySave() == 1:
+            # decline action with unsaved changes
+            self.combo_series.currentTextChanged.disconnect()
+            self.combo_series.setCurrentText(self.__cache["prev_combo_series"])
+            self.combo_series.currentTextChanged.connect(self.changeComboSeries)
+            return
         self.slice_id = 0
+        self.__cache["prev_combo_series"] = entry
         try: # prevent triggering when changing patient
-            if not self.lbl_holder.SAVED:
-                if not self._alertMsg("Unsaved changes, continue?"):
-                    return 1
             self.__readSeries()
             self.__updateImg()
         except: pass
@@ -210,7 +239,7 @@ class MainWindow(QMainWindow):
             self.slider_im.setMaximum(len(self.imgs)-1)
             self.im_widget.resetCamera()
 
-    def changComboLabels(self, entry):
+    def changeComboLabels(self, entry):
         self.curr_lbl = entry
         try:    # prevent triggering when clear
             self.__updateImg()
@@ -232,6 +261,11 @@ class MainWindow(QMainWindow):
         self.slice_id = self.slider_im.value()
         self.__updateImg()
 
+    def switchLabel(self):
+        """switch between labels, for shortcut use"""
+        new_label_id = (LABELS.index(self.curr_lbl) + 1)%len(LABELS)
+        self.combo_label.setCurrentText(LABELS[new_label_id]) # will trigger changeComboLabels()
+
     def nextSlice(self):
         if self.slice_id >= len(self.imgs)-1:
             return 1
@@ -249,17 +283,15 @@ class MainWindow(QMainWindow):
         return 0
 
     def nextPatient(self):
-        if not self.lbl_holder.SAVED:
-            if not self._alertMsg("Unsaved changes, continue?"):
-                return 1
+        if self.__querySave() == 1:
+            return
         if self.fl.next():
             self.__updatePatient()
             return 0
         
     def prevPatient(self):
-        if not self.lbl_holder.SAVED:
-            if not self._alertMsg("Unsaved changes, continue?"):
-                return 1
+        if self.__querySave() == 1:
+            return
         if self.fl.previous():
             self.__updatePatient()
             return 0
@@ -284,16 +316,26 @@ class MainWindow(QMainWindow):
             self.lbl_holder.data[self.slice_id] = copy.deepcopy(self.lbl_holder.data[self.slice_id+1])
             self.lbl_holder.SAVED = False
             self.__updateImg()
-
+        elif type(next_mask) == type(None):
+            print("Copied from previous slice")
+            self.lbl_holder.data[self.slice_id] = copy.deepcopy(self.lbl_holder.data[self.slice_id-1])
+            self.lbl_holder.SAVED = False
+            self.__updateImg()
+        else:
+            """should be improved in the futute"""
+            print("Copied from previous slice")
+            self.lbl_holder.data[self.slice_id] = copy.deepcopy(self.lbl_holder.data[self.slice_id-1])
+            self.lbl_holder.SAVED = False
+            self.__updateImg()
 
     def previewLabels3D(self):
-        if not self.DATALOADED:
+        if not self.__cache["data_loaded"]:
             pass
         self.preview_win_3d = Preview3DWindow(self.imgs, self.__getMasks(), spacing = self.spacing)
         self.preview_win_3d.show()
 
     def previewLabels2D(self):
-        if not self.DATALOADED:
+        if not self.__cache["data_loaded"]:
             pass
         self.preview_win_2d = Preview2DWindow(self.imgs, self.__getMasks(), self.slice_id) 
         self.preview_win_2d.show()
@@ -302,6 +344,10 @@ class MainWindow(QMainWindow):
         self.im_widget.style.forceDrawing()
 
     def saveCurrentSlice(self, cnts_data):
+        """
+        Will be triggered automatically when modifying the contour, will be
+        called by vtkClass
+        """
         self.lbl_holder.data[self.slice_id][self.curr_lbl] = cnts_data
         self.lbl_holder.data[self.slice_id]["SOPInstanceUID"] = self.SOPInstanceUIDs[self.slice_id]
         self.lbl_holder.SAVED = False
@@ -420,6 +466,17 @@ class MainWindow(QMainWindow):
         for w in widgets:
             w.setEnabled(False)
     
+    def __querySave(self):
+        """Check if there are unsaved changes"""
+        if not self.lbl_holder.SAVED:
+            if self._alertMsg("Unsaved changes, continue?"):
+                self.lbl_holder.SAVED = True # prevent multiple calls
+                return 0
+            else:
+                return 1
+        else:
+            return 0
+
     def _alertMsg(self,msg, title = "Alert", func = lambda x : None):
         msg_box = QMessageBox()
         msg_box.setText(msg)
@@ -447,7 +504,7 @@ class MainWindow(QMainWindow):
         if(event.type() == QEvent.MouseMove):
             """vtk seems difficult in recognizing mouse dragging, so 
             implimented With Qt"""
-            if not self.DATALOADED:
+            if not self.__cache["data_loaded"]:
                 return False
             self.im_widget.style.mouseMoveEvent(None, None)
         return super().eventFilter(receiver, event)
