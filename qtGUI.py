@@ -12,7 +12,9 @@ import myFuncs as F
 from labelResultHolder import LabelHolder
 from config import *
 from previewGUI import Preview3DWindow, Preview2DWindow
+from settingsGUI import SettingsDialog
 import cv2 as cv
+import copy
 
 LOCAL_DIR = os.path.dirname(os.path.realpath(__file__))
 
@@ -79,6 +81,8 @@ class MainWindow(QMainWindow):
         self.act_set_path.setShortcut("Ctrl+Alt+P")
         self.act_set_lbler.triggered.connect(self.setLabeler)
         self.act_set_lbler.setShortcut("Ctrl+Alt+L")
+        self.act_set_settings.triggered.connect(self.setSettings)
+        self.act_set_settings.setShortcut("Ctrl+Alt+S")
 
     def initPanel(self):
         """Init the whole panel, will be called on loading the patients""" 
@@ -89,12 +93,14 @@ class MainWindow(QMainWindow):
 
         self.combo_series.currentTextChanged.connect(self.changeComboSeries)
         self.combo_label.currentTextChanged.connect(self.changComboLabels)
+        self.check_crv.stateChanged.connect(self.changeCheckCrv)
         self.btn_next_slice.clicked.connect(self.nextSlice)
         self.btn_prev_slice.clicked.connect(self.prevSlice)
         self.btn_next_patient.clicked.connect(self.nextPatient)
         self.btn_prev_patient.clicked.connect(self.prevPatient)
         self.btn_save.clicked.connect(self.saveCurrentPatient)
         self.btn_clear.clicked.connect(self.clearCurrentSlice)
+        self.btn_interp.clicked.connect(self.interpCurrentSlice)
         self.btn_preview.clicked.connect(self.previewLabels2D)
         self.btn_add_cnt.clicked.connect(self.addContour)
         self.slider_im.valueChanged.connect(self.changeSliderValue)
@@ -115,8 +121,6 @@ class MainWindow(QMainWindow):
         file_path = Path(fname)
         self.fl = FolderLoader(file_path)
 
-        #self.initPanel()
-        #self.initImageUI()
         self.__updatePatient()
 
         self.DATALOADED = True
@@ -186,6 +190,11 @@ class MainWindow(QMainWindow):
             self.labeler_name = str(text)
             self.__updateQLabelText()
 
+    def setSettings(self):
+        self.settings_dialog = SettingsDialog(self)
+        self.settings_dialog.exec_()
+        #self.settings_dialog.show()
+
     def changeComboSeries(self, entry):
         """Triggered when self.combo_series change the entry"""
         self.slice_id = 0
@@ -206,6 +215,17 @@ class MainWindow(QMainWindow):
         try:    # prevent triggering when clear
             self.__updateImg()
         except: pass
+        mode = LBL_MODE[LABELS.index(self.curr_lbl)]
+        if mode == 1:
+            self.check_crv.setChecked(True)
+        elif mode == 0:
+            self.check_crv.setChecked(False)
+
+    def changeCheckCrv(self, i):
+        if self.check_crv.isChecked():
+            LBL_MODE[LABELS.index(self.curr_lbl)] = 1
+        else:
+            LBL_MODE[LABELS.index(self.curr_lbl)] = 0
 
     def changeSliderValue(self):
         """Triggered when slider_im changes value"""
@@ -252,6 +272,19 @@ class MainWindow(QMainWindow):
     def clearCurrentSlice(self):
         self.lbl_holder.data[self.slice_id][self.curr_lbl] = []
         self.__updateImg()
+
+    def interpCurrentSlice(self):
+        prev_mask = self.__getSingleMask(self.slice_id-1, self.combo_label.currentText())
+        next_mask = self.__getSingleMask(self.slice_id+1, self.combo_label.currentText())
+        if type(prev_mask) == type(None) and type(next_mask) == type(None):
+            print("Nothing to interpolate")
+            return
+        elif type(prev_mask) == type(None):
+            print("Copied from next slice")
+            self.lbl_holder.data[self.slice_id] = copy.deepcopy(self.lbl_holder.data[self.slice_id+1])
+            self.lbl_holder.SAVED = False
+            self.__updateImg()
+
 
     def previewLabels3D(self):
         if not self.DATALOADED:
@@ -312,6 +345,26 @@ class MainWindow(QMainWindow):
                 mask_data[label] = mask_data[label].astype(np.bool)
             masks.append(mask_data) 
         return masks
+
+    def __getSingleMask(self, idx, label):
+        """get mask for a single label in single image, used for interpolation"""
+        if idx <0 or idx > len(self.imgs)-1:
+            return None
+        im_shape = self.imgs[idx].shape
+        mask = np.zeros(im_shape[:2], np.uint8)
+        cnts_data = self.lbl_holder.data[idx][label]
+        if cnts_data == []:
+            return None
+        for cnt_data in cnts_data:
+            all_pts = cnt_data["Contour"] # All the points position on the contour, in CV coordinate
+            if cnt_data["Open"] == True:
+                cv_cnt = np.array([arr for arr in F.removeDuplicate2d(all_pts)])
+                cv.polylines(mask,[cv_cnt],False,1)
+            else:
+                cv_cnt = np.array([[arr] for arr in F.removeDuplicate2d(all_pts)])
+                cv.fillPoly(mask, pts = [cv_cnt], color = 1)
+        mask = mask.astype(np.bool)
+        return mask
 
     def __updateComboSeries(self):
         """Update the series combobox when changing patient"""

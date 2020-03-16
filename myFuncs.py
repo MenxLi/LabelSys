@@ -4,6 +4,7 @@ Useful functions
 
 import numpy as np
 import scipy.ndimage
+import cv2 as cv
 
 def gray2rgb_(img):
     new_img = np.concatenate((img[:,:,np.newaxis], img[:,:,np.newaxis], img[:,:,np.newaxis]), axis=2)
@@ -122,6 +123,22 @@ def find_region(mask, value = 1):
     col_end = coord[1].max()
     return((row_start, row_end), (col_start, col_end))
 
+def find_max_areaContour(img, approx = cv.RETR_TREE):
+    """
+    用opencv的contour找到最大面积的轮廓
+    返回轮廓
+    """
+    contours, _= cv.findContours(img, cv.RETR_TREE, approx)
+
+    max_area_id = 0 #记录最大轮廓的id
+    max_area = 0 #记录最大长度
+    for i in range(len(contours)):
+        current_area = cv.contourArea(contours[i])
+        if current_area > max_area:
+            max_area = current_area
+            max_area_id = i
+    return contours[max_area_id]
+
 def resampleSpacing(imgs, old_spacing, new_spacing = [1,1,1]): 
     """Resample /dicom/ images"""
     spacing = np.array(old_spacing)
@@ -144,4 +161,51 @@ def overlap_mask(img, mask, color = (255,0,0), alpha = 1):
     f_im = im*(1-mask) + im*mask*(1-alpha) + color_*alpha*mask
     return f_im.astype(np.uint8)
 
+class Interpolate_mask_init:
+    """
+    get initial contour from two masks: msk1, msk2
+    @msk1, msk2: masks (binary)
+    @num_interp: # of masks to interpolate
+    """
+    def __init__(self, msk1, msk2, num_interp, accuracy = 100):
+        if msk1.shape != msk2.shape:
+            raise Exception("Unmatched shape for two images, check image demension")
+        elif num_interp<1: raise Exception("Cannot interpolate sccessive masks  ")
 
+        self.msk1 = msk1.astype(np.uint8)
+        self.msk2 = msk2.astype(np.uint8)
+        self.msks = None
+        self.num = num_interp
+        self.cnt1 = find_max_areaContour(self.msk1, cv.CHAIN_APPROX_NONE)
+        self.cnt2 = find_max_areaContour(self.msk2, cv.CHAIN_APPROX_NONE)
+        self.cnt1_unif = self.resample(self.cnt1, accuracy) #uniformed
+        self.cnt2_unif = self.resample(self.cnt2, accuracy)
+
+    def run(self):
+        NI = self.num
+        weights = [((NI-pos)/(NI+1),(pos+1)/(NI+1)) for pos in range(NI)]
+        cnts = [(w1*self.cnt1_unif + w2*self.cnt2_unif).astype(int) for w1, w2 in weights]
+        self.msks = [self.get_mask(cnt, self.msk1.shape[:2]) for cnt in cnts]
+        return self.msks
+
+    #=========================Utils===================================
+    def resample(self, ori_seq, length):
+        """
+        index_seq: range sequence
+        """
+        id_index = range(length)
+        id_corr_ori = (len(ori_seq)-1)/(length-1) * np.array(id_index)
+        new_seq = []
+        for i in id_corr_ori:
+            if i == int(i):
+                new_seq.append(ori_seq[int(i)])
+            else:
+                floor = max((np.floor(i)).astype(int), 0)
+                ceil = min((np.ceil(i)).astype(int), len(ori_seq)-1)
+                val = (i-floor)*ori_seq[ceil] + (ceil-i)*ori_seq[floor]
+                new_seq.append(val)
+        return np.array(new_seq)
+    def get_mask(self, cnt, shape):
+        img = np.zeros(shape, np.uint8)
+        cv.fillPoly(img, pts =[cnt], color = 1)
+        return img

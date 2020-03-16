@@ -1,0 +1,19 @@
+{
+    "Labels":{
+        "Disc" :{
+            "value": 1, 
+            "color": [1.0, 0.0, 0.0], 
+            "mode": 0
+        },
+        "Condyle" :{
+            "value": 2, 
+            "color": [1.0, 1.0, 0.0], 
+            "mode": 1
+        },
+        "Eminence" :{
+            "value": 3, 
+            "color": [0.0, 1.0, 1.0], 
+            "mode": 1
+        }
+    }
+}

@@ -412,10 +412,25 @@
     </property>
     <addaction name="act_set_path"/>
     <addaction name="act_set_lbler"/>
-    <addaction name="act_set_cnt_behav"/>
+    <addaction name="act_set_settings"/>
+   </widget>
+   <widget class="QMenu" name="menu_operation">
+    <property name="title">
+     <string>Operation</string>
+    </property>
+    <addaction name="act_op_next_slice"/>
+    <addaction name="act_op_prev_slice"/>
+    <addaction name="act_op_next_patient"/>
+    <addaction name="act_op_prev_patient"/>
+    <addaction name="act_op_change_lbl"/>
+    <addaction name="act_op_save"/>
+    <addaction name="act_op_clear"/>
+    <addaction name="act_op_interp"/>
+    <addaction name="act_op_add_cnt"/>
    </widget>
    <addaction name="menu_file"/>
    <addaction name="menu_view"/>
+   <addaction name="menu_operation"/>
    <addaction name="menu_settings"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
@@ -452,7 +467,7 @@
   </action>
   <action name="act_3D_preview">
    <property name="text">
-    <string>3D Preview</string>
+    <string>3D Preview (Experimental)</string>
    </property>
   </action>
   <action name="act_set_lbler">
@@ -460,9 +475,54 @@
     <string>Labeler name</string>
    </property>
   </action>
-  <action name="act_set_cnt_behav">
+  <action name="act_set_settings">
    <property name="text">
-    <string>Default contour behavior</string>
+    <string>Other settings</string>
+   </property>
+  </action>
+  <action name="act_op_next_slice">
+   <property name="text">
+    <string>Next slice</string>
+   </property>
+  </action>
+  <action name="act_op_prev_slice">
+   <property name="text">
+    <string>Previous slice</string>
+   </property>
+  </action>
+  <action name="act_op_next_patient">
+   <property name="text">
+    <string>Next patient</string>
+   </property>
+  </action>
+  <action name="act_op_prev_patient">
+   <property name="text">
+    <string>Previous patient</string>
+   </property>
+  </action>
+  <action name="act_op_change_lbl">
+   <property name="text">
+    <string>Change label</string>
+   </property>
+  </action>
+  <action name="act_op_save">
+   <property name="text">
+    <string>Save</string>
+   </property>
+  </action>
+  <action name="act_op_clear">
+   <property name="text">
+    <string>Clear</string>
+   </property>
+  </action>
+  <action name="act_op_interp">
+   <property name="text">
+    <string>Interpolation</string>
+   </property>
+  </action>
+  <action name="act_op_add_cnt">
+   <property name="text">
+    <string>Add contour</string>
    </property>
   </action>
  </widget>
