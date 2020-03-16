@@ -510,6 +510,8 @@ class MainWindow(QMainWindow):
         return super().eventFilter(receiver, event)
 
     def wheelEvent(self, event):
+        if not self.__cache["data_loaded"]:
+            return 
         modifier = QtWidgets.QApplication.keyboardModifiers() 
         if event.angleDelta().y() < 0:
             if modifier == Qt.ControlModifier:
