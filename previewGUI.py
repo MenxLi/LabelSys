@@ -1,4 +1,3 @@
-import myFuncs as F
 import vtk
 from vtk.util import vtkImageImportFromArray
 from vtk.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
@@ -7,7 +6,7 @@ from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtGui import QImage, QPixmap
 import numpy as np
 from configLoader import *
-import myFuncs as F
+import utils_ as F
 import cv2 as cv
 
 class PreviewWindow(QWidget):

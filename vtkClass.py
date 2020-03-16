@@ -5,7 +5,7 @@ from vtk.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 from PyQt5.QtWidgets import *
 import numpy as np
 import cv2 as cv
-import myFuncs as F
+import utils_ as F
 
 class VtkWidget(QVTKRenderWindowInteractor):
     def __init__(self, frame, checkbox, save_func):

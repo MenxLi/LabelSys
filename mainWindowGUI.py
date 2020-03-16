@@ -8,7 +8,7 @@ from dicomFileReader import FolderLoader
 from pathlib import Path
 import os,sys
 from vtkClass import VtkWidget
-import myFuncs as F
+import utils_ as F
 from labelResultHolder import LabelHolder
 from configLoader import *
 from previewGUI import Preview3DWindow, Preview2DWindow

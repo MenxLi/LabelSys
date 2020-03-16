@@ -1,6 +1,6 @@
 import sys
 from PyQt5.QtWidgets import QApplication
-from qtGUI import MainWindow
+from mainWindowGUI import MainWindow
 from argParse import parser, args
 
 
