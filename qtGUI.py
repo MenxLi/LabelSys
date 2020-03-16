@@ -10,7 +10,7 @@ import os,sys
 from vtkClass import VtkWidget
 import myFuncs as F
 from labelResultHolder import LabelHolder
-from config import *
+from configLoader import *
 from previewGUI import Preview3DWindow, Preview2DWindow
 from settingsGUI import SettingsDialog
 import cv2 as cv

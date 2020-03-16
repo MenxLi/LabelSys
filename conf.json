@@ -15,5 +15,9 @@
             "color": [0.0, 1.0, 1.0], 
             "mode": 1
         }
-    }
+    },
+    "2D_preview_mag":2,
+    "Default_series":"SEG PD",
+    "Contour_mode_open":1,
+    "Contour_mode_close":0
 }

@@ -1,5 +1,5 @@
 from base64ImageConverter import imgEncodeB64, imgDecodeB64
-from config import *
+from configLoader import *
 import os
 import vtk
 import cv2 as cv

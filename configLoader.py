@@ -3,10 +3,10 @@ import json
 with open("conf.json", "r") as f:
     CONF = json.load(f)
 
-CNT_OPEN = 1
-CNT_CLOSE = 0
+CNT_OPEN = CONF["Contour_mode_open"]
+CNT_CLOSE = CONF["Contour_mode_close"]
 
-SERIES = 'SAG PD'
+SERIES = CONF["Default_series"]
 
 LABELS = []
 LBL_COLORS = []
@@ -17,5 +17,5 @@ for _label in CONF["Labels"].keys():
     LBL_MODE.append(CONF["Labels"][_label]["mode"])
 
 # Magnification for preview
-PREVIEW2D_MAG = 2
+PREVIEW2D_MAG = CONF["2D_preview_mag"]
 
