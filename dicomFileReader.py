@@ -3,6 +3,7 @@ import numpy as np
 import pydicom
 import os
 import scipy.ndimage
+from pathlib import Path
 
 # Pydicom reading reference: https://pydicom.github.io/pydicom/stable/tutorials/dataset_basics.html
 
@@ -20,7 +21,14 @@ class DicomLoader:
         return a list of pydicom.dataset.FileDataset instance
         """
         dicom_path = glob(patient_path + '/*')
-        slices = [pydicom.read_file(s, force=True) for s in dicom_path]
+        slices = []
+        for path_ in dicom_path:
+            if os.path.isfile(path_) and Path(path_).stem != "DIOOMDIR":
+                try:
+                    s = pydicom.read_file(path_)
+                    slices.append(s)
+                except: pass
+        #slices = [pydicom.read_file(s, force=True) for s in dicom_path]
         slices.sort(key = lambda x: int(x.InstanceNumber))
         return slices
     def creatSeries(self, slices):
@@ -103,6 +111,3 @@ class FolderLoader:
         else: return 0
     def getPath(self):
         return self.paths[self.ptr]
-
-
-

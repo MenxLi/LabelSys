@@ -28,7 +28,6 @@ class MainWindow(QMainWindow):
         ui_path = os.path.join(LOCAL_DIR, "mainWindow.ui")
         uic.loadUi(ui_path, self)
         self.args = args
-        sys.stdout = EmittingStream(textWritten = self.stdoutStream)
 
         # set style sheet
         self.tb_console.setStyleSheet("color: white; background-color:black;")
@@ -51,7 +50,8 @@ class MainWindow(QMainWindow):
         # store some status indicator and temporary variables
         self.__cache = {
                 "data_loaded":False, # Indicate whether there are date loaded in main window
-                "prev_combo_series": None # used for decline combo series change with unsaved data
+                "prev_combo_series": None, # used for decline combo series change with unsaved data
+                "output_set": False # Indecate wether user have set the output path
                 }
         # data
         # self.imgs = None # current image series of a patient
@@ -69,6 +69,7 @@ class MainWindow(QMainWindow):
             self.loadPatietns()
         else:
             print("Welcome to ")
+            sys.stdout = EmittingStream(textWritten = self.stdoutStream)
 
     def initMenu(self):
         # File
@@ -170,7 +171,6 @@ class MainWindow(QMainWindow):
                 )
         self.slice_id = 0
         header, self.imgs = self.lbl_holder.loadFile(Path(fname))
-        self.output_path = Path(fname).parent
         self.SOPInstanceUIDs = [s["SOPInstanceUID"] for s in self.lbl_holder.data]
         self.labeler_name = header["Labeler"]
         self.spacing = header["Spacing"]
@@ -187,6 +187,8 @@ class MainWindow(QMainWindow):
 
         self.__cache["data_loaded"] = True
         #self.__updateImg()
+
+        self.output_path = Path(fname)#.parent
         self.__updateQLabelText()
 
     def quitApp(self):
@@ -211,6 +213,7 @@ class MainWindow(QMainWindow):
         if fname == "":
             return 1
         self.output_path = Path(fname)
+        self.__cache["output_set"] = True
         self.__updateQLabelText()
         return 0
 
@@ -249,12 +252,12 @@ class MainWindow(QMainWindow):
         self.curr_lbl = entry
         try:    # prevent triggering when clear
             self.__updateImg()
+            mode = LBL_MODE[LABELS.index(self.curr_lbl)]
+            if mode == 1:
+                self.check_crv.setChecked(True)
+            elif mode == 0:
+                self.check_crv.setChecked(False)
         except: pass
-        mode = LBL_MODE[LABELS.index(self.curr_lbl)]
-        if mode == 1:
-            self.check_crv.setChecked(True)
-        elif mode == 0:
-            self.check_crv.setChecked(False)
 
     def changeCheckCrv(self, i):
         if self.check_crv.isChecked():
@@ -294,7 +297,7 @@ class MainWindow(QMainWindow):
         if self.fl.next():
             self.__updatePatient()
             return 0
-        
+
     def prevPatient(self):
         if self.__querySave() == 1:
             return
@@ -357,6 +360,12 @@ class MainWindow(QMainWindow):
         self.lbl_holder.data[self.slice_id][self.curr_lbl] = cnts_data
         self.lbl_holder.data[self.slice_id]["SOPInstanceUID"] = self.SOPInstanceUIDs[self.slice_id]
         self.lbl_holder.SAVED = False
+
+        try:
+            # update 2D preview window
+            if self.preview_win_2d.isVisible():
+                self.preview_win_2d.updateInfo(self.__getMasks(), self.slice_id)
+        except: pass
 
     def saveCurrentPatient(self):
         folder_name = "Label-"+Path(self.fl.getPath()).stem + "-" + self.labeler_name.replace(" ", "_")
@@ -437,6 +446,9 @@ class MainWindow(QMainWindow):
         self.__updateImg()
         self.slider_im.setSliderPosition(self.slice_id)
         self.slider_im.setMaximum(len(self.imgs)-1)
+        if not self.__cache["output_set"]:
+            self.output_path = self.fl.getPath()
+            self.__updateQLabelText()
 
     def __updateImg(self):
         """update image showing on im_frame"""

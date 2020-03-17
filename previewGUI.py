@@ -11,13 +11,13 @@ import cv2 as cv
 
 class PreviewWindow(QWidget):
     def __init__(self, imgs, masks, spacing = [1,1,1]):
-        super().__init__()
+        super().__init__(None, QtCore.Qt.WindowStaysOnTopHint)
         if masks== None:
             self.close()
         self.imgs = imgs
         self.masks_raw = masks
         self.spacing = spacing
-        self.masks = self.generateMasks()
+        self.masks = self.generateMasks(self.masks_raw)
         #self._center()
 
         self.initUI()
@@ -31,9 +31,9 @@ class PreviewWindow(QWidget):
         qr.moveCenter(cp)
         self.move(qr.topLeft())
 
-    def generateMasks(self):
+    def generateMasks(self, masks_raw):
         masks = []
-        for mask_ in self.masks_raw: 
+        for mask_ in masks_raw: 
             color = 1
             mask = np.ma.zeros(self.imgs[0].shape[:2], np.uint8)
             for label in mask_.keys():
@@ -200,7 +200,7 @@ class Preview2DWindow(PreviewWindow):
         for lbl_id_ in range(len(LABELS)):
             self.lbl_color[lbl_id_+1] = [int(i*255) for i in LBL_COLORS[lbl_id_]]
 
-        self.updatePanel()
+        self.__updatePanel()
 
     def initUI(self):
         self.setWindowTitle("Preview-2D")
@@ -214,13 +214,18 @@ class Preview2DWindow(PreviewWindow):
 
     def nextSlice(self):
         self.slice_id = min(self.slice_id +1, len(self.imgs)-1)
-        self.updatePanel()
+        self.__updatePanel()
 
     def prevSlice(self):
         self.slice_id = max(self.slice_id -1, 0)
-        self.updatePanel()
+        self.__updatePanel()
 
-    def updatePanel(self):
+    def updateInfo(self, masks, curr_slice_id):
+        self.slice_id = curr_slice_id
+        self.masks = self.generateMasks(masks)
+        self.__updatePanel()
+
+    def __updatePanel(self):
         self.__updateImg()
         self.__updateText()
 
