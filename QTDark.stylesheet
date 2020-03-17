@@ -280,6 +280,8 @@ QMenu::separator {
 	background: #353535;
 }
 
+
+/*Modified here*/
 QPushButton {
     border: 2px solid #555;
     border-radius: 10px;
