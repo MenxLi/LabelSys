@@ -24,6 +24,7 @@ LOCAL_DIR = os.path.dirname(os.path.realpath(__file__))
 class MainWindow(QMainWindow):
     def __init__(self,args):
         super().__init__()
+        sys.stdout = EmittingStream(textWritten = self.stdoutStream)
         # load UI
         ui_path = os.path.join(LOCAL_DIR, "mainWindow.ui")
         uic.loadUi(ui_path, self)
@@ -68,8 +69,8 @@ class MainWindow(QMainWindow):
             print("Developing mode...")
             self.loadPatietns()
         else:
-            print("Welcome to ")
-            sys.stdout = EmittingStream(textWritten = self.stdoutStream)
+            print("Welcome to LabelSys v"+__version__)
+            print("For help see: Help -> manual")
 
     def initMenu(self):
         # File
