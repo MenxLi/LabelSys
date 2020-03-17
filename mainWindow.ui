@@ -428,10 +428,17 @@
     <addaction name="act_op_interp"/>
     <addaction name="act_op_add_cnt"/>
    </widget>
+   <widget class="QMenu" name="menu_help">
+    <property name="title">
+     <string>Help</string>
+    </property>
+    <addaction name="act_manual"/>
+   </widget>
    <addaction name="menu_file"/>
    <addaction name="menu_view"/>
    <addaction name="menu_operation"/>
    <addaction name="menu_settings"/>
+   <addaction name="menu_help"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="act_open">
@@ -523,6 +530,11 @@
   <action name="act_op_add_cnt">
    <property name="text">
     <string>Add contour</string>
+   </property>
+  </action>
+  <action name="act_manual">
+   <property name="text">
+    <string>Manual</string>
    </property>
   </action>
  </widget>

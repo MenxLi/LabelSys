@@ -1,20 +1,23 @@
+import webbrowser
+from pathlib import Path
+import os,sys
+import copy
+
+from version import __version__
+from dicomFileReader import FolderLoader
+from configLoader import *
+import utils_ as F
+from labelResultHolder import LabelHolder
+from previewGUI import Preview3DWindow, Preview2DWindow
+from settingsGUI import SettingsDialog
+
 import numpy as np
 from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import Qt, pyqtSignal, QObject, QEvent
 from PyQt5 import uic
-from version import __VERSION__, __DESCRIPTION__
-from dicomFileReader import FolderLoader
-from pathlib import Path
-import os,sys
 from vtkClass import VtkWidget
-import utils_ as F
-from labelResultHolder import LabelHolder
-from configLoader import *
-from previewGUI import Preview3DWindow, Preview2DWindow
-from settingsGUI import SettingsDialog
 import cv2 as cv
-import copy
 
 LOCAL_DIR = os.path.dirname(os.path.realpath(__file__))
 
@@ -32,7 +35,7 @@ class MainWindow(QMainWindow):
 
         # UI change
         self.showFullScreen(); self.__screen_mode = 2
-        self.setWindowTitle("LabelSys "+__VERSION__)
+        self.setWindowTitle("LabelSys "+__version__)
         self.setFocus()
         self.setFocusPolicy(Qt.StrongFocus)
 
@@ -65,7 +68,7 @@ class MainWindow(QMainWindow):
             print("Developing mode...")
             self.loadPatietns()
         else:
-            print("Normal mode")
+            print("Welcome to ")
 
     def initMenu(self):
         # File
@@ -108,6 +111,9 @@ class MainWindow(QMainWindow):
         self.act_set_lbler.setShortcut("Ctrl+Alt+L")
         self.act_set_settings.triggered.connect(self.setSettings)
         self.act_set_settings.setShortcut("Ctrl+Alt+S")
+
+        # Help
+        self.act_manual.triggered.connect(self.showHelpManual)
 
     def initPanel(self):
         """Init the whole panel, will be called on loading the patients""" 
@@ -487,6 +493,10 @@ class MainWindow(QMainWindow):
         if return_value == QMessageBox.Ok:
             return True
         else: return False
+
+    def showHelpManual(self):
+        file_path = os.path.realpath("help.html")
+        webbrowser.open("file://"+file_path)
     
     #==============Event Handler================
     def eventFilter(self, receiver, event):
