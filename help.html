@@ -9,7 +9,8 @@
       <li><a href="#c_interface">Interface</a></li>
       <li><a href="#c_example_mri">Example - MRILabeling of articular disc</a></li>
       <ul>
-        <li><a href="#c_example_open">Opening DICOM files</a></li>
+        <li><a href="#c_example_open">Open DICOM files</a></li>
+        <li><a href="c_setup_info">Before start</a></li>
       </ul>
     </ul>
 
@@ -20,16 +21,38 @@
       <h2 id="c_interface"> Interface </h2>
       <img src="Pics/mainWindow.png" width="50%" height="50%"> 
       <ol>
-        <li>Menu Bar</li>
-        <li>Operation Panel: Main labeling operations can be accessed here</li>
-        <li>Labeling Panel: Showing image and allow labeling</li>
-        <li>Console Output: Where program output shows</li>
+        <li id="panel_1">Menu Bar</li>
+        <li id="panel_2">Operation Panel: Main labeling operations can be accessed here</li>
+        <li id="panel_3">Labeling Panel: Showing image and allow labeling</li>
+        <li id="panel_4">Console Output: Where program output shows</li>
       </ol>
     </section>
 
     <section>
       <h2 id="c_example_mri">Example - MRILabeling of articular disc</h2>
-      <h3 id="c_example_open">Openning DICOM files</h3>
+
+      <h3 id="c_example_open">Open DICOM files</h3>
+      To open dicom files for labeling, go to <a href="#panel_1">panel.1</a> -> File -> Open and choose the directory to open <br>
+      the directory to be opened can contain multiple patient images and should be structed as follows: <br>
+      <div id="folder_hierarchy">
+      Folder_to_open <br>
+      |--Patient0 <br>
+      |&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp|--slice0.dcm <br>
+      |&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp|--slice1.dcm <br>
+      |&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp|--slice2.dcm <br>
+      |&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp|--... <br> 
+      |--Patient1 <br>
+      |&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp|--slice0.dcm <br>
+      |&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp|--... <br>
+      |--Patient2 <br>
+      |&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp|--... <br>
+      |--... <br>
+      </div>
+
+      <h3 id="c_setup_info">Before start</h3>
+      Before we start labeling, we need to setup labler's name, it's in <a href="#panel_1">panel.1</a> -> Settings -> Labeler name. <br>
+      Notice that it's better for labeler's name to be consistent through out the labeling process, i.e. one person just use one name. <br> 
+      We can also setup the output path, however for this specific project, 
     </section>
 
     <p>This manual will be finished later</p>
