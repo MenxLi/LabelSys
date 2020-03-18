@@ -10,7 +10,9 @@
       <li><a href="#c_example_mri">Example - MRILabeling of articular disc</a></li>
       <ul>
         <li><a href="#c_example_open">Open DICOM files</a></li>
-        <li><a href="c_setup_info">Before start</a></li>
+        <li><a href="#c_setup_info">Before start</a></li>
+        <li><a href="#c_navigation">Navigation</a></li>
+        <li><a href="#c_label">Label</a></li>
       </ul>
     </ul>
 
@@ -26,33 +28,56 @@
         <li id="panel_3">Labeling Panel: Showing image and allow labeling</li>
         <li id="panel_4">Console Output: Where program output shows</li>
       </ol>
+      In the following part of this tutorial, panel.1-4 will be used to represent these interface panels.
     </section>
 
     <section>
       <h2 id="c_example_mri">Example - MRILabeling of articular disc</h2>
 
       <h3 id="c_example_open">Open DICOM files</h3>
-      To open dicom files for labeling, go to <a href="#panel_1">panel.1</a> -> File -> Open and choose the directory to open <br>
-      the directory to be opened can contain multiple patient images and should be structed as follows: <br>
+      To open dicom files for labeling, go to <a href="#panel_1">panel.1</a> -> File -> Open and choose the directory to open. <br>
+      The directory to be opened can contain multiple patient images and should be structed as follows: <br>
       <div id="folder_hierarchy">
       Folder_to_open <br>
+      |<br>
       |--Patient0 <br>
       |&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp|--slice0.dcm <br>
       |&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp|--slice1.dcm <br>
       |&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp|--slice2.dcm <br>
-      |&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp|--... <br> 
+      |&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&#8735;... <br> 
+      |<br>
       |--Patient1 <br>
       |&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp|--slice0.dcm <br>
-      |&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp|--... <br>
+      |&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&#8735;... <br>
+      |<br>
       |--Patient2 <br>
-      |&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp|--... <br>
-      |--... <br>
+      |&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&#8735;... <br>
+      &#8735;... <br>
       </div>
 
       <h3 id="c_setup_info">Before start</h3>
-      Before we start labeling, we need to setup labler's name, it's in <a href="#panel_1">panel.1</a> -> Settings -> Labeler name. <br>
+      Before we start labeling, we need to setup labler's name, it's in <a href="#panel_1">panel.1</a> -> Settings -> Labeler name. 
       Notice that it's better for labeler's name to be consistent through out the labeling process, i.e. one person just use one name. <br> 
-      We can also setup the output path, however for this specific project, 
+      We can also setup the output path of our labeling at <a href="#panel_1">panel.1</a> -> Settings -> Output path, 
+      however for this specific project, <font color="red">we do NOT need to change output path</font>, the default output path will be under each patient folder
+
+      <h3 id="c_navigation">Navigation</h3>
+      Navigation operation including roaming between patients, slices and different image series of single patient, they are all in the upper part of <a href="#panel_2">panel.2</a>.
+      Operations are also binded with mouse buttons:
+      <ul>
+        <li>Move image - Right button pressd and move</li>
+        <li>Change slices - Wheel rolling</li>
+        <li>Zoom in/out - Ctrl + Wheel rolling</li>
+        <li>Change contrast/brightness - Middle button pressed and move</li>
+        <li>Initlate labeling - left button pressed and move</li>
+      </ul>
+      Navigation shortcut can be found in <a href="#panel_1">panel.1</a> -> Operations.
+
+      <h3 id="c_label">Label</h3>
+      Then we start labeling. Labels can be found in <a href="#panel_1">panel.1</a>. <br>
+      By drawing on <a href="#panel_4">panel.4</a> with left mouse button pressed,
+      we started labeling, the curve will be initiated when button is released.
+
     </section>
 
     <p>This manual will be finished later</p>
