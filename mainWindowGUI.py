@@ -52,7 +52,9 @@ class MainWindow(QMainWindow):
         self.__cache = {
                 "data_loaded":False, # Indicate whether there are date loaded in main window
                 "prev_combo_series": None, # used for decline combo series change with unsaved data
-                "output_set": False # Indecate wether user have set the output path
+                "output_set": False, # Indecate wether user have set the output path
+                "load_path": None # save the path of loaded labeled data
+
                 }
         # data
         # self.imgs = None # current image series of a patient
@@ -67,14 +69,14 @@ class MainWindow(QMainWindow):
 
         if self.args.dev: 
             print("Developing mode...")
-            self.loadPatietns()
+            self.loadPatients()
         else:
             print("Welcome to LabelSys v"+__version__)
             print("For help see: Help -> manual")
 
     def initMenu(self):
         # File
-        self.act_open.triggered.connect(self.loadPatietns)
+        self.act_open.triggered.connect(self.loadPatients)
         self.act_open.setShortcut("Ctrl+O")
         self.act_quit.triggered.connect(self.quitApp)
         self.act_quit.setShortcut("Ctrl+Q")
@@ -142,7 +144,7 @@ class MainWindow(QMainWindow):
         """Put image on to main window, will be called on loading the patients"""
         self.im_widget = VtkWidget(self.im_frame, self.check_crv, self.saveCurrentSlice) 
 
-    def loadPatietns(self):
+    def loadPatients(self):
         """Load patients folder, and call initPanelAct() to initialize the panel""" 
         self.central_widget.setEnabled(True)
         if self.args.dev: 
@@ -170,6 +172,7 @@ class MainWindow(QMainWindow):
                 self.btn_prev_patient,
                 self.combo_series
                 )
+        self.fl = None  # prevent lbl_holder initialize when changing series and alter saving behaviour
         self.slice_id = 0
         header, self.imgs = self.lbl_holder.loadFile(Path(fname))
         self.SOPInstanceUIDs = [s["SOPInstanceUID"] for s in self.lbl_holder.data]
@@ -187,10 +190,11 @@ class MainWindow(QMainWindow):
         self.slider_im.setMaximum(len(self.imgs)-1)
 
         self.__cache["data_loaded"] = True
-        #self.__updateImg()
 
-        self.output_path = Path(fname)#.parent
+        self.output_path = Path(fname).parent
+        self.__cache["load_path"] = fname
         self.__updateQLabelText()
+        print("Data loaded")
 
     def quitApp(self):
         if not self.lbl_holder.SAVED and not self.args.dev:
@@ -369,7 +373,10 @@ class MainWindow(QMainWindow):
         except: pass
 
     def saveCurrentPatient(self):
-        folder_name = "Label-"+Path(self.fl.getPath()).stem + "-" + self.labeler_name.replace(" ", "_")
+        try:
+            folder_name = "Label-"+Path(self.fl.getPath()).stem + "-" + self.labeler_name.replace(" ", "_")
+        except:
+            folder_name = Path(self.__cache["load_path"]).stem
         file_path = os.path.join(self.output_path, folder_name)
         if os.path.exists(file_path):
             if not self._alertMsg("Data exists, overwrite?"):
@@ -546,21 +553,6 @@ class MainWindow(QMainWindow):
                 self.im_widget.style.OnMouseWheelBackward()
             else:
                 self.nextSlice()
-    
-    #def keyPressEvent(self, event):
-        #key = event.key()
-        #modifier = QtWidgets.QApplication.keyboardModifiers() 
-        #if key == Qt.Key_F and modifier == Qt.ControlModifier:
-            #print("Change screen mode")
-            #self.changeScreenMode()
-        #if key == Qt.Key_Q and modifier == Qt.ControlModifier:
-            #self.quitApp()
-        #if key == Qt.Key_O and modifier == Qt.ControlModifier:
-            #self.loadPatietns()
-        #if key == Qt.Key_Up:
-            #self.nextSlice()
-        #if key == Qt.Key_Down:
-            #self.prevSlice()
 
 class EmittingStream(QObject):
     """Reference: https://stackoverflow.com/questions/8356336/how-to-capture-output-of-pythons-interpreter-and-show-in-a-text-widget"""
