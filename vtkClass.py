@@ -8,14 +8,10 @@ import cv2 as cv
 import utils_ as F
 
 class VtkWidget(QVTKRenderWindowInteractor):
-    def __init__(self, frame, checkbox, save_func):
-        """
-        - save_func: functions to be triggered when modify the contour
-        """
+    def __init__(self, frame, parent):
         super().__init__(frame)
         self.master = frame
-        self.checkbox = checkbox
-        self.save_func = save_func
+        self.parent = parent
 
         layout = QGridLayout()
         layout.addWidget(self, 0, 0)
@@ -127,7 +123,8 @@ class VtkWidget(QVTKRenderWindowInteractor):
         pd.SetPoints(points)
         pd.SetLines(lines)
 
-        contour_widget = self.contourWidget(contourWidgetEndInteraction = self.__saveContour)
+        color = self.parent._getColor(self.parent.combo_label.currentText())
+        contour_widget = self.contourWidget(color = color, contourWidgetEndInteraction = self.__saveContour)
         contour_widget.On()
         contour_widget.Initialize(pd,1)
         contour_widget.Render()
@@ -182,7 +179,7 @@ class VtkWidget(QVTKRenderWindowInteractor):
                     "Contour": full_cnt
                     }
             data.append(contour_data)
-        self.save_func(data)
+        self.parent.saveCurrentSlice(data)
 
     def __getFullCnt(self, contour_widget, img_shape):
         """
@@ -244,7 +241,7 @@ class VtkWidget(QVTKRenderWindowInteractor):
         self.contours = []
     
     def __isOpen(self):
-        return self.checkbox.isChecked()
+        return self.parent.check_crv.isChecked()
 
 
 class MyInteractorStyle(vtk.vtkInteractorStyleImage):

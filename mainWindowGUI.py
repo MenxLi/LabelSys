@@ -142,7 +142,7 @@ class MainWindow(QMainWindow):
 
     def initImageUI(self):
         """Put image on to main window, will be called on loading the patients"""
-        self.im_widget = VtkWidget(self.im_frame, self.check_crv, self.saveCurrentSlice) 
+        self.im_widget = VtkWidget(self.im_frame, self) 
 
     def loadPatients(self):
         """Load patients folder, and call initPanelAct() to initialize the panel""" 
@@ -389,6 +389,13 @@ class MainWindow(QMainWindow):
                 series = str(self.combo_series.currentText())
                 )
         self.lbl_holder.SAVED = True
+
+    def _getColor(self, label):
+        try:
+            idx = LABELS.index(label)
+        except:
+            return (1,0,0)
+        return LBL_COLORS[idx]
 
     def __getMasks(self):
         im_shape = self.imgs[0].shape

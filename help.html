@@ -10,10 +10,14 @@
       <li><a href="#c_example_mri">Example - MRILabeling of articular disc</a></li>
       <ul>
         <li><a href="#c_example_open">Open DICOM files</a></li>
-        <li><a href="#c_setup_info">Before start</a></li>
-        <li><a href="#c_navigation">Navigation</a></li>
-        <li><a href="#c_label">Label</a></li>
+        <li><a href="#c_example_setup_info">Settings before start</a></li>
+        <li><a href="#c_example_navigation">Navigation</a></li>
+        <li><a href="#c_example_label">Label</a></li>
+        <li><a href="#c_example_preview">Preview</a></li>
+        <li><a href="#c_example_export">Export</a></li>
+        <li><a href="#c_example_load">Load and revise</a></li>
       </ul>
+      <li><a href="#c_advanced">Advanced settings</a></li>
     </ul>
 
     <hr>
@@ -23,10 +27,10 @@
       <h2 id="c_interface"> Interface </h2>
       <img src="Pics/mainWindow.png" width="50%" height="50%"> 
       <ol>
-        <li id="panel_1">Menu Bar</li>
+        <li id="panel_1">Menu</li>
         <li id="panel_2">Operation Panel: Main labeling operations can be accessed here</li>
         <li id="panel_3">Labeling Panel: Showing image and allow labeling</li>
-        <li id="panel_4">Console Output: Where program output shows</li>
+        <li id="panel_4">Console: Where program output shows</li>
       </ol>
       In the following part of this tutorial, panel.1-4 will be used to represent these interface panels.
     </section>
@@ -34,53 +38,112 @@
     <section>
       <h2 id="c_example_mri">Example - MRILabeling of articular disc</h2>
 
-      <h3 id="c_example_open">Open DICOM files</h3>
-      To open dicom files for labeling, go to <a href="#panel_1">panel.1</a> -> File -> Open and choose the directory to open. <br>
-      The directory to be opened can contain multiple patient images and should be structed as follows: <br>
-      <div id="folder_hierarchy">
-      Folder_to_open <br>
-      |<br>
-      |--Patient0 <br>
-      |&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp|--slice0.dcm <br>
-      |&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp|--slice1.dcm <br>
-      |&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp|--slice2.dcm <br>
-      |&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&#8735;... <br> 
-      |<br>
-      |--Patient1 <br>
-      |&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp|--slice0.dcm <br>
-      |&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&#8735;... <br>
-      |<br>
-      |--Patient2 <br>
-      |&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&#8735;... <br>
-      &#8735;... <br>
-      </div>
+        <h3 id="c_example_open">Open DICOM files</h3>
+          To open dicom files for labeling, go to <a href="#panel_1">panel.1</a> -> File -> Open and choose the directory to open. <br>
+          The directory to be opened can contain multiple patient images and should be structed as follows: <br>
+          <div id="folder_hierarchy">
+          Folder_to_open <br>
+          |<br>
+          |--Patient0 <br>
+          |&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp|--slice0.dcm <br>
+          |&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp|--slice1.dcm <br>
+          |&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp|--slice2.dcm <br>
+          |&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&#8735;... <br> 
+          |<br>
+          |--Patient1 <br>
+          |&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp|--slice0.dcm <br>
+          |&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&#8735;... <br>
+          |<br>
+          |--Patient2 <br>
+          |&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&#8735;... <br>
+        &#8735;... <br>
+          </div>
+  
+        <h3 id="c_example_setup_info">Settings before start</h3>
+          Before we start labeling, we need to setup labler's name, it's in <a href="#panel_1">panel.1</a> -> Settings -> Labeler name. 
+          Notice that it's better for labeler's name to be consistent through out the labeling process, i.e. one person just use one name. <br> 
+          We can also setup the output path of our labeling at <a href="#panel_1">panel.1</a> -> Settings -> Output path, 
+          however for this specific project, <font color="red">we do NOT need to change output path</font>, the default output path will be under each patient folder
+  
+        <h3 id="c_example_navigation">Navigation</h3>
+          Navigation operation including roaming between patients, slices and different image series of single patient, they are all in the upper part of <a href="#panel_2">panel.2</a>.
+          Operations are also binded with mouse buttons:
+          <ul>
+            <li>Move image - Right button pressd and move</li>
+            <li>Change slices - Wheel rolling</li>
+            <li>Zoom in/out - Ctrl + Wheel rolling</li>
+            <li>Change contrast/brightness - Middle button pressed and move</li>
+            <li>Initlate labeling - left button pressed and move</li>
+          </ul>
+          Navigation shortcut can be found in <a href="#panel_1">panel.1</a> -> Operations.
+          <br>
+          <br>
+          Note that during labeling process, image series can't be changed, so be sure that we are in the right image series before labeling, 
+          In this project we will be using "SEG PD".
+  
+        <h3 id="c_example_label">Label</h3>
+          <figure>
+            <img src="Pics/LabelSelectPt.png" width="30%" height="30%">
+            <figcaption>
+              Labeling interface, with point selected by hoveing cursor.
+            </figcaption>
+          </figure>
+          <br>
+          Avaliable labels can be found in <a href="#panel_1">panel.1</a>. <br>
+          To start labeling, drawing on <a href="#panel_4">panel.4</a> with left mouse button pressed, and the curve will be initiated when button is released.
+          <br>
+          We have following ways to adjust the control points on the curve:
+          <ul>
+            <li>Move - Move control point with left mouse button</li>
+            <li>Add - To create a  control point, simply click and drag in the middle of the curve</li>
+            <li>Delete - To delete a control point, use mouse to hover above the control point and press Backspace.</li>
+          </ul>
+          No manual saving is needed after labeling each slice, it will save automatically when initiating the curve or when changes are made to the curve.
+          So feel free to change slices or labels after drawing the curve. 
+          <br><br>
+          In some circumstances, we may need multiply contours to label the object (i.e. the object is split), in this situation, use the "Add another contour"
+          button in <a href="#panel_2">panel.2</a> to enable again contour initialization after one contour has been drawn.
+          <br>
+          To faciliate the labeling process, we can copy contour from previous slice as the contour initilization by pressing "Interp" button 
+          in <a href="#panel_2">panel.2</a>
 
-      <h3 id="c_setup_info">Before start</h3>
-      Before we start labeling, we need to setup labler's name, it's in <a href="#panel_1">panel.1</a> -> Settings -> Labeler name. 
-      Notice that it's better for labeler's name to be consistent through out the labeling process, i.e. one person just use one name. <br> 
-      We can also setup the output path of our labeling at <a href="#panel_1">panel.1</a> -> Settings -> Output path, 
-      however for this specific project, <font color="red">we do NOT need to change output path</font>, the default output path will be under each patient folder
+        <h3 id="c_example_preview">Preview</h3>
+          <figure>
+            <img src="Pics/PreviewWindow.png" width=40% height=40%>
+            <figcaption>Preview window</figcaption>
+          </figure>
+          <br>
+          After labeling all the slices we may want to have a check and probably make some revisions before exporting the result, it can be achieved by preview.
+          Both 2D and 3D previews are provided.
+          <br><br>
+          Click on Preview button of <a href="#panel_2">panel.2</a> to open 2D preview window. 
+          We can go back and forth between slices with mouse wheel in 2D preview window and make changes in <a href="#panel_4">panel.4</a> with 2D preview window opened, 
+          the changes will be updated in realtime to the preview window. (Note that the image in 2D preview window can't be magnified)
+          <br>
+          3D preview can be found in <a href="#panel_1">panel.1</a> -> View -> 3D Preview.
+          In the 3D preview window, we can zoom with mouse wheel, move the object with middle mouse button clicked and rotate with left button.
 
-      <h3 id="c_navigation">Navigation</h3>
-      Navigation operation including roaming between patients, slices and different image series of single patient, they are all in the upper part of <a href="#panel_2">panel.2</a>.
-      Operations are also binded with mouse buttons:
-      <ul>
-        <li>Move image - Right button pressd and move</li>
-        <li>Change slices - Wheel rolling</li>
-        <li>Zoom in/out - Ctrl + Wheel rolling</li>
-        <li>Change contrast/brightness - Middle button pressed and move</li>
-        <li>Initlate labeling - left button pressed and move</li>
-      </ul>
-      Navigation shortcut can be found in <a href="#panel_1">panel.1</a> -> Operations.
+        <h3 id="c_example_export">Export</h3>
+          To export labels, click on "Export" button on <a href="#panel_2">panel.2</a>, the export will be started, 
+          destination and progress can be checked on <a href="panel_4">panel.4</a>
+          <br>
+          The exporting should be done for each patient. 
+          And the output will be saved in a folder named"Label-&lt;Labeler's name&gt;-&lt;File name&gt;"
 
-      <h3 id="c_label">Label</h3>
-      Then we start labeling. Labels can be found in <a href="#panel_1">panel.1</a>. <br>
-      By drawing on <a href="#panel_4">panel.4</a> with left mouse button pressed,
-      we started labeling, the curve will be initiated when button is released.
+        <h3 id="c_example_load">Load and revise</h3>
+          Sometimes we may want to revise our labels after we have exported.
+          To do so, go to <a href="#panel_1">panel.1</a> -> Files -> Load and open the folder we have exported, then we can do the revision.
+          <br>
+          Please note that for revison, we can't load multiple patient at the same time, and we will lost all the data loaded in the current window.
 
     </section>
 
-    <p>This manual will be finished later</p>
+    <section>
+      <h2 id="c_advanced">Advanced settings</h2>
+      Configuration files can be changed to modify the behavior of this program, they are in "config.json"
+    </section>
+
+    <p>--This manual will be finished later--</p>
 
 
     <hr>
