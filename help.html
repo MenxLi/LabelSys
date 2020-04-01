@@ -25,11 +25,14 @@
 
     <section>
       <h2 id="c_interface"> Interface </h2>
-      <img src="Pics/mainWindow.png" width="50%" height="50%"> 
+      <figure>
+        <img src="Pics/mainWindow.png" width="50%" height="50%">
+        <figcaption>Main UI</figcaption>
+      </figure> 
       <ol>
         <li id="panel_1">Menu</li>
         <li id="panel_2">Operation Panel: Main labeling operations can be accessed here</li>
-        <li id="panel_3">Labeling Panel: Showing image and allow labeling</li>
+        <li id="panel_3">Labeling Panel: Shows image and allows labeling</li>
         <li id="panel_4">Console: Where program output shows</li>
       </ol>
       In the following part of this tutorial, panel.1-4 will be used to represent these interface panels.
@@ -41,7 +44,7 @@
         <h3 id="c_example_open">Open DICOM files</h3>
           To open dicom files for labeling, go to <a href="#panel_1">panel.1</a> -> File -> Open and choose the directory to open. <br>
           The directory to be opened can contain multiple patient images and should be structed as follows: <br>
-          <div id="folder_hierarchy">
+          <div id="folder_hierarchy" style="margin: 20px;">
           Folder_to_open <br>
           |<br>
           |--Patient0 <br>
@@ -66,14 +69,14 @@
           however for this specific project, <font color="red">we do NOT need to change output path</font>, the default output path will be under each patient folder
   
         <h3 id="c_example_navigation">Navigation</h3>
-          Navigation operation including roaming between patients, slices and different image series of single patient, they are all in the upper part of <a href="#panel_2">panel.2</a>.
+          Navigation operation includes roaming between patients, slices and different image series of single patient, they are all in the upper part of <a href="#panel_2">panel.2</a>.
           Operations are also binded with mouse buttons:
           <ul>
             <li>Move image - Right button pressd and move</li>
             <li>Change slices - Wheel rolling</li>
             <li>Zoom in/out - Ctrl + Wheel rolling</li>
             <li>Change contrast/brightness - Middle button pressed and move</li>
-            <li>Initlate labeling - left button pressed and move</li>
+            <li>Initiate labeling - left button pressed and move</li>
           </ul>
           Navigation shortcut can be found in <a href="#panel_1">panel.1</a> -> Operations.
           <br>
@@ -96,7 +99,7 @@
           <ul>
             <li>Move - Move control point with left mouse button</li>
             <li>Add - To create a  control point, simply click and drag in the middle of the curve</li>
-            <li>Delete - To delete a control point, use mouse to hover above the control point and press Backspace.</li>
+            <li>Delete - To delete a control point, use mouse to hover above the control point and press Backspace/Delete.</li>
           </ul>
           No manual saving is needed after labeling each slice, it will save automatically when initiating the curve or when changes are made to the curve.
           So feel free to change slices or labels after drawing the curve. 
@@ -124,8 +127,8 @@
           In the 3D preview window, we can zoom with mouse wheel, move the object with middle mouse button clicked and rotate with left button.
 
         <h3 id="c_example_export">Export</h3>
-          To export labels, click on "Export" button on <a href="#panel_2">panel.2</a>, the export will be started, 
-          destination and progress can be checked on <a href="panel_4">panel.4</a>
+          To export labels, click on "Export" button on <a href="#panel_2">panel.2</a>, the exporting process will be started, 
+          destination and progress can be checked at <a href="panel_3">panel.3</a>
           <br>
           The exporting should be done for each patient. 
           And the output will be saved in a folder named"Label-&lt;Labeler's name&gt;-&lt;File name&gt;"
