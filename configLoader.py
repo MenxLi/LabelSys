@@ -12,10 +12,12 @@ SERIES = CONF["Default_series"]
 LABELS = []
 LBL_COLORS = []
 LBL_MODE = []
+LBL_STEP = {}
 for _label in CONF["Labels"].keys():
     LABELS.append(_label)
     LBL_COLORS.append(CONF["Labels"][_label]["color"])
     LBL_MODE.append(CONF["Labels"][_label]["mode"])
+    LBL_STEP[_label] = CONF["Labels"][_label]["label_step"]
 
 # Magnification for preview
 PREVIEW2D_MAG = CONF["2D_preview_mag"]

@@ -137,9 +137,8 @@ class GeneralImageLoader(LoaderBase):
                     arr.append(im[:, :, 0])
                 else: arr.append(im)
             except: pass
-        if arr != []: 
+        if arr != []:
             self.series[self.entry_base] = arr
-            print(self.getEntries())
         return
     def getEntries(self):
         return super().getEntries()

@@ -49,13 +49,14 @@ class MainWindow(QMainWindow):
 
         self.slice_id = 0
 
+        self.__configSetup()
+
         # store some status indicator and temporary variables
         self.__cache = {
                 "data_loaded":False, # Indicate whether there are date loaded in main window
                 "prev_combo_series": None, # used for decline combo series change with unsaved data
                 "output_set": False, # Indecate wether user have set the output path
                 "load_path": None # save the path of loaded labeled data
-
                 }
         # data
         # self.imgs = None # current image series of a patient
@@ -75,6 +76,15 @@ class MainWindow(QMainWindow):
             print("Welcome to LabelSys v"+__version__)
             print("For help see: Help -> manual")
 
+    def __configSetup(self):
+        """Unfinished function, will move all CONF attribute into self.config in the future"""
+        self.config = {
+            "loading_mode":None,
+            "label_step": LBL_STEP
+        }
+        if self.args.loading_mode != None:
+            self.config["loading_mode"] = self.args.loading_mode
+        else: self.config["loading_mode"] = CONF["Loading_mode"]
     def initMenu(self):
         # File
         self.act_open.triggered.connect(self.loadPatients)
@@ -155,7 +165,7 @@ class MainWindow(QMainWindow):
         if fname == "":
             return 1
         file_path = Path(fname)
-        self.fl = FolderLoader(file_path, mode = LOADING_MODE)
+        self.fl = FolderLoader(file_path, mode = self.config["loading_mode"])
 
         self.__updatePatient()
 
@@ -476,7 +486,7 @@ class MainWindow(QMainWindow):
 
         self.im_widget.readNpArray(im, txt)
         self.im_widget.reInitStyle()
-        self.im_widget.setStyleSampleStep(CONF["Labels"][self.curr_lbl]["label_step"])
+        self.im_widget.setStyleSampleStep(self.config["label_step"][self.curr_lbl])
 
         # load contour
         cnts_data = self.lbl_holder.data[self.slice_id][self.curr_lbl]
