@@ -309,6 +309,19 @@ class MyInteractorStyle(vtk.vtkInteractorStyleImage):
                 full_curve += [[pt[0], pt[1], MyInteractorStyle.HEIGHT] for pt in interp_pts[1:] ]
             # Sampling inside full_curve
             self.pts = full_curve[::self.sample_step]
+            if np.linalg.norm(np.array(self.pts[-1]) - np.array(full_curve[-1])) > self.sample_step * 0.4:
+                # when last point is too far from initialization, add last point
+                self.pts.append(full_curve[-1])
+
+            if len(self.pts) < 2:
+                # if the line is too short to construct 2 points for the
+                # contour, then just abort this line and allow re-draw
+                for actor in self.lines:
+                    self.widget.ren.RemoveActor(actor)
+                self.widget.ren_win.Render()
+                self._reinitState()
+                return
+
             # Construct contour
             self.widget.constructContour(self.pts)
 
