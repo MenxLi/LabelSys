@@ -4,7 +4,7 @@ import os,sys
 import copy
 
 from version import __version__
-from dicomFileReader import FolderLoader
+from fileReader import FolderLoader
 from configLoader import *
 import utils_ as F
 from labelResultHolder import LabelHolder
@@ -24,7 +24,8 @@ LOCAL_DIR = os.path.dirname(os.path.realpath(__file__))
 class MainWindow(QMainWindow):
     def __init__(self,args):
         super().__init__()
-        sys.stdout = EmittingStream(textWritten = self.stdoutStream)
+        if not args.dev:
+            sys.stdout = EmittingStream(textWritten = self.stdoutStream)
         # load UI
         ui_path = os.path.join(LOCAL_DIR, "mainWindow.ui")
         uic.loadUi(ui_path, self)
@@ -44,7 +45,7 @@ class MainWindow(QMainWindow):
         # Attribute init
         self.output_path = Path(os.getcwd()).parent
         self.labeler_name = "Anonymous"
-        self.lbl_holder = LabelHolder() 
+        self.lbl_holder = LabelHolder()
 
         self.slice_id = 0
 
@@ -67,7 +68,7 @@ class MainWindow(QMainWindow):
         self.initImageUI()
         self.initPanel()
 
-        if self.args.dev: 
+        if self.args.dev:
             print("Developing mode...")
             self.loadPatients()
         else:
@@ -120,7 +121,7 @@ class MainWindow(QMainWindow):
         self.act_manual.triggered.connect(self.showHelpManual)
 
     def initPanel(self):
-        """Init the whole panel, will be called on loading the patients""" 
+        """Init the whole panel, will be called on loading the patients"""
         self.slider_im.setPageStep(1)
         self.combo_label.addItems(LABELS)
         self.curr_lbl = str(self.combo_label.currentText())
@@ -142,19 +143,19 @@ class MainWindow(QMainWindow):
 
     def initImageUI(self):
         """Put image on to main window, will be called on loading the patients"""
-        self.im_widget = VtkWidget(self.im_frame, self) 
+        self.im_widget = VtkWidget(self.im_frame, self)
 
     def loadPatients(self):
-        """Load patients folder, and call initPanelAct() to initialize the panel""" 
+        """Load patients folder, and call initPanelAct() to initialize the panel"""
         self.central_widget.setEnabled(True)
-        if self.args.dev: 
+        if self.args.dev:
             fname = self.args.file
-        else: 
+        else:
             fname = QFileDialog.getExistingDirectory(self, "Select Directory")
         if fname == "":
             return 1
         file_path = Path(fname)
-        self.fl = FolderLoader(file_path)
+        self.fl = FolderLoader(file_path, mode = LOADING_MODE)
 
         self.__updatePatient()
 
@@ -168,7 +169,7 @@ class MainWindow(QMainWindow):
             return 1
         self.central_widget.setEnabled(True)
         self.__disableWidgets(
-                self.btn_next_patient, 
+                self.btn_next_patient,
                 self.btn_prev_patient,
                 self.combo_series
                 )
@@ -208,7 +209,7 @@ class MainWindow(QMainWindow):
         self.__screen_mode = (self.__screen_mode+1)%3
         if self.__screen_mode == 0:
             self.showNormal()
-        elif self.__screen_mode == 1: 
+        elif self.__screen_mode == 1:
             self.showMaximized()
         elif self.__screen_mode == 2:
             self.showFullScreen()
@@ -311,7 +312,7 @@ class MainWindow(QMainWindow):
             return 0
 
     def stdoutStream(self, text):
-        #self.tb_console.append(text) 
+        #self.tb_console.append(text)
         self.tb_console.insertPlainText(text)
         self.tb_console.verticalScrollBar().setValue(self.tb_console.verticalScrollBar().maximum())
 
@@ -351,7 +352,7 @@ class MainWindow(QMainWindow):
     def previewLabels2D(self):
         if not self.__cache["data_loaded"]:
             pass
-        self.preview_win_2d = Preview2DWindow(self.imgs, self.__getMasks(), self.slice_id) 
+        self.preview_win_2d = Preview2DWindow(self.imgs, self.__getMasks(), self.slice_id)
         self.preview_win_2d.show()
 
     def addContour(self):
@@ -380,7 +381,7 @@ class MainWindow(QMainWindow):
         file_path = os.path.join(self.output_path, folder_name)
         if os.path.exists(file_path):
             if not self._alertMsg("Data exists, overwrite?"):
-                return 
+                return
         self.lbl_holder.saveToFile(
                 path = file_path,
                 imgs = self.imgs,
@@ -401,7 +402,7 @@ class MainWindow(QMainWindow):
         im_shape = self.imgs[0].shape
         for im in self.imgs:
             if im.shape != im_shape:
-               return None 
+               return None
         masks = []
         for slice_idx in range(len(self.imgs)):
             mask_data = {}
@@ -419,7 +420,7 @@ class MainWindow(QMainWindow):
                         cv_cnt = np.array([[arr] for arr in F.removeDuplicate2d(all_pts)])
                         cv.fillPoly(mask_data[label], pts = [cv_cnt], color = 1)
                 mask_data[label] = mask_data[label].astype(np.bool)
-            masks.append(mask_data) 
+            masks.append(mask_data)
         return masks
 
     def __getSingleMask(self, idx, label):
@@ -493,12 +494,12 @@ class MainWindow(QMainWindow):
         self.imgs = image_data["Images"]
         self.SOPInstanceUIDs = image_data["SOPInstanceUIDs"]
         self.spacing = image_data["Spacing"]
-        self.lbl_holder.initialize(LABELS, self.SOPInstanceUIDs) 
+        self.lbl_holder.initialize(LABELS, self.SOPInstanceUIDs)
 
     def __disableWidgets(self, *widgets):
         for w in widgets:
             w.setEnabled(False)
-    
+
     def __querySave(self):
         """Check if there are unsaved changes"""
         if not self.lbl_holder.SAVED:
@@ -524,11 +525,11 @@ class MainWindow(QMainWindow):
     def showHelpManual(self):
         file_path = os.path.realpath("help.html")
         webbrowser.open("file://"+file_path)
-    
+
     #==============Event Handler================
     def eventFilter(self, receiver, event):
         """Globally defined event"""
-        modifier = QtWidgets.QApplication.keyboardModifiers() 
+        modifier = QtWidgets.QApplication.keyboardModifiers()
         if(event.type() == QEvent.KeyPress):
             """KeyBoard shortcut"""
             key = event.key()
@@ -539,7 +540,7 @@ class MainWindow(QMainWindow):
                 # Down : previous slice
                 self.prevSlice()
         if(event.type() == QEvent.MouseMove):
-            """vtk seems difficult in recognizing mouse dragging, so 
+            """vtk seems difficult in recognizing mouse dragging, so
             implimented With Qt"""
             if not self.__cache["data_loaded"]:
                 return False
@@ -548,14 +549,14 @@ class MainWindow(QMainWindow):
 
     def wheelEvent(self, event):
         if not self.__cache["data_loaded"]:
-            return 
-        modifier = QtWidgets.QApplication.keyboardModifiers() 
+            return
+        modifier = QtWidgets.QApplication.keyboardModifiers()
         if event.angleDelta().y() < 0:
             if modifier == Qt.ControlModifier:
                 self.im_widget.style.OnMouseWheelForward()
             else:
                 self.prevSlice()
-        else: 
+        else:
             if modifier == Qt.ControlModifier:
                 self.im_widget.style.OnMouseWheelBackward()
             else:

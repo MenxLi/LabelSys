@@ -16,8 +16,11 @@
             "mode": 1
         }
     },
+    "Loading_mode": 1,
     "2D_preview_mag":2,
     "Default_series":"SAG PD",
-    "Contour_mode_open":1,
-    "Contour_mode_close":0
+    "__Below are comments for your understanding--------":"-------don't change them__",
+    "__Contour_mode": {"Open": 1, "Close": 0},
+    "__Loading_mode": {"DICOM":0, "Images":1, "Video":2}
 }
+

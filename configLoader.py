@@ -3,9 +3,10 @@ import json
 with open("conf.json", "r") as f:
     CONF = json.load(f)
 
-CNT_OPEN = CONF["Contour_mode_open"]
-CNT_CLOSE = CONF["Contour_mode_close"]
+# CNT_OPEN = CONF["Contour_mode"]["Open"]
+# CNT_CLOSE = CONF["Contour_mode"]["Close"]
 
+LOADING_MODE = CONF["Loading_mode"]
 SERIES = CONF["Default_series"]
 
 LABELS = []
