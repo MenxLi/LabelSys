@@ -21,7 +21,7 @@ class VtkWidget(QVTKRenderWindowInteractor):
         self.ren = vtk.vtkRenderer()
         self.camera_set = False
         self.ren_win.AddRenderer(self.ren)
-        self.iren = self.ren_win.GetInteractor()  
+        self.iren = self.ren_win.GetInteractor()
         self.ren_win.Render()
         self.iren.Initialize()
 
@@ -47,7 +47,7 @@ class VtkWidget(QVTKRenderWindowInteractor):
         #===============Update Image======================
         # import from numpy array
         importer = vtkImageImportFromArray.vtkImageImportFromArray()
-        importer.SetArray(arr) 
+        importer.SetArray(arr)
         importer.Update()
 
         # flip image along y axis
@@ -55,7 +55,7 @@ class VtkWidget(QVTKRenderWindowInteractor):
         flipY_filter.SetFilteredAxis(1)
         flipY_filter.SetInputConnection(importer.GetOutputPort())
         flipY_filter.Update()
-        
+
         self.actor = vtk.vtkImageActor()
         self.actor.GetMapper().SetInputConnection(flipY_filter.GetOutputPort())
         # Add actor to renderer, reset camera and render
@@ -72,7 +72,7 @@ class VtkWidget(QVTKRenderWindowInteractor):
         txtprop.SetFontFamilyToCourier()
         txtprop.SetFontSize(12)
         self.t_actor.SetDisplayPosition(5,5)
-        
+
         self.ren.AddActor(self.t_actor)
 
         self.ren_win.Render()
@@ -84,14 +84,14 @@ class VtkWidget(QVTKRenderWindowInteractor):
     def contourWidget(self, color=[1, 0, 0], contourWidgetEndInteraction=None):
         """Create a template widget for drawing contours"""
         contourRep = vtk.vtkOrientedGlyphContourRepresentation()
-        contourRep.GetLinesProperty().SetColor(color) 
-               
+        contourRep.GetLinesProperty().SetColor(color)
+
         contour_widget = vtk.vtkContourWidget()
         contour_widget.SetInteractor(self.iren)
         contour_widget.SetRepresentation(contourRep)
         contour_widget.AddObserver('EndInteractionEvent', contourWidgetEndInteraction)
         contour_widget.AddObserver('WidgetValueChangedEvent', contourWidgetEndInteraction)
-        
+
         return contour_widget
 
     def constructContour(self, pts, open_curve = None, save = True):
@@ -117,7 +117,7 @@ class VtkWidget(QVTKRenderWindowInteractor):
             vertex_ids = list(range(len(pts))) + [0]
             lines.InsertNextCell(len(pts)+1, vertex_ids)
         else:
-            vertex_ids = list(range(len(pts))) 
+            vertex_ids = list(range(len(pts)))
             lines.InsertNextCell(len(pts), vertex_ids)
 
         pd.SetPoints(points)
@@ -157,13 +157,16 @@ class VtkWidget(QVTKRenderWindowInteractor):
     def reInitStyle(self):
         self.style._reinitState()
 
+    def setStyleSampleStep(self, step = 20):
+        self.style._setSampleStep(step)
+
     def __saveContour(self, obj, event):
         data = []
         for contour in self.contours:
             rep = contour.GetContourRepresentation()
             #if rep.GetClosedLoop():
                 #mask = self.__getMask(contour, self.im.shape, "Close").astype(np.bool)
-            #else: 
+            #else:
                 #mask = self.__getMask(contour, self.im.shape, "Open").astype(np.bool)
             full_cnt = self.__getFullCnt(contour, self.im.shape)
 
@@ -239,15 +242,14 @@ class VtkWidget(QVTKRenderWindowInteractor):
         self.contours = []
         self.ren.RemoveAllViewProps()
         self.contours = []
-    
+
     def __isOpen(self):
         return self.parent.check_crv.isChecked()
 
 
 class MyInteractorStyle(vtk.vtkInteractorStyleImage):
     """Interactor style for vtk widget"""
-    HEIGHT = 0 # Z/W position of the curve 
-    SAMPLE_STEP = 10
+    HEIGHT = 0 # Z/W position of the curve
     def __init__(self,widget):
         self.widget = widget
         self.picker = vtk.vtkPropPicker()
@@ -273,7 +275,7 @@ class MyInteractorStyle(vtk.vtkInteractorStyleImage):
         self.pts = []
         self.lines = []
         self.__mode = "Drawing"
-        self.__drawing = False 
+        self.__drawing = False
         self.__prev_pt = None
 
     def leftButtonPressEvent(self, obj, event):
@@ -288,7 +290,7 @@ class MyInteractorStyle(vtk.vtkInteractorStyleImage):
             self.__prev_pt = now_pt
             self.__drawing = True
             return 0
-    
+
     def mouseMoveEvent(self, obj, event):
         if self.__mode == "Drawing" and self.__drawing:
             now_pt = self._getMousePos()
@@ -306,7 +308,7 @@ class MyInteractorStyle(vtk.vtkInteractorStyleImage):
                 interp_pts = self.__linearInterp(*[pos[:2] for pos in self.pts_raw[i-1:i+1]], mode = "")
                 full_curve += [[pt[0], pt[1], MyInteractorStyle.HEIGHT] for pt in interp_pts[1:] ]
             # Sampling inside full_curve
-            self.pts = full_curve[::MyInteractorStyle.SAMPLE_STEP*2]
+            self.pts = full_curve[::self.sample_step]
             # Construct contour
             self.widget.constructContour(self.pts)
 
@@ -319,7 +321,7 @@ class MyInteractorStyle(vtk.vtkInteractorStyleImage):
     def keyPressEvent(self, obj, event):
         key = self.widget.iren.GetKeySym()
         if key == "v": # Zoom in
-            self.OnMouseWheelForward()  
+            self.OnMouseWheelForward()
         elif key == "c": # Zoom out
             self.OnMouseWheelBackward()
         elif key == "r": # Reset camera
@@ -327,6 +329,9 @@ class MyInteractorStyle(vtk.vtkInteractorStyleImage):
 
     def forceDrawing(self):
         self.__mode = "Drawing"
+
+    def _setSampleStep(self, step):
+        self.sample_step = step
 
     def _reinitState(self):
         """Should be called when going to different slice"""
@@ -338,7 +343,7 @@ class MyInteractorStyle(vtk.vtkInteractorStyleImage):
         self.lines = []
         self.pts = []
         self.pts_raw = []
-    
+
     def _getMousePos(self):
         click_pos = self.GetInteractor().GetEventPosition()
         self.picker.Pick(*click_pos, 0, self.GetDefaultRenderer())

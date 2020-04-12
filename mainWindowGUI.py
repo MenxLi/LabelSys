@@ -476,6 +476,7 @@ class MainWindow(QMainWindow):
 
         self.im_widget.readNpArray(im, txt)
         self.im_widget.reInitStyle()
+        self.im_widget.setStyleSampleStep(CONF["Labels"][self.curr_lbl]["label_step"])
 
         # load contour
         cnts_data = self.lbl_holder.data[self.slice_id][self.curr_lbl]

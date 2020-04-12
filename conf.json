@@ -3,24 +3,28 @@
         "Disc" :{
             "value": 1, 
             "color": [1.0, 0.0, 0.0], 
-            "mode": 0
+            "mode": 0,
+            "label_step":10
         },
         "Condyle" :{
             "value": 2, 
             "color": [1.0, 1.0, 0.0], 
-            "mode": 1
+            "mode": 1,
+            "label_step":30
         },
         "Eminence" :{
             "value": 3, 
             "color": [0.0, 1.0, 1.0], 
-            "mode": 1
+            "mode": 1,
+            "label_step":20
         }
     },
-    "Loading_mode": 1,
+    "Loading_mode": 0,
     "2D_preview_mag":2,
     "Default_series":"SAG PD",
-    "__Below are comments for your understanding--------":"-------don't change them__",
+    "-----------Below are comments for your understanding--------":
+    "-------don't change them---------",
     "__Contour_mode": {"Open": 1, "Close": 0},
-    "__Loading_mode": {"DICOM":0, "Images":1, "Video":2}
+    "__Loading_mode": {"DICOMs":0, "Images":1, "Video":2}
 }
 
