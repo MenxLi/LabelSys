@@ -1,3 +1,4 @@
+# {{{ Import
 from glob import glob
 import numpy as np
 import pydicom
@@ -6,10 +7,11 @@ import scipy.ndimage
 from pathlib import Path
 import cv2 as cv
 import utils_ as F
+# }}}
 
 # Pydicom reading reference: https://pydicom.github.io/pydicom/stable/tutorials/dataset_basics.html
 
-class LoaderBase:
+class LoaderBase:# {{{
     """
     Base class for different file type readers
     Define APIs
@@ -35,9 +37,9 @@ class LoaderBase:
         """
         Return all entries' name
         """
-        return self.series.keys()
+        return self.series.keys()# }}}
 
-class DicomLoader(LoaderBase):
+class DicomLoader(LoaderBase):# {{{
     """Read single patient DICOM file"""
     def __init__(self, path):
         """
@@ -45,8 +47,9 @@ class DicomLoader(LoaderBase):
         """
         super().__init__(path)
         self.patient = None
-        self.load()
-    def loadScan(self, patient_path):
+        self.__load()
+
+    def __loadScan(self, patient_path):
         """
         @ patient_path: Folder contains image for a single patient, The folder must contain only DICOM file
         return a list of pydicom.dataset.FileDataset instance
@@ -62,7 +65,7 @@ class DicomLoader(LoaderBase):
         #slices = [pydicom.read_file(s, force=True) for s in dicom_path]
         slices.sort(key = lambda x: int(x.InstanceNumber))
         return slices
-    def creatSeries(self, slices):
+    def __creatSeries(self, slices):
         """
         @ slices: a list of FileDataset
         Re-classify the data of a patient into \'SeriesDiscription\'
@@ -109,11 +112,11 @@ class DicomLoader(LoaderBase):
         imgs = scipy.ndimage.interpolation.zoom(imgs, real_resize_factor)
 
         return imgs, new_spacing
-    def load(self):
-        self.patient = self.loadScan(self.path)
-        self.series = self.creatSeries(self.patient)
+    def __load(self):
+        self.patient = self.__loadScan(self.path)
+        self.series = self.__creatSeries(self.patient)# }}}
 
-class GeneralImageLoader(LoaderBase):
+class GeneralImageLoader(LoaderBase):# {{{
     """
     Read Jpeg, png, or other type of images
     refer to cv2.imread for supported type
@@ -140,8 +143,6 @@ class GeneralImageLoader(LoaderBase):
         if arr != []:
             self.series[self.entry_base] = arr
         return
-    def getEntries(self):
-        return super().getEntries()
     def getSeriesImg(self, entry = None, series = None):
         super().getSeriesImg(entry, series)
         if series == None and self.series != dict():
@@ -152,12 +153,49 @@ class GeneralImageLoader(LoaderBase):
             "SOPInstanceUIDs": [self.SOPInstanceUID_base]*len(images),
             "Spacing": self.spacing_base
         }
-        return data
+        return data# }}}
 
-class GeneralVideoLoader(LoaderBase):
-    pass
+class GeneralVideoLoader(LoaderBase):# {{{
+    """
+    Read mpeg4, avi, ...
+    refer to cv2.VideoCapture for supported type
+    """
+    def __init__(self, path):
+        """
+        - path: directory that contain multiple images
+        """
+        super().__init__(path)
+        self.__readVideos()
+        return
 
-class FolderLoader:
+    def __readVideos(self):
+        imgs = []
+        cap = cv.VideoCapture(self.path)
+        while(True):
+            success, image = cap.read()
+            if success:
+                if F.img_channel(image)==3:
+                    imgs.append(image[:, :, 0])
+                else:
+                    imgs.append(image)
+            else:
+                break
+        cap.release()
+        self.series[self.entry_base] = imgs
+        return imgs
+    def getSeriesImg(self, entry = None, series = None):
+        super().getSeriesImg(entry, series)
+        if series == None and self.series != dict():
+            series = self.series
+        images = series[entry]
+        data = {
+            "Images": images,
+            "SOPInstanceUIDs": [self.SOPInstanceUID_base]*len(images),
+            "Spacing": self.spacing_base
+        }
+        return data# }}}
+
+class FolderLoader:# {{{
     """
     Load data folder
     Data type has to be specified when loading
@@ -193,7 +231,8 @@ class FolderLoader:
     def loadData(self, id):
         loaderCases = {
             0: DicomLoader,
-            1: GeneralImageLoader
+            1: GeneralImageLoader,
+            2: GeneralVideoLoader
         }
         self.curr_patient = loaderCases[self.__mode](self.paths[id])
 
@@ -210,4 +249,4 @@ class FolderLoader:
             return 1
         else: return 0
     def getPath(self):
-        return self.paths[self.ptr]
+        return self.paths[self.ptr]# }}}

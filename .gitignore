@@ -1,5 +1,6 @@
 # ignored files
 *_temp*
+*.ipynb
 # cache files
 __pycache__
 *.swp
