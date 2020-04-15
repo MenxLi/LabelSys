@@ -1,6 +1,24 @@
 import numpy as np
+import ctypes
+from sys import platform
+import os
 
-B64_TABLE = [
+root_path = os.path.abspath("./")
+print(root_path)
+
+if platform == "linux" or platform == "linux2":
+    # linux
+    dll_name = "c_utils.so"
+elif platform == "darwin":
+    # OS X
+    dll_name = "c_utils.dylib"
+elif platform == "win32":
+    # Windows...
+    dll_name = "c_utils.dll"
+
+clib = ctypes.cdll.LoadLibrary(os.path.join(root_path, dll_name))
+
+B64_TABLE =[
     "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z",\
     "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z",\
     "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "+", "/"
@@ -10,16 +28,27 @@ DECODE_DIC = {}
 for i in range(len(B64_TABLE)):
     DECODE_DIC[B64_TABLE[i]] = i
 
+def getIntPtr(arr):
+    if not arr.dtype == np.dtype(np.intc):
+        print("data type error")
+    cIntP= ctypes.POINTER(ctypes.c_int)
+    return arr.ctypes.data_as(cIntP)
+def getCharPtr(arr):
+    #  if not arr.dtype == np.dtype(np.int32):
+        #  print("data type error")
+    cCharP= ctypes.POINTER(ctypes.c_char)
+    return arr.ctypes.data_as(cCharP)
 
 class Base64_2DImageEncoder:
     OPERATOR = np.array([2**i for i in range(6)][::-1])
     CHANNEL_BYTE = 1
     BIT_BYTE = 1
     SIZE_BYTE_HALF = 3
-    def __init__(self, img, bit_len = None):
+    def __init__(self, img, bit_len = None, show_progress = False):
         """
         @ bit_len: bit length of each pixel (for single channel)
         """
+        self.show_progress = show_progress
         if (img.astype(int) != img).any():
             raise Exception("Integer image is needed")
         if len(img.shape) == 2:
@@ -32,7 +61,8 @@ class Base64_2DImageEncoder:
             max_value = np.max(img)
             max_log = np.log(max_value)/np.log(2)
             bit_len = int(np.floor(max_log) + 1)
-            #print("\'bit_len\' not given, using conjectural value: ", bit_len)
+            if show_progress:
+                print("\'bit_len\' not given, using conjectural value: ", bit_len)
         self.bit = bit_len
 
 
@@ -43,23 +73,51 @@ class Base64_2DImageEncoder:
         W_b64 = self.decimal2B64(self.W, Base64_2DImageEncoder.SIZE_BYTE_HALF)
         return channel_b64 + bit_b64 + H_b64 + W_b64
 
+    def encode1Channel_accelerate(self, im):
+        """Encode one channel image"""
+        # Using ctypes
+        bi_arr = np.array([])
+        step = 800      #chunk image
+        flattened_im = im.ravel()
+        for i in range(0, im.size, step):
+            chunk = flattened_im[i:i+step].astype(np.intc)
+            bi_chunk = np.zeros(len(chunk)*self.bit, np.intc)
+            clib.intArray2Bool(getIntPtr(chunk), ctypes.c_int(len(chunk)),
+                               ctypes.c_int(self.bit), getIntPtr(bi_chunk))
+            bi_arr = np.concatenate((bi_arr, bi_chunk))
+
+        bi_len = int(np.ceil(len(bi_arr)/6))*6
+        bi_arr_append = np.concatenate((bi_arr, np.array([0]*(bi_len-len(bi_arr))) )).astype(np.intc)
+        char_arr = np.array([chr(0).encode("ascii")]*int(bi_len/6))
+        clib.biArray2B64Str(getIntPtr(bi_arr_append), getCharPtr(char_arr),
+                            ctypes.c_int(bi_len))
+        return "".join([c.decode("ascii") for c in char_arr])
+
     def encode1Channel(self, im):
         """Encode one channel image"""
         # convert to binary
         bi_im = ""
-        for px in im.flatten():
-            bi_im += self.decimal2Binary(px, self.bit)
+        length = len(im.flatten())
+        for i in range(length) :
+            bi_im += self.decimal2Binary(im.flatten()[i], self.bit)
         bits = int(np.ceil(len(bi_im)/6))*6
         bi_im_append = bi_im + ''.join(["0"]*(bits - len(bi_im)))
         return self.binary2B64(bi_im_append)
 
-    def run(self):
+
+    def __call__(self, accelerate = False):
+        if not accelerate:
+            encode1Channel = self.encode1Channel
+        else:
+            encode1Channel = self.encode1Channel_accelerate
         if self.channel == 1:
-            return self.calcHeader() + self.encode1Channel(self.img)
+            return self.calcHeader() + encode1Channel(self.img)
         elif self.channel >1:
             result = self.calcHeader()
             for i in range(self.channel):
-                result += self.encode1Channel(self.img[:,:,i])
+                if self.show_progress:
+                    print("Encoding channel {} ".format(i))
+                result += encode1Channel(self.img[:,:,i])
             return result
 
     def decimal2B64(self, decimal, b64byte_len):
@@ -67,7 +125,7 @@ class Base64_2DImageEncoder:
         return self.binary2B64(self.decimal2Binary(decimal, b64byte_len*6))
 
     def binary2B64(self, binary):
-        """calculate b64 characters from a binary of length being bultiples of 6"""
+        """calculate b64 characters from a binary of length being multiples of 6"""
         if len(binary)%6 != 0:
             raise Exception("Binary served should be multiple of 6")
         b64 = []
@@ -153,15 +211,29 @@ class Base64_2DImageDecoder:
         im = np.array(im).reshape((self.H, self.W))
         return im
 
-    def run(self):
+    def decode1Channel_accelerate(self, im_b64):
+        # Use Ctypes
+        im_size = self.H * self.W
+        im_plain = np.zeros(im_size, np.intc)
+        im_b64_arr = np.array(im_b64.encode("ascii"))
+        clib.str2intArray(getCharPtr(im_b64_arr), getIntPtr(im_plain),
+                          ctypes.c_int(self.bit), len(im_b64))
+        im = im_plain.reshape((self.H, self.W))
+        return im
+
+    def __call__(self, accelerate = False):
+        if accelerate:
+            decode1Channel = self.decode1Channel_accelerate
+        else:
+            decode1Channel = self.decode1Channel
         if self.channel == 1:
-            return self.decode1Channel(self.im_b64)
+            return decode1Channel(self.im_b64)
         else:
             channels = []
             step = int(len(self.im_b64)/self.channel)
             for idx in range(0, len(self.im_b64), step):
                 im_b64 = self.im_b64[idx:idx+step]
-                channels.append(self.decode1Channel(im_b64))
+                channels.append(decode1Channel(im_b64))
             return np.concatenate([c[:,:,np.newaxis] for c in channels], axis = 2)
             #return channels
 
@@ -186,19 +258,19 @@ class Base64_2DImageDecoder:
 
 #==============================Encapsulation====================================
 
-def imgEncodeB64(img, bit = None):
+def imgEncodeB64(img, bit = None, accelerate = True, show_progress = False):
     """
     Encode image in Base64 scheme
     @ img: numpy array - int
     @ bit: size for each channel of a single pixel in bit
     """
-    encoder = Base64_2DImageEncoder(img, bit)
-    return encoder.run()
+    encoder = Base64_2DImageEncoder(img, bit, show_progress)
+    return encoder(accelerate)
 
-def imgDecodeB64(b64_string):
+def imgDecodeB64(b64_string, accelerate = True):
     """
     Decoder for the imgEncodeB64
     @ b64_string: string encoded with imgEncodeB64()
     """
     decoder = Base64_2DImageDecoder(b64_string)
-    return decoder.run()
+    return decoder(accelerate)

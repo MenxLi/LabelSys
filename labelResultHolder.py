@@ -39,7 +39,7 @@ class LabelHolder:
             else:
                 with open(file_path, "r") as f_:
                     slice_data = json.load(f_)
-                img = imgDecodeB64(slice_data["Image"])
+                img = imgDecodeB64(slice_data["Image"], accelerate=True)
                 imgs.append(img)
                 data_ = slice_data["Data"]
                 data.append(data_)
@@ -64,7 +64,7 @@ class LabelHolder:
                 "Labeler":labeler,
                 "Time":str(datetime.datetime.now()),
                 "Spacing":spacing,
-                "Labels": LABELS, 
+                "Labels": LABELS,
                 "Series": series
                 }
 
@@ -79,7 +79,7 @@ class LabelHolder:
         for i in range(len(imgs)):
             print("Saving...{}/{}".format(i+1, len(imgs)))
             file_name = "Slice_"+str(i+1)+".json"
-            im_string = imgEncodeB64(imgs[i])
+            im_string = imgEncodeB64(imgs[i], accelerate= True)
             js_data = {
                     "Data": self.data[i],
                     "Image": im_string
