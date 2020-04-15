@@ -157,7 +157,6 @@ class MainWindow(QMainWindow):
 
     def loadPatients(self):
         """Load patients folder, and call initPanelAct() to initialize the panel"""
-        self.central_widget.setEnabled(True)
         if self.args.dev:
             fname = self.args.file
         else:
@@ -165,9 +164,15 @@ class MainWindow(QMainWindow):
         if fname == "":
             return 1
         file_path = Path(fname)
-        self.fl = FolderLoader(file_path, mode = self.config["loading_mode"])
 
-        self.__updatePatient()
+        try:
+            self.fl = FolderLoader(file_path, mode = self.config["loading_mode"])
+            self.__updatePatient()
+        except Exception as excp:
+            print("An error happend when opening files: ", excp)
+            return 1
+
+        self.central_widget.setEnabled(True)
 
         self.__cache["data_loaded"] = True
         return 0
