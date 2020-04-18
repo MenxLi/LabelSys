@@ -1,3 +1,4 @@
+# import{{{
 import vtk
 from vtk.util import vtkImageImportFromArray
 from vtk.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
@@ -6,9 +7,10 @@ from PyQt5.QtWidgets import *
 import numpy as np
 import cv2 as cv
 import utils_ as F
+# }}}
 
-class VtkWidget(QVTKRenderWindowInteractor):
-    def __init__(self, frame, parent):
+class VtkWidget(QVTKRenderWindowInteractor):# {{{
+    def __init__(self, frame, parent):# {{{
         super().__init__(frame)
         self.master = frame
         self.parent = parent
@@ -33,8 +35,8 @@ class VtkWidget(QVTKRenderWindowInteractor):
         # Attribute
         self.colors = vtk.vtkNamedColors()
         self.contours = []
-
-    def readNpArray(self, arr, txt = ""):
+# }}}
+    def readNpArray(self, arr, txt = ""):# {{{
         """
         Read numpy array and display in the window
         - txt: text to be shown on the screen
@@ -76,12 +78,12 @@ class VtkWidget(QVTKRenderWindowInteractor):
         self.ren.AddActor(self.t_actor)
 
         self.ren_win.Render()
-
-    def resetCamera(self):
+# }}}
+    def resetCamera(self):# {{{
         self.ren.ResetCamera()
         self.ren_win.Render()
-
-    def contourWidget(self, color=[1, 0, 0], contourWidgetEndInteraction=None):
+# }}}
+    def contourWidget(self, color=[1, 0, 0], contourWidgetEndInteraction=None):# {{{
         """Create a template widget for drawing contours"""
         contourRep = vtk.vtkOrientedGlyphContourRepresentation()
         contourRep.GetLinesProperty().SetColor(color)
@@ -93,8 +95,8 @@ class VtkWidget(QVTKRenderWindowInteractor):
         contour_widget.AddObserver('WidgetValueChangedEvent', contourWidgetEndInteraction)
 
         return contour_widget
-
-    def constructContour(self, pts, open_curve = None, save = True):
+# }}}
+    def constructContour(self, pts, open_curve = None, save = True):# {{{
         """
         Default behaviour:
         - LeftButtonPressEvent - triggers a Select event
@@ -134,12 +136,12 @@ class VtkWidget(QVTKRenderWindowInteractor):
             # self.loadContour
             self.__saveContour(None, None)
         return 0
-
-    def loadContour(self, pts, open_curve):
+# }}}
+    def loadContour(self, pts, open_curve):# {{{
         self.constructContour(pts, open_curve, save = False)
         self.style._reinitState()
-
-    def drawLine(self, pt0, pt1, color = [0.5,1,1], lw = 4):
+# }}}
+    def drawLine(self, pt0, pt1, color = [0.5,1,1], lw = 4):# {{{
         line_source = vtk.vtkLineSource()
         line_source.SetPoint1(pt0)
         line_source.SetPoint2(pt1)
@@ -153,14 +155,14 @@ class VtkWidget(QVTKRenderWindowInteractor):
         self.ren.AddActor(actor)
         self.ren_win.Render()
         return actor
-
-    def reInitStyle(self):
+# }}}
+    def reInitStyle(self):# {{{
         self.style._reinitState()
-
-    def setStyleSampleStep(self, step = 20):
+# }}}
+    def setStyleSampleStep(self, step = 20):# {{{
         self.style._setSampleStep(step)
-
-    def __saveContour(self, obj, event):
+# }}}
+    def __saveContour(self, obj, event):# {{{
         data = []
         for contour in self.contours:
             rep = contour.GetContourRepresentation()
@@ -183,8 +185,8 @@ class VtkWidget(QVTKRenderWindowInteractor):
                     }
             data.append(contour_data)
         self.parent.saveCurrentSlice(data)
-
-    def __getFullCnt(self, contour_widget, img_shape):
+# }}}
+    def __getFullCnt(self, contour_widget, img_shape):# {{{
         """
         Get all point position in the image
         return point in (col, row)
@@ -203,8 +205,8 @@ class VtkWidget(QVTKRenderWindowInteractor):
                 all_pts.append(self.__getBackCvCoord(*point[:2], img_shape))
         all_pts = np.array(all_pts).astype(np.int)
         return all_pts.tolist()
-
-    def __getMask(self, contour_widget, img_shape, mode):
+# }}}
+    def __getMask(self, contour_widget, img_shape, mode):# {{{
         """
         -img_shape : (H, W)
         """
@@ -227,30 +229,31 @@ class VtkWidget(QVTKRenderWindowInteractor):
             cv_cnt = np.array([arr for arr in F.removeDuplicate2d(all_pts)])
             cv.polylines(mask,[cv_cnt],False,1)
         return mask
-
-    def __getBackNpCoord(self, x, y, img_shape):
+# }}}
+    def __getBackNpCoord(self, x, y, img_shape):# {{{
         """Get coordinate in (row, col)
         - img_shape: (W, H)"""
         return np.array([img_shape[1]-1-y, x])
-
-    def __getBackCvCoord(self, x, y, img_shape):
+# }}}
+    def __getBackCvCoord(self, x, y, img_shape):# {{{
         """Get coordinate in (col, row)
         - img_shape: (W, H)"""
         return np.array([x, img_shape[1]-1-y])
-
-    def __clearCanvas(self):
+# }}}
+    def __clearCanvas(self):# {{{
         self.contours = []
         self.ren.RemoveAllViewProps()
         self.contours = []
-
-    def __isOpen(self):
+# }}}
+    def __isOpen(self):# {{{
         return self.parent.check_crv.isChecked()
+# }}}
+# }}}
 
-
-class MyInteractorStyle(vtk.vtkInteractorStyleImage):
+class MyInteractorStyle(vtk.vtkInteractorStyleImage):# {{{
     """Interactor style for vtk widget"""
     HEIGHT = 0 # Z/W position of the curve
-    def __init__(self,widget):
+    def __init__(self,widget):# {{{
         self.widget = widget
         self.picker = vtk.vtkPropPicker()
 
@@ -277,8 +280,8 @@ class MyInteractorStyle(vtk.vtkInteractorStyleImage):
         self.__mode = "Drawing"
         self.__drawing = False
         self.__prev_pt = None
-
-    def leftButtonPressEvent(self, obj, event):
+# }}}
+    def leftButtonPressEvent(self, obj, event):# {{{
         ctrl = self.widget.iren.GetControlKey()
         alt = self.widget.iren.GetAltKey()
         shift = self.widget.iren.GetShiftKey()
@@ -290,8 +293,8 @@ class MyInteractorStyle(vtk.vtkInteractorStyleImage):
             self.__prev_pt = now_pt
             self.__drawing = True
             return 0
-
-    def mouseMoveEvent(self, obj, event):
+# }}}
+    def mouseMoveEvent(self, obj, event):# {{{
         if self.__mode == "Drawing" and self.__drawing:
             now_pt = self._getMousePos()
             self.pts_raw.append(now_pt)
@@ -299,8 +302,8 @@ class MyInteractorStyle(vtk.vtkInteractorStyleImage):
             self.lines.append(self.widget.drawLine(self.__prev_pt, now_pt))
             self.__prev_pt = now_pt
             return 0
-
-    def leftButtonReleaseEvent(self, obj, event):
+# }}}
+    def leftButtonReleaseEvent(self, obj, event):# {{{
         if self.__mode == "Drawing":
             # Interpolate between raw points
             full_curve = [self.pts_raw[0]]
@@ -330,8 +333,8 @@ class MyInteractorStyle(vtk.vtkInteractorStyleImage):
                 self.widget.ren.RemoveActor(actor)
             self.widget.ren_win.Render()
             self._reinitState()
-
-    def keyPressEvent(self, obj, event):
+# }}}
+    def keyPressEvent(self, obj, event):# {{{
         key = self.widget.iren.GetKeySym()
         if key == "v": # Zoom in
             self.OnMouseWheelForward()
@@ -339,14 +342,14 @@ class MyInteractorStyle(vtk.vtkInteractorStyleImage):
             self.OnMouseWheelBackward()
         elif key == "r": # Reset camera
             self.widget.resetCamera()
-
-    def forceDrawing(self):
+# }}}
+    def forceDrawing(self):# {{{
         self.__mode = "Drawing"
-
-    def _setSampleStep(self, step):
+# }}}
+    def _setSampleStep(self, step):# {{{
         self.sample_step = step
-
-    def _reinitState(self):
+# }}}
+    def _reinitState(self):# {{{
         """Should be called when going to different slice"""
         self.__prev_pt = None
         self.__drawing = False
@@ -356,15 +359,15 @@ class MyInteractorStyle(vtk.vtkInteractorStyleImage):
         self.lines = []
         self.pts = []
         self.pts_raw = []
-
-    def _getMousePos(self):
+# }}}
+    def _getMousePos(self):# {{{
         click_pos = self.GetInteractor().GetEventPosition()
         self.picker.Pick(*click_pos, 0, self.GetDefaultRenderer())
         pos = self.picker.GetPickPosition()
         #return pos
         return (pos[0], pos[1], MyInteractorStyle.HEIGHT)
-
-    def __linearInterp(self, pos1, pos2, mode = "Int"):
+# }}}
+    def __linearInterp(self, pos1, pos2, mode = "Int"):# {{{
         """Linear interpolation between two 2D points"""
         pos1 = np.array(pos1)
         pos2 = np.array(pos2)
@@ -380,9 +383,8 @@ class MyInteractorStyle(vtk.vtkInteractorStyleImage):
                 interp_pos.append(pos2*t+pos1*(1-t))
         interp_pos.append(pos2)
         #print(interp_pos)
-        t
-        return self.__removeDuplicate2d(interp_pos)
-    def __removeDuplicate2d(self, duplicate):
+        return self.__removeDuplicate2d(interp_pos)# }}}
+    def __removeDuplicate2d(self, duplicate):# {{{
         final_list = []
         flag = True
         for num in duplicate:
@@ -391,5 +393,5 @@ class MyInteractorStyle(vtk.vtkInteractorStyleImage):
                     flag = False
             if flag: final_list.append(num)
             flag = True
-        return final_list
-
+        return final_list# }}}
+# }}}

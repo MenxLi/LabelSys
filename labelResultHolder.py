@@ -1,3 +1,4 @@
+# import{{{
 from base64ImageConverter import imgEncodeB64, imgDecodeB64
 from configLoader import *
 import os
@@ -9,15 +10,17 @@ import copy
 from threading import Thread
 import datetime
 import re
+# }}}
 
 class LabelHolder:
     """
     HOlding the label result
     """
-    def __init__(self):
+    def __init__(self):# {{{
         self.data = None
         self.SAVED = True
-    def initialize(self, entries, SOPInstanceUIDs):
+# }}}
+    def initialize(self, entries, SOPInstanceUIDs):# {{{
         self.data = []
         self.SAVED = True
         for ids in SOPInstanceUIDs:
@@ -25,8 +28,8 @@ class LabelHolder:
             for entry in entries:
                 self.data[-1][entry] = []
             self.data[-1]["SOPInstanceUID"] = ids
-
-    def loadFile(self, path):
+# }}}
+    def loadFile(self, path):# {{{
         imgs = []
         data = []
         file_list = [x for x in os.listdir(path) if x.endswith('.json')]
@@ -46,8 +49,8 @@ class LabelHolder:
         self.data = data
         self.SAVED = True
         return  header_data, imgs
-
-    def saveToFile(self, path, imgs, labeler, spacing = [1,1,1], series = "Unknown"):
+# }}}
+    def saveToFile(self, path, imgs, labeler, spacing = [1,1,1], series = "Unknown"):# {{{
         """
         - path: directory to store all the data for current patient
         Note: the x,y coordinate is in vtk coordinate
@@ -74,8 +77,8 @@ class LabelHolder:
 
         thread = Thread(target = self.__threadSaveToFile, args = (path, imgs.copy(),))
         thread.start()
-
-    def __threadSaveToFile(self, path, imgs):
+# }}}
+    def __threadSaveToFile(self, path, imgs):# {{{
         for i in range(len(imgs)):
             print("Saving...{}/{}".format(i+1, len(imgs)))
             file_name = "Slice_"+str(i+1)+".json"
@@ -87,20 +90,20 @@ class LabelHolder:
             with open(os.path.join(path, file_name), "w") as f:
                 json.dump(js_data, f)
         print("Exporting finished!\nDestination: ", path)
-
-    def __getBackNpCoord(self, x, y, img_shape):
+# }}}
+    def __getBackNpCoord(self, x, y, img_shape):# {{{
         """Get coordinate in (row, col)
         - img_shape: (W, H)"""
         return img_shape[1]-1-y, x
-
-    def __getBackCvCoord(self, x, y, img_shape):
+# }}}
+    def __getBackCvCoord(self, x, y, img_shape):# {{{
         """Get coordinate in (col, row)
         - img_shape: (W, H)"""
         return x, img_shape[1]-1-y
-
-    def __creatThreadFunction(self, func, *args, start = False, deamon = False):
+# }}}
+    def __creatThreadFunction(self, func, *args, start = False, deamon = False):# {{{
         thread = Thread(target = func, args = args)
         if start:
             thread.start()
         return thread
-
+# }}}

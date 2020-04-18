@@ -1,3 +1,4 @@
+# Import {{{
 import webbrowser
 from pathlib import Path
 import os,sys
@@ -18,11 +19,12 @@ from PyQt5.QtCore import Qt, pyqtSignal, QObject, QEvent
 from PyQt5 import uic
 from vtkClass import VtkWidget
 import cv2 as cv
-
+# }}}
 LOCAL_DIR = os.path.dirname(os.path.realpath(__file__))
 
 class MainWindow(QMainWindow):
-    def __init__(self,args):
+    # Init{{{
+    def __init__(self,args):# {{{
         super().__init__()
         if not args.dev:
             sys.stdout = EmittingStream(textWritten = self.stdoutStream)
@@ -75,8 +77,8 @@ class MainWindow(QMainWindow):
         else:
             print("Welcome to LabelSys v"+__version__)
             print("For help see: Help -> manual")
-
-    def __configSetup(self):
+# }}}
+    def __configSetup(self):# {{{
         """Unfinished function, will move all CONF attribute into self.config in the future"""
         self.config = {
             "loading_mode":None,
@@ -85,7 +87,8 @@ class MainWindow(QMainWindow):
         if self.args.loading_mode != None:
             self.config["loading_mode"] = self.args.loading_mode
         else: self.config["loading_mode"] = CONF["Loading_mode"]
-    def initMenu(self):
+# }}}
+    def initMenu(self):# {{{
         # File
         self.act_open.triggered.connect(self.loadPatients)
         self.act_open.setShortcut("Ctrl+O")
@@ -129,8 +132,8 @@ class MainWindow(QMainWindow):
 
         # Help
         self.act_manual.triggered.connect(self.showHelpManual)
-
-    def initPanel(self):
+# }}}
+    def initPanel(self):# {{{
         """Init the whole panel, will be called on loading the patients"""
         self.slider_im.setPageStep(1)
         self.combo_label.addItems(LABELS)
@@ -150,12 +153,13 @@ class MainWindow(QMainWindow):
         self.btn_preview.clicked.connect(self.previewLabels2D)
         self.btn_add_cnt.clicked.connect(self.addContour)
         self.slider_im.valueChanged.connect(self.changeSliderValue)
-
-    def initImageUI(self):
+# }}}
+    def initImageUI(self):# {{{
         """Put image on to main window, will be called on loading the patients"""
-        self.im_widget = VtkWidget(self.im_frame, self)
-
-    def loadPatients(self):
+        self.im_widget = VtkWidget(self.im_frame, self)# }}}
+# }}}
+    # Load images{{{
+    def loadPatients(self):# {{{
         """Load patients folder, and call initPanelAct() to initialize the panel"""
         if self.args.dev:
             fname = self.args.file
@@ -176,8 +180,8 @@ class MainWindow(QMainWindow):
 
         self.__cache["data_loaded"] = True
         return 0
-
-    def loadLabeledFile(self):
+# }}}
+    def loadLabeledFile(self):# {{{
         """Load a labeld file for one patient"""
         fname = QFileDialog.getExistingDirectory(self, "Select loading directory")
         if fname == "":
@@ -211,15 +215,16 @@ class MainWindow(QMainWindow):
         self.__cache["load_path"] = fname
         self.__updateQLabelText()
         print("Data loaded")
-
-    def quitApp(self):
+        # }}}
+# }}}
+    def quitApp(self):# {{{
         if not self.lbl_holder.SAVED and not self.args.dev:
             if not self._alertMsg("Unsaved changes, quitting?"):
                 return 1
         self.close()
         return 0
-
-    def changeScreenMode(self):
+# }}}
+    def changeScreenMode(self):# {{{
         """Change screen mode between Normal Maximized and full screen"""
         self.__screen_mode = (self.__screen_mode+1)%3
         if self.__screen_mode == 0:
@@ -228,8 +233,8 @@ class MainWindow(QMainWindow):
             self.showMaximized()
         elif self.__screen_mode == 2:
             self.showFullScreen()
-
-    def setOutputPath(self):
+# }}}
+    def setOutputPath(self):# {{{
         fname = QFileDialog.getExistingDirectory(self, "Select output directory")
         if fname == "":
             return 1
@@ -237,20 +242,20 @@ class MainWindow(QMainWindow):
         self.__cache["output_set"] = True
         self.__updateQLabelText()
         return 0
-
-    def setLabeler(self):
+# }}}
+    def setLabeler(self):# {{{
         """Set labeler name"""
         text, ok = QInputDialog.getText(self, "Set labeler", "Enter your name: ")
         if ok:
             self.labeler_name = str(text)
             self.__updateQLabelText()
-
-    def setSettings(self):
+# }}}
+    def setSettings(self):# {{{
         self.settings_dialog = SettingsDialog(self)
         self.settings_dialog.exec_()
         #self.settings_dialog.show()
-
-    def changeComboSeries(self, entry):
+# }}}
+    def changeComboSeries(self, entry):# {{{
         """Triggered when self.combo_series change the entry"""
         if self.__querySave() == 1:
             # decline action with unsaved changes
@@ -268,8 +273,8 @@ class MainWindow(QMainWindow):
             self.slider_im.setSliderPosition(self.slice_id)
             self.slider_im.setMaximum(len(self.imgs)-1)
             self.im_widget.resetCamera()
-
-    def changeComboLabels(self, entry):
+# }}}
+    def changeComboLabels(self, entry):# {{{
         self.curr_lbl = entry
         try:    # prevent triggering when clear
             self.__updateImg()
@@ -279,63 +284,63 @@ class MainWindow(QMainWindow):
             elif mode == 0:
                 self.check_crv.setChecked(False)
         except: pass
-
-    def changeCheckCrv(self, i):
+# }}}
+    def changeCheckCrv(self, i):# {{{
         if self.check_crv.isChecked():
             LBL_MODE[LABELS.index(self.curr_lbl)] = 1
         else:
             LBL_MODE[LABELS.index(self.curr_lbl)] = 0
-
-    def changeSliderValue(self):
+# }}}
+    def changeSliderValue(self):# {{{
         """Triggered when slider_im changes value"""
         self.slice_id = self.slider_im.value()
         self.__updateImg()
-
-    def switchLabel(self):
+# }}}
+    def switchLabel(self):# {{{
         """switch between labels, for shortcut use"""
         new_label_id = (LABELS.index(self.curr_lbl) + 1)%len(LABELS)
         self.combo_label.setCurrentText(LABELS[new_label_id]) # will trigger changeComboLabels()
-
-    def nextSlice(self):
+# }}}
+    def nextSlice(self):# {{{
         if self.slice_id >= len(self.imgs)-1:
             return 1
         self.slice_id += 1
         self.slider_im.setSliderPosition(self.slice_id)
         #self.__updateImg()
         return 0
-
-    def prevSlice(self):
+# }}}
+    def prevSlice(self):# {{{
         if self.slice_id < 1:
             return 1
         self.slice_id -= 1
         self.slider_im.setSliderPosition(self.slice_id)
         #self.__updateImg()
         return 0
-
-    def nextPatient(self):
+# }}}
+    def nextPatient(self):# {{{
         if self.__querySave() == 1:
             return
         if self.fl.next():
             self.__updatePatient()
             return 0
-
-    def prevPatient(self):
+# }}}
+    def prevPatient(self):# {{{
         if self.__querySave() == 1:
             return
         if self.fl.previous():
             self.__updatePatient()
             return 0
-
-    def stdoutStream(self, text):
+# }}}
+    def stdoutStream(self, text):# {{{
         #self.tb_console.append(text)
         self.tb_console.insertPlainText(text)
         self.tb_console.verticalScrollBar().setValue(self.tb_console.verticalScrollBar().maximum())
-
-    def clearCurrentSlice(self):
+# }}}
+    def clearCurrentSlice(self):# {{{
         self.lbl_holder.data[self.slice_id][self.curr_lbl] = []
         self.__updateImg()
-
-    def interpCurrentSlice(self):
+# }}}
+    def interpCurrentSlice(self):# {{{
         prev_mask = self.__getSingleMask(self.slice_id-1, self.combo_label.currentText())
         next_mask = self.__getSingleMask(self.slice_id+1, self.combo_label.currentText())
         if type(prev_mask) == type(None) and type(next_mask) == type(None):
@@ -357,23 +362,23 @@ class MainWindow(QMainWindow):
             self.lbl_holder.data[self.slice_id] = copy.deepcopy(self.lbl_holder.data[self.slice_id-1])
             self.lbl_holder.SAVED = False
             self.__updateImg()
-
-    def previewLabels3D(self):
+# }}}
+    def previewLabels3D(self):# {{{
         if not self.__cache["data_loaded"]:
             pass
         self.preview_win_3d = Preview3DWindow(self.imgs, self.__getMasks(), spacing = self.spacing)
         self.preview_win_3d.show()
-
-    def previewLabels2D(self):
+# }}}
+    def previewLabels2D(self):# {{{
         if not self.__cache["data_loaded"]:
             pass
         self.preview_win_2d = Preview2DWindow(self.imgs, self.__getMasks(), self.slice_id)
         self.preview_win_2d.show()
-
-    def addContour(self):
+# }}}
+    def addContour(self):# {{{
         self.im_widget.style.forceDrawing()
-
-    def saveCurrentSlice(self, cnts_data):
+# }}}
+    def saveCurrentSlice(self, cnts_data):# {{{
         """
         Will be triggered automatically when modifying the contour, will be
         called by vtkClass
@@ -405,15 +410,15 @@ class MainWindow(QMainWindow):
                 series = str(self.combo_series.currentText())
                 )
         self.lbl_holder.SAVED = True
-
-    def _getColor(self, label):
+# }}}
+    def _getColor(self, label):# {{{
         try:
             idx = LABELS.index(label)
         except:
             return (1,0,0)
         return LBL_COLORS[idx]
-
-    def __getMasks(self):
+# }}}
+    def __getMasks(self):# {{{
         im_shape = self.imgs[0].shape
         for im in self.imgs:
             if im.shape != im_shape:
@@ -437,8 +442,8 @@ class MainWindow(QMainWindow):
                 mask_data[label] = mask_data[label].astype(np.bool)
             masks.append(mask_data)
         return masks
-
-    def __getSingleMask(self, idx, label):
+# }}}
+    def __getSingleMask(self, idx, label):# {{{
         """get mask for a single label in single image, used for interpolation"""
         if idx <0 or idx > len(self.imgs)-1:
             return None
@@ -457,8 +462,8 @@ class MainWindow(QMainWindow):
                 cv.fillPoly(mask, pts = [cv_cnt], color = 1)
         mask = mask.astype(np.bool)
         return mask
-
-    def __updateComboSeries(self):
+# }}}
+    def __updateComboSeries(self):# {{{
         """Update the series combobox when changing patient"""
         self.combo_series.clear()
         series = self.fl.curr_patient.getEntries()
@@ -468,8 +473,8 @@ class MainWindow(QMainWindow):
             self.combo_series.setCurrentText(SERIES)
         else:
             self.combo_series.setCurrentText(list(series)[0])
-
-    def __updatePatient(self):
+# }}}
+    def __updatePatient(self):# {{{
         """Update current showing patient, will be triggeted when changing patient"""
         self.slice_id = 0
         self.__updateComboSeries()
@@ -480,8 +485,8 @@ class MainWindow(QMainWindow):
         if not self.__cache["output_set"]:
             self.output_path = self.fl.getPath()
             self.__updateQLabelText()
-
-    def __updateImg(self):
+# }}}
+    def __updateImg(self):# {{{
         """update image showing on im_frame"""
         im = F.map_mat_255(self.imgs[self.slice_id])
 
@@ -498,12 +503,12 @@ class MainWindow(QMainWindow):
         if cnts_data != []:
             for cnt in cnts_data:
                 self.im_widget.loadContour(cnt["Points"], cnt["Open"])
-
-    def __updateQLabelText(self):
+# }}}
+    def __updateQLabelText(self):# {{{
         self.lbl_wd.setText("Console -- LABELER: {} || OUTPUT_PATH: {}".\
                 format(self.labeler_name, str(self.output_path)))
-
-    def __readSeries(self):
+# }}}
+    def __readSeries(self):# {{{
         """update self.imgs and self.SOPInstanceUIDs by current chosen image series"""
         entry = str(self.combo_series.currentText())
         image_data = self.fl.curr_patient.getSeriesImg(entry)
@@ -511,12 +516,12 @@ class MainWindow(QMainWindow):
         self.SOPInstanceUIDs = image_data["SOPInstanceUIDs"]
         self.spacing = image_data["Spacing"]
         self.lbl_holder.initialize(LABELS, self.SOPInstanceUIDs)
-
-    def __disableWidgets(self, *widgets):
+# }}}
+    def __disableWidgets(self, *widgets):# {{{
         for w in widgets:
             w.setEnabled(False)
-
-    def __querySave(self):
+# }}}
+    def __querySave(self):# {{{
         """Check if there are unsaved changes"""
         if not self.lbl_holder.SAVED:
             if self._alertMsg("Unsaved changes, continue?"):
@@ -526,8 +531,8 @@ class MainWindow(QMainWindow):
                 return 1
         else:
             return 0
-
-    def _alertMsg(self,msg, title = "Alert", func = lambda x : None):
+# }}}
+    def _alertMsg(self,msg, title = "Alert", func = lambda x : None):# {{{
         msg_box = QMessageBox()
         msg_box.setText(msg)
         msg_box.setWindowTitle(title)
@@ -537,13 +542,13 @@ class MainWindow(QMainWindow):
         if return_value == QMessageBox.Ok:
             return True
         else: return False
-
-    def showHelpManual(self):
+# }}}
+    def showHelpManual(self):# {{{
         file_path = os.path.realpath("help.html")
         webbrowser.open("file://"+file_path)
-
+# }}}
     #==============Event Handler================
-    def eventFilter(self, receiver, event):
+    def eventFilter(self, receiver, event):# {{{
         """Globally defined event"""
         modifier = QtWidgets.QApplication.keyboardModifiers()
         if(event.type() == QEvent.KeyPress):
@@ -562,8 +567,8 @@ class MainWindow(QMainWindow):
                 return False
             self.im_widget.style.mouseMoveEvent(None, None)
         return super().eventFilter(receiver, event)
-
-    def wheelEvent(self, event):
+# }}}
+    def wheelEvent(self, event):# {{{
         if not self.__cache["data_loaded"]:
             return
         modifier = QtWidgets.QApplication.keyboardModifiers()
@@ -577,6 +582,7 @@ class MainWindow(QMainWindow):
                 self.im_widget.style.OnMouseWheelBackward()
             else:
                 self.nextSlice()
+# }}}
 
 class EmittingStream(QObject):
     """Reference: https://stackoverflow.com/questions/8356336/how-to-capture-output-of-pythons-interpreter-and-show-in-a-text-widget"""

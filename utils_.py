@@ -2,15 +2,24 @@
 Useful functions
 """
 
+# import{{{
 import numpy as np
-import scipy.ndimage
-import cv2 as cv
+try:
+    import scipy.ndimage
+except: pass
+try:
+    import cv2 as cv
+except:pass
+try:
+    import matplotlib as pyplot
+except: pass
+# }}}
 
-def gray2rgb_(img):
+def gray2rgb_(img):# {{{
     new_img = np.concatenate((img[:,:,np.newaxis], img[:,:,np.newaxis], img[:,:,np.newaxis]), axis=2)
     return new_img
-
-def removeDuplicate2d(duplicate):
+# }}}
+def removeDuplicate2d(duplicate):# {{{
     final_list = []
     flag = True
     for num in duplicate:
@@ -20,8 +29,8 @@ def removeDuplicate2d(duplicate):
         if flag: final_list.append(num)
         flag = True
     return final_list
-
-def plot_imgs(imgs, n_col = 3, gray = False, titles = None):
+# }}}
+def plot_imgs(imgs, n_col = 3, gray = False, titles = None):# {{{
     """Take a list of images and plot them in grids"""
     if titles ==None:
         print_title = False
@@ -41,31 +50,31 @@ def plot_imgs(imgs, n_col = 3, gray = False, titles = None):
             ax.imshow(img, cmap = 'gray')
         else: ax.imshow(img)
     plt.show()
-
-def img_hist(img):
+# }}}
+def img_hist(img):# {{{
     plt.hist(equ.ravel(), bins=256, range=(0, 256), fc='k', ec='k')
     plt.show()
-
-def normalize_mat(mat, minimum = "mean"):
+# }}}
+def normalize_mat(mat, minimum = "mean"):# {{{
     if minimum == "zero":
         return (mat - mat.min())/(mat.max() - mat.min())
     if minimum == "mean":
         return (mat - mat.mean())/(mat.max() - mat.min())
-
-def map_mat_255(img):
+# }}}
+def map_mat_255(img):# {{{
     img = img.astype(np.float)
     if (img == 0).all():
         return img.astype(np.uint8)
     result = normalize_mat(img, minimum = "zero")*255
     return result.astype(np.uint8)
-
-def img_channel(img):
+# }}}
+def img_channel(img):# {{{
     if len(img.shape)==3:
         return img.shape[2]
     if len(img.shape)==2:
         return 1
-
-def equal_multiChannel(mat, template):
+# }}}
+def equal_multiChannel(mat, template):# {{{
     """
     To find template in a mat
     tamplate must be 1D and len(template) == mat.shape[-1]
@@ -80,8 +89,8 @@ def equal_multiChannel(mat, template):
     for bl in bools:
         result = np.logical_and(result, bl)
     return result
-
-def overlap_(fg_img, bg_img, mask):
+# }}}
+def overlap_(fg_img, bg_img, mask):# {{{
     """
     按蒙版重叠图像fg_img和bg_img，fg_img在蒙版的白色区bg_img在黑色区
     @fg_img: 前景图，三通道
@@ -93,8 +102,8 @@ def overlap_(fg_img, bg_img, mask):
 
     new_img = fg_img * mask + bg_img * (1 - mask)
     return new_img
-
-def returned_img(patch, img, pos):
+# }}}
+def returned_img(patch, img, pos):# {{{
     """
     return an image patch into the original image
     pos: upper left corner (row, col)
@@ -107,14 +116,14 @@ def returned_img(patch, img, pos):
     patch_w = patch.shape[1]
     img[pos[0]:pos[0]+patch_h, pos[1]:pos[1]+patch_w] = patch
     return img
-
-def get_region(img, h_range, w_range):
+# }}}
+def get_region(img, h_range, w_range):# {{{
     """
     fetch a image patch without worrying about get out of the image dimension
     """
     return [[max(0, h_range[0]), min(h_range[1], img.shape[0])], [max(0, w_range[0]), min(w_range[1], img.shape[1])]]
-
-def find_region(mask, value = 1):
+# }}}
+def find_region(mask, value = 1):# {{{
     """Find the row & col image region that the mask == value"""
     coord = np.where(mask==value)
     row_start = coord[0].min()
@@ -122,8 +131,8 @@ def find_region(mask, value = 1):
     col_start = coord[1].min()
     col_end = coord[1].max()
     return((row_start, row_end), (col_start, col_end))
-
-def find_max_areaContour(img, approx = cv.RETR_TREE):
+# }}}
+def find_max_areaContour(img, approx = cv.RETR_TREE):# {{{
     """
     用opencv的contour找到最大面积的轮廓
     返回轮廓
@@ -138,8 +147,8 @@ def find_max_areaContour(img, approx = cv.RETR_TREE):
             max_area = current_area
             max_area_id = i
     return contours[max_area_id]
-
-def resampleSpacing(imgs, old_spacing, new_spacing = [1,1,1]): 
+# }}}
+def resampleSpacing(imgs, old_spacing, new_spacing = [1,1,1]):# {{{
     """Resample /dicom/ images"""
     spacing = np.array(old_spacing)
     resize_factor = spacing / new_spacing
@@ -149,8 +158,8 @@ def resampleSpacing(imgs, old_spacing, new_spacing = [1,1,1]):
     new_spacing = spacing / real_resize_factor
     imgs = scipy.ndimage.interpolation.zoom(imgs, real_resize_factor)
     return imgs, new_spacing
-
-def overlap_mask(img, mask, color = (255,0,0), alpha = 1):
+# }}}
+def overlap_mask(img, mask, color = (255,0,0), alpha = 1):# {{{
     if img_channel(img) == 1:
         img = gray2rgb_(img)
     if img_channel(mask) == 1:
@@ -160,8 +169,8 @@ def overlap_mask(img, mask, color = (255,0,0), alpha = 1):
     color_ = np.concatenate((channel[:,:,np.newaxis]*color[0],channel[:,:,np.newaxis]*color[1],channel[:,:,np.newaxis]*color[2]), axis = 2)
     f_im = im*(1-mask) + im*mask*(1-alpha) + color_*alpha*mask
     return f_im.astype(np.uint8)
-
-class Interpolate_mask_init:
+# }}}
+class Interpolate_mask_init:# {{{
     """
     get initial contour from two masks: msk1, msk2
     @msk1, msk2: masks (binary)
@@ -209,3 +218,10 @@ class Interpolate_mask_init:
         img = np.zeros(shape, np.uint8)
         cv.fillPoly(img, pts =[cnt], color = 1)
         return img
+# }}}
+def otsuThresh(arr):
+    if not isinstance(arr, np.ndarray):
+        arr = np.array(arr)
+    min_value = arr.min()
+    return arr.mean()
+
