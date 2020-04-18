@@ -11,6 +11,7 @@ __VERSIONS__ =[ \
         ["2.0-beta", "Re-write the whole program using PyQt5 and vtk, under develpment"],\
         ["2.0.0", "For MRI labeling - disc, condyle and eminence"],
         ["2.0.1", "Fix curve initialization crash bug, add individual curve initialization step, \
-         add image/video loading support"]
+         add image/video loading support"],
+        ["2.0.2", "For hip effusion project"]
         ]
 __version__, __description__ = __VERSIONS__[-1]

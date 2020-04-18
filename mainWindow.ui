@@ -388,7 +388,7 @@
      <x>0</x>
      <y>0</y>
      <width>1024</width>
-     <height>21</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_file">
@@ -427,6 +427,7 @@
     <addaction name="act_op_clear"/>
     <addaction name="act_op_interp"/>
     <addaction name="act_op_add_cnt"/>
+    <addaction name="act_op_otsu"/>
    </widget>
    <widget class="QMenu" name="menu_help">
     <property name="title">
@@ -535,6 +536,11 @@
   <action name="act_manual">
    <property name="text">
     <string>Manual</string>
+   </property>
+  </action>
+  <action name="act_op_otsu">
+   <property name="text">
+    <string>Otsu (Experimental)</string>
    </property>
   </action>
  </widget>

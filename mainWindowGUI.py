@@ -267,7 +267,7 @@ class MainWindow(QMainWindow):
         self.__cache["prev_combo_series"] = entry
         try: # prevent triggering when changing patient
             self.__readSeries()
-            self.__updateImg()
+            self._updateImg()
         except: pass
         finally:
             self.slider_im.setSliderPosition(self.slice_id)
@@ -277,7 +277,7 @@ class MainWindow(QMainWindow):
     def changeComboLabels(self, entry):# {{{
         self.curr_lbl = entry
         try:    # prevent triggering when clear
-            self.__updateImg()
+            self._updateImg()
             mode = LBL_MODE[LABELS.index(self.curr_lbl)]
             if mode == 1:
                 self.check_crv.setChecked(True)
@@ -294,7 +294,7 @@ class MainWindow(QMainWindow):
     def changeSliderValue(self):# {{{
         """Triggered when slider_im changes value"""
         self.slice_id = self.slider_im.value()
-        self.__updateImg()
+        self._updateImg()
 # }}}
     def switchLabel(self):# {{{
         """switch between labels, for shortcut use"""
@@ -306,7 +306,7 @@ class MainWindow(QMainWindow):
             return 1
         self.slice_id += 1
         self.slider_im.setSliderPosition(self.slice_id)
-        #self.__updateImg()
+        #self._updateImg()
         return 0
 # }}}
     def prevSlice(self):# {{{
@@ -314,7 +314,7 @@ class MainWindow(QMainWindow):
             return 1
         self.slice_id -= 1
         self.slider_im.setSliderPosition(self.slice_id)
-        #self.__updateImg()
+        #self._updateImg()
         return 0
 # }}}
     def nextPatient(self):# {{{
@@ -338,11 +338,11 @@ class MainWindow(QMainWindow):
 # }}}
     def clearCurrentSlice(self):# {{{
         self.lbl_holder.data[self.slice_id][self.curr_lbl] = []
-        self.__updateImg()
+        self._updateImg()
 # }}}
     def interpCurrentSlice(self):# {{{
-        prev_mask = self.__getSingleMask(self.slice_id-1, self.combo_label.currentText())
-        next_mask = self.__getSingleMask(self.slice_id+1, self.combo_label.currentText())
+        prev_mask = self._getSingleMask(self.slice_id-1, self.combo_label.currentText())
+        next_mask = self._getSingleMask(self.slice_id+1, self.combo_label.currentText())
         if type(prev_mask) == type(None) and type(next_mask) == type(None):
             print("Nothing to interpolate")
             return
@@ -350,18 +350,18 @@ class MainWindow(QMainWindow):
             print("Copied from next slice")
             self.lbl_holder.data[self.slice_id] = copy.deepcopy(self.lbl_holder.data[self.slice_id+1])
             self.lbl_holder.SAVED = False
-            self.__updateImg()
+            self._updateImg()
         elif type(next_mask) == type(None):
             print("Copied from previous slice")
             self.lbl_holder.data[self.slice_id] = copy.deepcopy(self.lbl_holder.data[self.slice_id-1])
             self.lbl_holder.SAVED = False
-            self.__updateImg()
+            self._updateImg()
         else:
             """should be improved in the futute"""
             print("Copied from previous slice")
             self.lbl_holder.data[self.slice_id] = copy.deepcopy(self.lbl_holder.data[self.slice_id-1])
             self.lbl_holder.SAVED = False
-            self.__updateImg()
+            self._updateImg()
 # }}}
     def previewLabels3D(self):# {{{
         if not self.__cache["data_loaded"]:
@@ -443,7 +443,7 @@ class MainWindow(QMainWindow):
             masks.append(mask_data)
         return masks
 # }}}
-    def __getSingleMask(self, idx, label):# {{{
+    def _getSingleMask(self, idx, label):# {{{
         """get mask for a single label in single image, used for interpolation"""
         if idx <0 or idx > len(self.imgs)-1:
             return None
@@ -479,14 +479,14 @@ class MainWindow(QMainWindow):
         self.slice_id = 0
         self.__updateComboSeries()
         self.__readSeries()
-        self.__updateImg()
+        self._updateImg()
         self.slider_im.setSliderPosition(self.slice_id)
         self.slider_im.setMaximum(len(self.imgs)-1)
         if not self.__cache["output_set"]:
             self.output_path = self.fl.getPath()
             self.__updateQLabelText()
 # }}}
-    def __updateImg(self):# {{{
+    def _updateImg(self):# {{{
         """update image showing on im_frame"""
         im = F.map_mat_255(self.imgs[self.slice_id])
 

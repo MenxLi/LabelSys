@@ -1,6 +1,7 @@
 import sys
 from PyQt5.QtWidgets import QApplication
-from mainWindowGUI import MainWindow
+#  from mainWindowGUI import MainWindow
+from mainWindowGUI_hipEffusion import MainWindow_HE
 from argParse import parser, args
 
 
@@ -15,11 +16,8 @@ class Application(QApplication):
             return 1
 if __name__ == "__main__":
     app = Application([parser.prog])
-    # set stylesheet
-    #import qdarkstyle
-    #app.setStyleSheet(qdarkstyle.load_stylesheet_pyqt5())
     with open("QTDark.stylesheet") as f:
         app.setStyleSheet(f.read())
-    w = MainWindow(args)
+    w = MainWindow_HE(args)
     app.installEventFilter(w)
     sys.exit(app.exec_())
