@@ -7,7 +7,7 @@ import copy
 from version import __version__
 from fileReader import FolderLoader
 from configLoader import *
-import utils_ as F
+import utils.utils_ as F
 from labelResultHolder import LabelHolder
 from previewGUI import Preview3DWindow, Preview2DWindow
 from settingsGUI import SettingsDialog
@@ -29,7 +29,7 @@ class MainWindow(QMainWindow):
         if not args.dev:
             sys.stdout = EmittingStream(textWritten = self.stdoutStream)
         # load UI
-        ui_path = os.path.join(LOCAL_DIR, "mainWindow.ui")
+        ui_path = os.path.join(LOCAL_DIR, "ui",  "mainWindow.ui")
         uic.loadUi(ui_path, self)
         self.args = args
 

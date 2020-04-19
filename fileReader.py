@@ -6,7 +6,7 @@ import os
 import scipy.ndimage
 from pathlib import Path
 import cv2 as cv
-import utils_ as F
+import utils.utils_ as F
 # }}}
 
 # Pydicom reading reference: https://pydicom.github.io/pydicom/stable/tutorials/dataset_basics.html

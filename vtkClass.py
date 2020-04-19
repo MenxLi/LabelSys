@@ -6,7 +6,7 @@ from vtk.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 from PyQt5.QtWidgets import *
 import numpy as np
 import cv2 as cv
-import utils_ as F
+import utils.utils_ as F
 # }}}
 
 class VtkWidget(QVTKRenderWindowInteractor):# {{{

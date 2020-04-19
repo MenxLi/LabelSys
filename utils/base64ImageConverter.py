@@ -3,7 +3,7 @@ import ctypes
 from sys import platform
 import os
 
-root_path = os.path.abspath("./")
+root_path = os.path.dirname(os.path.abspath(__file__))
 print(root_path)
 
 if platform == "linux" or platform == "linux2":

@@ -1,5 +1,5 @@
 # import{{{
-from base64ImageConverter import imgEncodeB64, imgDecodeB64
+from utils.base64ImageConverter import imgEncodeB64, imgDecodeB64
 from configLoader import *
 import os
 import vtk

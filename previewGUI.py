@@ -6,7 +6,7 @@ from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtGui import QImage, QPixmap
 import numpy as np
 from configLoader import *
-import utils_ as F
+import utils.utils_ as F
 import cv2 as cv
 
 class PreviewWindow(QWidget):
@@ -33,7 +33,7 @@ class PreviewWindow(QWidget):
 
     def generateMasks(self, masks_raw):
         masks = []
-        for mask_ in masks_raw: 
+        for mask_ in masks_raw:
             color = 1
             mask = np.ma.zeros(self.imgs[0].shape[:2], np.uint8)
             for label in mask_.keys():
@@ -54,7 +54,7 @@ class Preview3DWindow(PreviewWindow):
         self.ren_win = self.vtk_widget.GetRenderWindow()
         self.ren = vtk.vtkRenderer()
         self.ren_win.AddRenderer(self.ren)
-        self.iren = self.ren_win.GetInteractor()  
+        self.iren = self.ren_win.GetInteractor()
 
         self.setWindowTitle("Preview-3D")
         layout = QGridLayout()
@@ -90,7 +90,7 @@ class Preview3DWindow(PreviewWindow):
         if smoothing:
             smoothingIterations = 5
             passBand = 0.001
-            featureAngle = 60.0 
+            featureAngle = 60.0
             smoother = vtk.vtkWindowedSincPolyDataFilter()
             smoother.SetInputConnection(surface_extractor.GetOutputPort())
             smoother.SetNumberOfIterations(smoothingIterations)
@@ -101,11 +101,11 @@ class Preview3DWindow(PreviewWindow):
             smoother.NonManifoldSmoothingOn()
             smoother.NormalizeCoordinatesOn()
             smoother.Update()
-        
+
             normals = vtk.vtkPolyDataNormals()
             normals.SetInputConnection(smoother.GetOutputPort())
             normals.SetFeatureAngle(featureAngle)
-        
+
             stripper = vtk.vtkStripper()
             stripper.SetInputConnection(normals.GetOutputPort())
         else:
@@ -115,23 +115,23 @@ class Preview3DWindow(PreviewWindow):
         surface_mapper = vtk.vtkPolyDataMapper()
         surface_mapper.SetInputConnection(stripper.GetOutputPort())
         surface_mapper.ScalarVisibilityOff()
-    
+
         colors.SetColor("SurfaceColor", [255, 125, 64, 255])
         surface = vtk.vtkActor()
         surface.SetMapper(surface_mapper)
         surface.GetProperty().SetDiffuseColor(colors.GetColor3d("SurfaceColor"))
-    
+
         # An outline provides context around the data.
         ouline_data = vtk.vtkOutlineFilter()
         ouline_data.SetInputConnection(data_importer.GetOutputPort())
-    
+
         map_outline = vtk.vtkPolyDataMapper()
         map_outline.SetInputConnection(ouline_data.GetOutputPort())
-    
+
         outline = vtk.vtkActor()
         outline.SetMapper(map_outline)
         outline.GetProperty().SetColor(colors.GetColor3d("Black"))
-    
+
         self.ren.AddActor(outline)
         self.ren.AddActor(surface)
         self.ren.ResetCamera()
@@ -250,14 +250,14 @@ class Preview2DWindow(PreviewWindow):
 
     #==============Event Handler================
     def wheelEvent(self, event):
-        modifier = QtWidgets.QApplication.keyboardModifiers() 
+        modifier = QtWidgets.QApplication.keyboardModifiers()
         if event.angleDelta().y() < 0:
             if modifier == QtCore.Qt.ControlModifier:
                 #self.im_widget.style.OnMouseWheelForward()
                 pass
             else:
                 self.prevSlice()
-        else: 
+        else:
             if modifier == QtCore.Qt.ControlModifier:
                 #self.im_widget.style.OnMouseWheelBackward()
                 pass

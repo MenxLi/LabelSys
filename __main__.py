@@ -1,7 +1,7 @@
-import sys
+import sys, os
 from PyQt5.QtWidgets import QApplication
 from mainWindowGUI import MainWindow
-from argParse import parser, args
+from utils.argParse import parser, args
 
 
 class Application(QApplication):
@@ -18,7 +18,7 @@ if __name__ == "__main__":
     # set stylesheet
     #import qdarkstyle
     #app.setStyleSheet(qdarkstyle.load_stylesheet_pyqt5())
-    with open("QTDark.stylesheet") as f:
+    with open(os.path.join("ui", "QTDark.stylesheet")) as f:
         app.setStyleSheet(f.read())
     w = MainWindow(args)
     app.installEventFilter(w)
