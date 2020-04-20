@@ -125,7 +125,12 @@ class VtkWidget(QVTKRenderWindowInteractor):# {{{
         pd.SetPoints(points)
         pd.SetLines(lines)
 
-        color = self.parent._getColor(self.parent.combo_label.currentText())
+        try:
+            color = self.parent._getColor(self.parent.combo_label.currentText())
+        except:
+            # for compare_win
+            color = self.parent._getColor(self.parent.parent.combo_label.currentText())
+
         contour_widget = self.contourWidget(color = color, contourWidgetEndInteraction = self.__saveContour)
         contour_widget.On()
         contour_widget.Initialize(pd,1)

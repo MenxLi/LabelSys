@@ -1,0 +1,208 @@
+# {{{
+from PyQt5 import uic
+from PyQt5 import QtWidgets, QtCore
+from PyQt5.QtWidgets import *
+from PyQt5.QtCore import Qt, pyqtSignal, QObject, QEvent
+from labelResultHolder import LabelHolder
+from vtkClass import VtkWidget
+from utils import utils_ as F
+
+import os, sys
+from pathlib import Path
+# }}}
+
+class CompareWidget(QWidget):
+    def __init__(self, parent = None):
+        super().__init__()
+        self.parent = parent
+        self.initUI()
+        self._cache = {
+            "data_loaded": False
+        }
+
+    def initUI(self):# {{{
+        ui_path = os.path.join("ui", "compareWidget.ui")
+        uic.loadUi(ui_path, self)
+        self.setWindowTitle("Compare Widget - Beta")
+        self.L_part = CompareWidgetVisualPart(self.frame_L, self)
+        self.R_part = CompareWidgetVisualPart(self.frame_R, self)
+
+        self.btn_next_slice.clicked.connect(self.nextSlice)
+        self.btn_prev_slice.clicked.connect(self.prevSlice)
+        self.combo_label.currentTextChanged.connect(self.changeComboLabels)
+# }}}
+    def nextSlice(self):# {{{
+        self.L_part.nextSlice()
+        self.R_part.nextSlice()
+# }}}
+    def prevSlice(self):# {{{
+        self.L_part.prevSlice()
+        self.R_part.prevSlice()
+# }}}
+    def changeComboLabels(self, entry):# {{{
+        self.R_part.curr_lbl = entry
+        self.L_part.curr_lbl = entry
+        try:    # prevent triggering when clear
+            self.R_part._updateImg()
+            self.L_part._updateImg()
+        except: pass
+# }}}
+    def wheelEvent(self, event):# {{{
+        if self._cache["data_loaded"] == False:
+            return
+        modifier = QtWidgets.QApplication.keyboardModifiers()
+        if event.angleDelta().y() < 0:
+            if modifier != Qt.ControlModifier:
+                self.prevSlice()
+        else:
+            if modifier != Qt.ControlModifier:
+                self.nextSlice()
+#}}}
+
+class CompareWidgetVisualPart(QWidget):
+    INIT_STEP = 15
+    COLOR = (1,0,0)
+    def __init__(self, frame, parent):# {{{
+        super().__init__(frame)
+        self.parent = parent
+        self.master = frame
+        self.initUI()
+
+        # Should be the same format as mainWindow
+        # Will be finished in the future, now using class static variables instead
+        self.config = {
+            "labels":[],
+            "label_colors":[],
+            "label_steps":[]
+        }
+        self.__cache = {
+            "data_loaded": False
+        }
+
+        # arributes
+        self.slice_id = 0
+        self.curr_lbl = ""
+        self.imgs = []
+        self.SOPInstanceUIDs = []
+        self.spacing = (1,1,1)
+        self.labeler_name = "Anonymous"
+        self.lbl_holder = LabelHolder()
+        self.output_path = ""
+# }}}
+    def initUI(self):# {{{
+        ui_path = os.path.join("ui", "compareVisualWidget.ui")
+        uic.loadUi(ui_path, self)
+        layout = QGridLayout()
+        layout.addWidget(self, 0,0)
+        self.master.setLayout(layout)
+        self.check_crv = QCheckBox()        # decoy checkbox to record curve type used by VtkWidget
+        self.check_crv.setVisible(False)
+        self.im_widget = VtkWidget(self.im_frame, self)
+        self.btn_load.clicked.connect(self.loadFile)
+# }}}
+    def initConfig(self, header):# {{{
+        """
+        This method is a placeholder method for now, will be finished in the future
+        """
+        self.config["labels"] = header["Labels"]
+        for i in self.config["labels"]:
+            self.config["label_colors"].append(self.COLOR)
+            self.config["label_steps"].append(self.INIT_STEP)
+# }}}
+    def loadFile(self, file_path):# {{{
+        """Load a labeld file for one patient"""
+        fname = QFileDialog.getExistingDirectory(self, "Select loading directory")
+        if fname == "":
+            return 1
+        header, imgs = self.lbl_holder.loadFile(Path(fname))
+        output_path = Path(fname).parent
+        self.loadData(header, self.lbl_holder.data, imgs, output_path)
+# }}}
+    def loadData(self, header, data, imgs, output_path, config = None):# {{{
+        """
+        load directly from data instead of loading from file
+        - data: LabelHolder.data
+        - imgs: -
+        """
+        if self.lbl_holder.data == None or self.lbl_holder.data == []:
+            # Loaded from file
+            self.lbl_holder.data = data
+            self.lbl_holder.SAVED = True
+        self.imgs = imgs
+        self.SOPInstanceUIDs = [s["SOPInstanceUID"] for s in self.lbl_holder.data]
+        self.labeler_name = header["Labeler"]
+        self.spacing = header["Spacing"]
+        self.output_path = output_path
+
+        self.parent.combo_label.clear()
+        self.parent.combo_label.addItems(header["Labels"])
+        self.curr_lbl = str(self.parent.combo_label.currentText())
+
+        if config == None:
+            self.initConfig(header)
+        else:
+            # loaded from mainWindow
+            self.config = config
+        self.__cache["data_loaded"] = True
+        self.parent._cache["data_loaded"] = True
+
+        self.lbl_output_path.setText("OUTPUT_PATH: "+ str(self.output_path))
+        self.lbl_info.setText(header["Labeler"]+" - "+header["Time"][:19])
+
+        self._updateImg()
+# }}}
+    def nextSlice(self):# {{{
+        if self.slice_id >= len(self.imgs)-1:
+            return 1
+        self.slice_id += 1
+        self._updateImg()
+# }}}
+    def prevSlice(self):# {{{
+        if self.slice_id < 1:
+            return 1
+        self.slice_id -= 1
+        self._updateImg()
+        return 0
+# }}}
+    def _updateImg(self):# {{{
+        im = F.map_mat_255(self.imgs[self.slice_id])
+        slice_info = "Slice: "+ str(self.slice_id+1)+"/"+str(len(self.imgs))
+        img_info = "Image size: {} x {}".format(*im.shape)
+        txt = slice_info + "\n" + img_info
+
+        self.im_widget.readNpArray(im, txt)
+        self.im_widget.reInitStyle()
+        idx = self.config["labels"].index(self.curr_lbl)
+        self.im_widget.setStyleSampleStep(self.config["label_steps"][idx])
+
+        # load contour
+        cnts_data = self.lbl_holder.data[self.slice_id][self.curr_lbl]
+        if cnts_data != []:
+            for cnt in cnts_data:
+                self.im_widget.loadContour(cnt["Points"], cnt["Open"])
+# }}}
+    def saveCurrentSlice(self, cnts_data):# {{{
+        # will be called by vtkClass
+        self.lbl_holder.data[self.slice_id][self.curr_lbl] = cnts_data
+        self.lbl_holder.data[self.slice_id]["SOPInstanceUID"] = self.SOPInstanceUIDs[self.slice_id]
+        self.lbl_holder.SAVED = False
+# }}}
+    def _getColor(self, label):# {{{
+        # will be called by vtkClass
+        try:
+            idx = self.config["labels"].index(label)
+        except:
+            return (1,0,0)
+        return self.config["label_colors"][idx]
+# }}}
+    def wheelEvent(self, event):# {{{
+        if self.__cache["data_loaded"] == False:
+            return
+        modifier = QtWidgets.QApplication.keyboardModifiers()
+        if event.angleDelta().y() < 0:
+            if modifier == Qt.ControlModifier:
+                self.im_widget.style.OnMouseWheelForward()
+        else:
+            if modifier == Qt.ControlModifier:
+                self.im_widget.style.OnMouseWheelBackward()
+# }}}

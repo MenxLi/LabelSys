@@ -11,6 +11,7 @@ import utils.utils_ as F
 from labelResultHolder import LabelHolder
 from previewGUI import Preview3DWindow, Preview2DWindow
 from settingsGUI import SettingsDialog
+from compareWidget import CompareWidget
 
 import numpy as np
 from PyQt5 import QtWidgets, QtCore
@@ -81,8 +82,10 @@ class MainWindow(QMainWindow):
     def __configSetup(self):# {{{
         """Unfinished function, will move all CONF attribute into self.config in the future"""
         self.config = {
+            "labels":LABELS,
             "loading_mode":None,
-            "label_step": LBL_STEP
+            "label_colors":LBL_COLORS,
+            "label_steps": LBL_STEP
         }
         if self.args.loading_mode != None:
             self.config["loading_mode"] = self.args.loading_mode
@@ -121,6 +124,9 @@ class MainWindow(QMainWindow):
         self.act_op_interp.setShortcut("Ctrl+I")
         self.act_op_add_cnt.triggered.connect(self.addContour)
         self.act_op_add_cnt.setShortcut("Ctrl+A")
+
+        # Tools
+        self.act_tool_compare.triggered.connect(self.openCompareWindow)
 
         # Settings
         self.act_set_path.triggered.connect(self.setOutputPath)
@@ -375,6 +381,20 @@ class MainWindow(QMainWindow):
         self.preview_win_2d = Preview2DWindow(self.imgs, self.__getMasks(), self.slice_id)
         self.preview_win_2d.show()
 # }}}
+    def openCompareWindow(self):# {{{
+        self.compare_win = CompareWidget(self)
+        self.compare_win.show()
+
+        header = {
+            "Labeler": self.labeler_name,
+            "Spacing": self.spacing,
+            "Time": " Now " ,
+            "Labels": self.config["labels"]
+        }
+
+        self.compare_win.L_part.loadData(header, \
+        self.lbl_holder.data, self.imgs, self.output_path, self.config)
+# }}}
     def addContour(self):# {{{
         self.im_widget.style.forceDrawing()
 # }}}
@@ -413,10 +433,10 @@ class MainWindow(QMainWindow):
 # }}}
     def _getColor(self, label):# {{{
         try:
-            idx = LABELS.index(label)
+            idx = self.config["labels"].index(label)
         except:
             return (1,0,0)
-        return LBL_COLORS[idx]
+        return self.config["label_colors"][idx]
 # }}}
     def __getMasks(self):# {{{
         im_shape = self.imgs[0].shape
@@ -483,7 +503,7 @@ class MainWindow(QMainWindow):
         self.slider_im.setSliderPosition(self.slice_id)
         self.slider_im.setMaximum(len(self.imgs)-1)
         if not self.__cache["output_set"]:
-            self.output_path = self.fl.getPath()
+            self.output_path = os.path.abspath( self.fl.getPath() )
             self.__updateQLabelText()
 # }}}
     def __updateImg(self):# {{{
@@ -496,7 +516,8 @@ class MainWindow(QMainWindow):
 
         self.im_widget.readNpArray(im, txt)
         self.im_widget.reInitStyle()
-        self.im_widget.setStyleSampleStep(self.config["label_step"][self.curr_lbl])
+        idx = self.config["labels"].index(self.curr_lbl)
+        self.im_widget.setStyleSampleStep(self.config["label_steps"][idx])
 
         # load contour
         cnts_data = self.lbl_holder.data[self.slice_id][self.curr_lbl]
