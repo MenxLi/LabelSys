@@ -385,15 +385,17 @@ class MainWindow(QMainWindow):
         self.compare_win = CompareWidget(self)
         self.compare_win.show()
 
-        header = {
-            "Labeler": self.labeler_name,
-            "Spacing": self.spacing,
-            "Time": " Now " ,
-            "Labels": self.config["labels"]
-        }
+        try:
+            header = {
+                "Labeler": self.labeler_name,
+                "Spacing": self.spacing,
+                "Time": " Now " ,
+                "Labels": self.config["labels"]
+            }
 
-        self.compare_win.L_part.loadData(header, \
-        self.lbl_holder.data, self.imgs, self.output_path, self.config)
+            self.compare_win.L_part.loadData(header, \
+            self.lbl_holder.data, self.imgs, self.output_path, self.config)
+        except:pass
 # }}}
     def addContour(self):# {{{
         self.im_widget.style.forceDrawing()
