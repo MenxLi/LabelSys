@@ -131,6 +131,7 @@ class MainWindow(QMainWindow):
 
         # Tools
         self.act_tool_compare.triggered.connect(self.openCompareWindow)
+        self.act_tool_compare.setShortcut("Ctrl+C")
 
         # Settings
         self.act_set_path.triggered.connect(self.setOutputPath)
