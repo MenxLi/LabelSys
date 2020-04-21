@@ -219,9 +219,37 @@ class Interpolate_mask_init:# {{{
         cv.fillPoly(img, pts =[cnt], color = 1)
         return img
 # }}}
-def otsuThresh(arr):
+def otsuThresh(arr):# {{{{{{
     if not isinstance(arr, np.ndarray):
         arr = np.array(arr)
     min_value = arr.min()
-    return arr.mean()
+    arr = arr-min_value
 
+    p_dic = dict()
+    for px in arr:
+        try:
+            p_dic[px] += 1
+        except: p_dic[px] = 0
+    values = np.sort(np.unique(arr))
+    count = np.zeros(values.shape, np.int)
+    for i in range(len(values)):
+        count[i] = p_dic[values[i]]
+
+    p = count/count.sum()   # possibility
+    ip = p*values
+    mu_total = ip.sum()
+    var = np.zeros(values.shape, np.int) # between class variance
+    for i in range(len(values)):
+        if i == 0:
+            sum_ip = ip[0]
+            w0 = p[0]
+        else:
+            sum_ip += ip[i]
+            w0 += p[i]
+        w1 = 1-w0
+        mu0 = sum_ip/(w0+0.000000001)
+        mu1 = (mu_total - sum_ip)/(w1+0.000000001)
+        var[i] = w0*w1*(mu1-mu0)**2
+    thresh = np.where(var == np.amax(var))[0][0]
+    return thresh + min_value
+# }}}
