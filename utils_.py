@@ -251,5 +251,5 @@ def otsuThresh(arr):# {{{
         mu1 = (mu_total - sum_ip)/(w1+0.000000001)
         var[i] = w0*w1*(mu1-mu0)**2
     thresh = np.where(var == np.amax(var))[0][0]
-    return thresh
+    return thresh + min_value
 # }}}
