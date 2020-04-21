@@ -12,14 +12,11 @@ from pathlib import Path
 # }}}
 
 class CompareWidget(QWidget):
-    def __init__(self, parent = None):
+    def __init__(self, parent = None):# {{{
         super().__init__()
         self.parent = parent
         self.initUI()
-        self._cache = {
-            "data_loaded": False
-        }
-
+# }}}
     def initUI(self):# {{{
         ui_path = os.path.join("ui", "compareWidget.ui")
         uic.loadUi(ui_path, self)
@@ -30,6 +27,7 @@ class CompareWidget(QWidget):
         self.btn_next_slice.clicked.connect(self.nextSlice)
         self.btn_prev_slice.clicked.connect(self.prevSlice)
         self.combo_label.currentTextChanged.connect(self.changeComboLabels)
+        self.btn_save.clicked.connect(self.save)
 # }}}
     def nextSlice(self):# {{{
         self.L_part.nextSlice()
@@ -47,16 +45,26 @@ class CompareWidget(QWidget):
             self.L_part._updateImg()
         except: pass
 # }}}
+    def save(self):# {{{
+        if self.R_part._cache["data_loaded"]:
+            self.R_part.saveCurrentPatient()
+        if self.L_part._cache["data_loaded"]:
+            self.L_part.saveCurrentPatient()
+# }}}
     def wheelEvent(self, event):# {{{
-        if self._cache["data_loaded"] == False:
-            return
         modifier = QtWidgets.QApplication.keyboardModifiers()
         if event.angleDelta().y() < 0:
             if modifier != Qt.ControlModifier:
                 self.prevSlice()
+            else:
+                if self.R_part._cache["data_loaded"]: self.R_part.im_widget.style.OnMouseWheelForward()
+                if self.L_part._cache["data_loaded"]: self.L_part.im_widget.style.OnMouseWheelForward()
         else:
             if modifier != Qt.ControlModifier:
                 self.nextSlice()
+            else:
+                if self.R_part._cache["data_loaded"]: self.R_part.im_widget.style.OnMouseWheelBackward()
+                if self.L_part._cache["data_loaded"]: self.L_part.im_widget.style.OnMouseWheelBackward()
 #}}}
 
 class CompareWidgetVisualPart(QWidget):
@@ -75,11 +83,12 @@ class CompareWidgetVisualPart(QWidget):
             "label_colors":[],
             "label_steps":[]
         }
-        self.__cache = {
+        self._cache = {
             "data_loaded": False
         }
 
         # arributes
+        self.header = {}    # header in the saved file
         self.slice_id = 0
         self.curr_lbl = ""
         self.imgs = []
@@ -87,7 +96,7 @@ class CompareWidgetVisualPart(QWidget):
         self.spacing = (1,1,1)
         self.labeler_name = "Anonymous"
         self.lbl_holder = LabelHolder()
-        self.output_path = ""
+        self.file_path = ""
 # }}}
     def initUI(self):# {{{
         ui_path = os.path.join("ui", "compareVisualWidget.ui")
@@ -102,27 +111,26 @@ class CompareWidgetVisualPart(QWidget):
 # }}}
     def initConfig(self, header):# {{{
         """
-        This method is a placeholder method for now, will be finished in the future
+        This method is a placeholder method for now, will be deprecated in the future
         """
         self.config["labels"] = header["Labels"]
         for i in self.config["labels"]:
             self.config["label_colors"].append(self.COLOR)
             self.config["label_steps"].append(self.INIT_STEP)
 # }}}
-    def loadFile(self, file_path):# {{{
+    def loadFile(self):# {{{
         """Load a labeld file for one patient"""
         fname = QFileDialog.getExistingDirectory(self, "Select loading directory")
         if fname == "":
             return 1
         header, imgs = self.lbl_holder.loadFile(Path(fname))
-        output_path = Path(fname).parent
-        self.loadData(header, self.lbl_holder.data, imgs, output_path)
+        self.loadData(header, self.lbl_holder.data, imgs, fname)
 # }}}
-    def loadData(self, header, data, imgs, output_path, config = None):# {{{
+    def loadData(self, header, data, imgs, file_path):# {{{
         """
-        load directly from data instead of loading from file
+        load directly from data directly (from mainWindow) instead of loading from file
         - data: LabelHolder.data
-        - imgs: -
+        - imgs
         """
         if self.lbl_holder.data == None or self.lbl_holder.data == []:
             # Loaded from file
@@ -132,32 +140,43 @@ class CompareWidgetVisualPart(QWidget):
         self.SOPInstanceUIDs = [s["SOPInstanceUID"] for s in self.lbl_holder.data]
         self.labeler_name = header["Labeler"]
         self.spacing = header["Spacing"]
-        self.output_path = output_path
+        self.file_path = file_path
+
+        try:
+            self.config = header["Config"]
+        except KeyError:
+            # in the older version of this tool header don't contain "config" attribute, Labels
+            # attribute was used instead
+            print("Warning: The header file does not contain config attribute, maybe this data was labeled with older version of the tool. \n You can ignore this warning if no error occurs, please save this file to overwrite previous one to add config attribute.")
+            self.config["labels"] = header["Labels"]
+            for i in self.config["labels"]:
+                self.config["label_colors"].append(self.COLOR)
+                self.config["label_steps"].append(self.INIT_STEP)
 
         self.parent.combo_label.clear()
-        self.parent.combo_label.addItems(header["Labels"])
+        self.parent.combo_label.addItems(self.config["labels"])
         self.curr_lbl = str(self.parent.combo_label.currentText())
 
-        if config == None:
-            self.initConfig(header)
-        else:
-            # loaded from mainWindow
-            self.config = config
-        self.__cache["data_loaded"] = True
-        self.parent._cache["data_loaded"] = True
+        self._cache["data_loaded"] = True
 
-        self.lbl_output_path.setText("OUTPUT_PATH: "+ str(self.output_path))
+        self.lbl_output_path.setText("OUTPUT_PATH: "+ os.path.dirname(str(self.file_path)))
         self.lbl_info.setText(header["Labeler"]+" - "+header["Time"][:19])
+
+        self.header = header
 
         self._updateImg()
 # }}}
     def nextSlice(self):# {{{
+        if not self._cache["data_loaded"]:
+            return
         if self.slice_id >= len(self.imgs)-1:
             return 1
         self.slice_id += 1
         self._updateImg()
 # }}}
     def prevSlice(self):# {{{
+        if not self._cache["data_loaded"]:
+            return
         if self.slice_id < 1:
             return 1
         self.slice_id -= 1
@@ -187,6 +206,10 @@ class CompareWidgetVisualPart(QWidget):
         self.lbl_holder.data[self.slice_id]["SOPInstanceUID"] = self.SOPInstanceUIDs[self.slice_id]
         self.lbl_holder.SAVED = False
 # }}}
+    def saveCurrentPatient(self):# {{{
+        self.lbl_holder.saveToFile(self.file_path, self.imgs, self.header)
+        self.lbl_holder.SAVED = True
+# }}}
     def _getColor(self, label):# {{{
         # will be called by vtkClass
         try:
@@ -195,8 +218,8 @@ class CompareWidgetVisualPart(QWidget):
             return (1,0,0)
         return self.config["label_colors"][idx]
 # }}}
-    def wheelEvent(self, event):# {{{
-        if self.__cache["data_loaded"] == False:
+    def wheelEvent_deprecated(self, event):# {{{
+        if self._cache["data_loaded"] == False:
             return
         modifier = QtWidgets.QApplication.keyboardModifiers()
         if event.angleDelta().y() < 0:

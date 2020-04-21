@@ -50,7 +50,7 @@ class LabelHolder:
         self.SAVED = True
         return  header_data, imgs
 # }}}
-    def saveToFile(self, path, imgs, labeler, spacing = [1,1,1], series = "Unknown"):# {{{
+    def saveToFile(self, path, imgs, head_info):# {{{
         """
         - path: directory to store all the data for current patient
         Note: the x,y coordinate is in vtk coordinate
@@ -63,13 +63,14 @@ class LabelHolder:
             print("Saving to file ", path)
             os.mkdir(path)
 
-        head_info = {
-                "Labeler":labeler,
-                "Time":str(datetime.datetime.now()),
-                "Spacing":spacing,
-                "Labels": LABELS,
-                "Series": series
-                }
+        #  head_info = {
+        #          "Labeler":labeler,
+        #          "Time":str(datetime.datetime.now()),
+        #          "Spacing":spacing,
+        #          #"Labels": labels,
+        #          "Series": series,
+        #          "Config": config
+        #          }
 
         print("Saving header file...")
         with open(os.path.join(path, "HEAD_0.json"), "w") as hf:

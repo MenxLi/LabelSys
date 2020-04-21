@@ -8,6 +8,7 @@ from version import __version__
 from fileReader import FolderLoader
 from configLoader import *
 import utils.utils_ as F
+from utils import specificUtils as SU
 from labelResultHolder import LabelHolder
 from previewGUI import Preview3DWindow, Preview2DWindow
 from settingsGUI import SettingsDialog
@@ -80,14 +81,17 @@ class MainWindow(QMainWindow):
             print("For help see: Help -> manual")
 # }}}
     def __configSetup(self):# {{{
-        """Unfinished function, will move all CONF attribute into self.config in the future"""
+        """Unfinished function, will move all CONF attributes into self.config in the future"""
         self.config = {
-            "labels":LABELS,
-            "loading_mode":None,
-            "label_colors":LBL_COLORS,
+            "labels": LABELS,
+            "default_series": SERIES,
+            "label_modes": LBL_MODE,
+            "loading_mode": None,
+            "label_colors": LBL_COLORS,
             "label_steps": LBL_STEP
         }
         if self.args.loading_mode != None:
+            # if not setup loading mode in the command line
             self.config["loading_mode"] = self.args.loading_mode
         else: self.config["loading_mode"] = CONF["Loading_mode"]
 # }}}
@@ -142,7 +146,7 @@ class MainWindow(QMainWindow):
     def initPanel(self):# {{{
         """Init the whole panel, will be called on loading the patients"""
         self.slider_im.setPageStep(1)
-        self.combo_label.addItems(LABELS)
+        self.combo_label.addItems(self.config["labels"])
         self.curr_lbl = str(self.combo_label.currentText())
         self.__updateQLabelText()
 
@@ -201,12 +205,21 @@ class MainWindow(QMainWindow):
         self.fl = None  # prevent lbl_holder initialize when changing series and alter saving behaviour
         self.slice_id = 0
         header, self.imgs = self.lbl_holder.loadFile(Path(fname))
+        try:
+            self.config = header["Config"]
+        except KeyError:
+            # In the older version of this tool header don't contain "config" attribute, Labels
+            # attribute was used instead
+            self.config["labels"] = header["Labels"]
+            print("Warning: The header file does not contain config attribute, maybe this data was labeled with older version of the tool. \n You can ignore this warning if no error occurs, please save this file to overwrite previous one to add config attribute.")
+
         self.SOPInstanceUIDs = [s["SOPInstanceUID"] for s in self.lbl_holder.data]
         self.labeler_name = header["Labeler"]
         self.spacing = header["Spacing"]
 
         self.combo_label.clear()
-        self.combo_label.addItems(header["Labels"])
+        # self.combo_label.addItems(header["Labels"])
+        self.combo_label.addItems(self.config["labels"])
         self.curr_lbl = str(self.combo_label.currentText())
 
         self.combo_series.clear()
@@ -284,7 +297,7 @@ class MainWindow(QMainWindow):
         self.curr_lbl = entry
         try:    # prevent triggering when clear
             self.__updateImg()
-            mode = LBL_MODE[LABELS.index(self.curr_lbl)]
+            mode = self.config["label_modes"][self.config["labels"].index(self.curr_lbl)]
             if mode == 1:
                 self.check_crv.setChecked(True)
             elif mode == 0:
@@ -293,9 +306,9 @@ class MainWindow(QMainWindow):
 # }}}
     def changeCheckCrv(self, i):# {{{
         if self.check_crv.isChecked():
-            LBL_MODE[LABELS.index(self.curr_lbl)] = 1
+            self.config["label_modes"][self.config["labels"].index(self.curr_lbl)] = 1
         else:
-            LBL_MODE[LABELS.index(self.curr_lbl)] = 0
+            self.config["label_modes"][self.config["labels"].index(self.curr_lbl)] = 0
 # }}}
     def changeSliderValue(self):# {{{
         """Triggered when slider_im changes value"""
@@ -304,8 +317,8 @@ class MainWindow(QMainWindow):
 # }}}
     def switchLabel(self):# {{{
         """switch between labels, for shortcut use"""
-        new_label_id = (LABELS.index(self.curr_lbl) + 1)%len(LABELS)
-        self.combo_label.setCurrentText(LABELS[new_label_id]) # will trigger changeComboLabels()
+        new_label_id = (self.config["labels"].index(self.curr_lbl) + 1)%len(self.config["labels"])
+        self.combo_label.setCurrentText(self.config["labels"][new_label_id]) # will trigger changeComboLabels()
 # }}}
     def nextSlice(self):# {{{
         if self.slice_id >= len(self.imgs)-1:
@@ -372,13 +385,13 @@ class MainWindow(QMainWindow):
     def previewLabels3D(self):# {{{
         if not self.__cache["data_loaded"]:
             pass
-        self.preview_win_3d = Preview3DWindow(self.imgs, self.__getMasks(), spacing = self.spacing)
+        self.preview_win_3d = Preview3DWindow(self, self.imgs, self.__getMasks(), spacing = self.spacing)
         self.preview_win_3d.show()
 # }}}
     def previewLabels2D(self):# {{{
         if not self.__cache["data_loaded"]:
             pass
-        self.preview_win_2d = Preview2DWindow(self.imgs, self.__getMasks(), self.slice_id)
+        self.preview_win_2d = Preview2DWindow(self, self.imgs, self.__getMasks(), self.slice_id)
         self.preview_win_2d.show()
 # }}}
     def openCompareWindow(self):# {{{
@@ -386,16 +399,24 @@ class MainWindow(QMainWindow):
         self.compare_win.show()
 
         try:
-            header = {
-                "Labeler": self.labeler_name,
-                "Spacing": self.spacing,
-                "Time": " Now " ,
-                "Labels": self.config["labels"]
-            }
+            # When there is file loaded in main window. Get output file path
+            try:
+                # Opening dicom file
+                folder_name = "Label-"+Path(self.fl.getPath()).stem + "-" + self.labeler_name.replace(" ", "_")
+            except:
+                # Loading labeled data
+                folder_name = Path(self.__cache["load_path"]).stem
+            file_path = os.path.join(self.output_path, folder_name)
+
+            # open up compare window with left side loading current images
+            header = SU.createHeader(labeler = self.labeler_name,
+                                 spacing = self.spacing,
+                                 series = str(self.combo_series.currentText()),
+                                 config = self.config)
 
             self.compare_win.L_part.loadData(header, \
-            self.lbl_holder.data, self.imgs, self.output_path, self.config)
-        except:pass
+            self.lbl_holder.data, self.imgs, file_path)
+        except:pass     # When no file is loaded
 # }}}
     def addContour(self):# {{{
         self.im_widget.style.forceDrawing()
@@ -414,23 +435,31 @@ class MainWindow(QMainWindow):
             if self.preview_win_2d.isVisible():
                 self.preview_win_2d.updateInfo(self.__getMasks(), self.slice_id)
         except: pass
-
-    def saveCurrentPatient(self):
+# }}}
+    def saveCurrentPatient(self):# {{{
         try:
+            # Opening dicom file
             folder_name = "Label-"+Path(self.fl.getPath()).stem + "-" + self.labeler_name.replace(" ", "_")
         except:
+            # Loading labeled data
             folder_name = Path(self.__cache["load_path"]).stem
         file_path = os.path.join(self.output_path, folder_name)
         if os.path.exists(file_path):
             if not self._alertMsg("Data exists, overwrite?"):
                 return
-        self.lbl_holder.saveToFile(
-                path = file_path,
-                imgs = self.imgs,
-                labeler = self.labeler_name,
-                spacing = self.spacing,
-                series = str(self.combo_series.currentText())
-                )
+        header = SU.createHeader(labeler = self.labeler_name,
+                                 spacing = self.spacing,
+                                 series = str(self.combo_series.currentText()),
+                                 config = self.config)
+        #  self.lbl_holder.saveToFile( path = file_path,
+        #          imgs = self.imgs,
+        #          #labels = self.config["labels"],
+        #          labeler = self.labeler_name,
+        #          spacing = self.spacing,
+        #          series = str(self.combo_series.currentText()),
+        #          config = self.config
+        #          )
+        self.lbl_holder.saveToFile(file_path, self.imgs, header)
         self.lbl_holder.SAVED = True
 # }}}
     def _getColor(self, label):# {{{
@@ -448,7 +477,7 @@ class MainWindow(QMainWindow):
         masks = []
         for slice_idx in range(len(self.imgs)):
             mask_data = {}
-            for label in LABELS:
+            for label in self.config["labels"]:
                 mask_data[label] = np.zeros(im_shape[:2], np.uint8)
                 cnts_data = self.lbl_holder.data[slice_idx][label]
                 if cnts_data == []:
@@ -491,8 +520,8 @@ class MainWindow(QMainWindow):
         series = self.fl.curr_patient.getEntries()
         self.combo_series.addItems(series)
         # set defult image series
-        if SERIES in series:
-            self.combo_series.setCurrentText(SERIES)
+        if self.config["default_series"] in series:
+            self.combo_series.setCurrentText(self.config["default_series"])
         else:
             self.combo_series.setCurrentText(list(series)[0])
 # }}}
@@ -538,7 +567,7 @@ class MainWindow(QMainWindow):
         self.imgs = image_data["Images"]
         self.SOPInstanceUIDs = image_data["SOPInstanceUIDs"]
         self.spacing = image_data["Spacing"]
-        self.lbl_holder.initialize(LABELS, self.SOPInstanceUIDs)
+        self.lbl_holder.initialize(self.config["labels"], self.SOPInstanceUIDs)
 # }}}
     def __disableWidgets(self, *widgets):# {{{
         for w in widgets:
