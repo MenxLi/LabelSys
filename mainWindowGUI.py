@@ -107,6 +107,8 @@ class MainWindow(QMainWindow):
         # View
         self.act_fullscreen.triggered.connect(self.changeScreenMode)
         self.act_fullscreen.setShortcut("Ctrl+F")
+        self.act_2D_preview.triggered.connect(self.previewLabels2D)
+        self.act_2D_preview.setShortcut("Ctrl+P")
         self.act_3D_preview.triggered.connect(self.previewLabels3D)
 
         # Operation
@@ -154,6 +156,7 @@ class MainWindow(QMainWindow):
         self.combo_series.currentTextChanged.connect(self.changeComboSeries)
         self.combo_label.currentTextChanged.connect(self.changeComboLabels)
         self.check_crv.stateChanged.connect(self.changeCheckCrv)
+        self.check_preview.stateChanged.connect(self.changeCheckPreview)
         self.btn_next_slice.clicked.connect(self.nextSlice)
         self.btn_prev_slice.clicked.connect(self.prevSlice)
         self.btn_next_patient.clicked.connect(self.nextPatient)
@@ -311,6 +314,9 @@ class MainWindow(QMainWindow):
         else:
             self.config["label_modes"][self.config["labels"].index(self.curr_lbl)] = 0
 # }}}
+    def changeCheckPreview(self):# {{{
+        self.__updateImg()
+# }}}
     def changeSliderValue(self):# {{{
         """Triggered when slider_im changes value"""
         self.slice_id = self.slider_im.value()
@@ -326,7 +332,11 @@ class MainWindow(QMainWindow):
             return 1
         self.slice_id += 1
         self.slider_im.setSliderPosition(self.slice_id)
-        #self.__updateImg()
+        try:
+            # update 2D preview window
+            if self.preview_win_2d.isVisible():
+                self.preview_win_2d.nextSlice()
+        except: pass
         return 0
 # }}}
     def prevSlice(self):# {{{
@@ -334,7 +344,11 @@ class MainWindow(QMainWindow):
             return 1
         self.slice_id -= 1
         self.slider_im.setSliderPosition(self.slice_id)
-        #self.__updateImg()
+        try:
+            # update 2D preview window
+            if self.preview_win_2d.isVisible():
+                self.preview_win_2d.prevSlice()
+        except: pass
         return 0
 # }}}
     def nextPatient(self):# {{{
@@ -431,6 +445,10 @@ class MainWindow(QMainWindow):
         self.lbl_holder.data[self.slice_id]["SOPInstanceUID"] = self.SOPInstanceUIDs[self.slice_id]
         self.lbl_holder.SAVED = False
 
+        # goes into segmentaion fault
+        #  if self.check_preview.isChecked():
+        #      self.__updateImg()
+
         try:
             # update 2D preview window
             if self.preview_win_2d.isVisible():
@@ -515,6 +533,19 @@ class MainWindow(QMainWindow):
         mask = mask.astype(np.bool)
         return mask
 # }}}
+    def _getMarkedImg(self, idx):# {{{
+        im = F.map_mat_255(self.imgs[idx])
+        if F.img_channel(im) == 1:
+            im = F.gray2rgb_(F.map_mat_255(im))
+        for label, color in zip(self.config["labels"], self.config["label_colors"]):
+            mask = self.__getSingleMask(idx, label)
+            if mask is None:
+                continue
+            # Currently only support 1 Channel image
+            #  im = F.overlap_mask(im, mask, color*255, alpha = 0.4)
+            im = F.overlap_mask(im, mask, (255,255,255), alpha = 0.5)
+        return im[:,:,0].copy(order='C') # Currently only support 1 Channel image
+# }}}
     def __updateComboSeries(self):# {{{
         """Update the series combobox when changing patient"""
         self.combo_series.clear()
@@ -540,7 +571,10 @@ class MainWindow(QMainWindow):
 # }}}
     def __updateImg(self):# {{{
         """update image showing on im_frame"""
-        im = F.map_mat_255(self.imgs[self.slice_id])
+        if not self.check_preview.isChecked():
+            im = F.map_mat_255(self.imgs[self.slice_id])
+        else:
+            im = self._getMarkedImg(self.slice_id)
 
         slice_info = "Slice: "+ str(self.slice_id+1)+"/"+str(len(self.imgs))
         img_info = "Image size: {} x {}".format(*im.shape)

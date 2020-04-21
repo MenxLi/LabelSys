@@ -197,6 +197,8 @@ class VtkWidget(QVTKRenderWindowInteractor):# {{{
         return point in (col, row)
         -img_shape : (H, W)
         """
+        if len(img_shape) == 3:
+            img_shape = img_shape[:2]
         mask = np.zeros(img_shape, np.uint8)
         cnt = contour_widget
         rep = cnt.GetContourRepresentation()

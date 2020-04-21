@@ -222,12 +222,12 @@ class Preview2DWindow(PreviewWindow):# {{{
     def nextSlice(self):# {{{
         self.slice_id = min(self.slice_id +1, len(self.imgs)-1)
         self.__updatePanel()
-        self.parent.nextSlice()
+        #  self.parent.nextSlice()
 # }}}
     def prevSlice(self):# {{{
         self.slice_id = max(self.slice_id -1, 0)
         self.__updatePanel()
-        self.parent.prevSlice()
+        #  self.parent.prevSlice()
 # }}}
     def updateInfo(self, masks, curr_slice_id):# {{{
         self.slice_id = curr_slice_id
