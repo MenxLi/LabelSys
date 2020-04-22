@@ -12,9 +12,9 @@ from pathlib import Path
 # }}}
 
 class CompareWidget(QWidget):
-    def __init__(self, parent = None):# {{{
+    def __init__(self, parent):# {{{
         super().__init__()
-        self.parent = parent
+        self.parent = parent    # mainWindow
         self.initUI()
 # }}}
     def initUI(self):# {{{
@@ -46,6 +46,9 @@ class CompareWidget(QWidget):
         except: pass
 # }}}
     def save(self):# {{{
+        if self.R_part.file_path == self.L_part.file_path:
+            if not self._alertMsg("The two images have the same output path and are labeled by same labeler. Output files will overwrite each other to corrupt the result. Continue?"):
+                return
         if self.R_part._cache["data_loaded"]:
             self.R_part.saveCurrentPatient()
         if self.L_part._cache["data_loaded"]:
@@ -66,13 +69,24 @@ class CompareWidget(QWidget):
                 if self.R_part._cache["data_loaded"]: self.R_part.im_widget.style.OnMouseWheelBackward()
                 if self.L_part._cache["data_loaded"]: self.L_part.im_widget.style.OnMouseWheelBackward()
 #}}}
+    def _alertMsg(self,msg, title = "Alert", func = lambda x : None):# {{{
+        msg_box = QMessageBox()
+        msg_box.setText(msg)
+        msg_box.setWindowTitle(title)
+        msg_box.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
+        msg_box.buttonClicked.connect(func)
+        return_value = msg_box.exec()
+        if return_value == QMessageBox.Ok:
+            return True
+        else: return False
+# }}}
 
 class CompareWidgetVisualPart(QWidget):
     INIT_STEP = 15
     COLOR = (1,0,0)
     def __init__(self, frame, parent):# {{{
         super().__init__(frame)
-        self.parent = parent
+        self.parent = parent    # compareWidget
         self.master = frame
         self.initUI()
 
@@ -129,8 +143,10 @@ class CompareWidgetVisualPart(QWidget):
     def loadData(self, header, data, imgs, file_path):# {{{
         """
         load directly from data directly (from mainWindow) instead of loading from file
+        - header: Label result header file
         - data: LabelHolder.data
         - imgs
+        - file_path: path to save the result
         """
         if self.lbl_holder.data == None or self.lbl_holder.data == []:
             # Loaded from file
@@ -148,10 +164,11 @@ class CompareWidgetVisualPart(QWidget):
             # in the older version of this tool header don't contain "config" attribute, Labels
             # attribute was used instead
             print("Warning: The header file does not contain config attribute, maybe this data was labeled with older version of the tool. \n You can ignore this warning if no error occurs, please save this file to overwrite previous one to add config attribute.")
-            self.config["labels"] = header["Labels"]
-            for i in self.config["labels"]:
-                self.config["label_colors"].append(self.COLOR)
-                self.config["label_steps"].append(self.INIT_STEP)
+            self.config = self.parent.parent.config     # mainWindow configration file
+            #  self.config["labels"] = header["Labels"]
+            #  for i in self.config["labels"]:
+            #      self.config["label_colors"].append(self.COLOR)
+            #      self.config["label_steps"].append(self.INIT_STEP)
 
         self.parent.combo_label.clear()
         self.parent.combo_label.addItems(self.config["labels"])

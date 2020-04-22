@@ -58,6 +58,7 @@ class Preview3DWindow(PreviewWindow):# {{{
         self.ren = vtk.vtkRenderer()
         self.ren_win.AddRenderer(self.ren)
         self.iren = self.ren_win.GetInteractor()
+        self.iren.SetInteractorStyle(vtk.vtkInteractorStyleTrackballCamera())
 
         self.setWindowTitle("Preview-3D")
         layout = QGridLayout()
