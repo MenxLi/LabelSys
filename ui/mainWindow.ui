@@ -310,7 +310,7 @@
            </font>
           </property>
           <property name="text">
-           <string>Show labels on the panel (experimental)</string>
+           <string>Show labels on the panel (Experimental)</string>
           </property>
          </widget>
         </item>
