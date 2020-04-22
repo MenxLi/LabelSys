@@ -113,6 +113,25 @@
        </property>
       </widget>
      </item>
+     <item>
+      <widget class="QPushButton" name="btn_reset_camera">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>120</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Reset Camera</string>
+       </property>
+      </widget>
+     </item>
     </layout>
    </item>
   </layout>

@@ -20,7 +20,7 @@ class CompareWidget(QWidget):
     def initUI(self):# {{{
         ui_path = os.path.join("ui", "compareWidget.ui")
         uic.loadUi(ui_path, self)
-        self.setWindowTitle("Compare Widget - Beta")
+        self.setWindowTitle("Compare Widget")
         self.L_part = CompareWidgetVisualPart(self.frame_L, self)
         self.R_part = CompareWidgetVisualPart(self.frame_R, self)
 
@@ -28,6 +28,7 @@ class CompareWidget(QWidget):
         self.btn_prev_slice.clicked.connect(self.prevSlice)
         self.combo_label.currentTextChanged.connect(self.changeComboLabels)
         self.btn_save.clicked.connect(self.save)
+        self.btn_reset_camera.clicked.connect(self.resetCamera)
 # }}}
     def nextSlice(self):# {{{
         self.L_part.nextSlice()
@@ -65,6 +66,10 @@ class CompareWidget(QWidget):
         self.L_part.slice_id = 0
         self.L_part._updateImg()
 # }}}
+    def resetCamera(self):#{{{
+        self.R_part.resetCamera()
+        self.L_part.resetCamera()
+#}}}
     def wheelEvent(self, event):# {{{
         modifier = QtWidgets.QApplication.keyboardModifiers()
         if event.angleDelta().y() < 0:
@@ -167,6 +172,7 @@ class CompareWidgetVisualPart(QWidget):
         self.SOPInstanceUIDs = [s["SOPInstanceUID"] for s in self.lbl_holder.data]
         self.labeler_name = header["Labeler"]
         self.spacing = header["Spacing"]
+        #  self.series = header["Series"]
         self.file_path = file_path
 
         try:
@@ -174,7 +180,7 @@ class CompareWidgetVisualPart(QWidget):
         except KeyError:
             # in the older version of this tool header don't contain "config" attribute, Labels
             # attribute was used instead
-            print("Warning: The header file does not contain config attribute, maybe this data was labeled with older version of the tool. \n You can ignore this warning if no error occurs, please save this file to overwrite previous one to add config attribute.")
+            print("Warning: The header file does not contain config attribute, maybe this data was labeled with older version of the tool. \n You can ignore this warning if no error occurs, please save this file in the mainWindow to overwrite previous one to add config attribute.")
             self.config = self.parent.parent.config     # load mainWindow configration file
             #  self.config["labels"] = header["Labels"]
             #  for i in self.config["labels"]:
@@ -231,6 +237,10 @@ class CompareWidgetVisualPart(QWidget):
             for cnt in cnts_data:
                 self.im_widget.loadContour(cnt["Points"], cnt["Open"])
 # }}}
+    def resetCamera(self):#{{{
+        if self._cache["data_loaded"]:
+            self.im_widget.resetCamera()
+#}}}
     def saveCurrentSlice(self, cnts_data):# {{{
         # will be called by vtkClass
         self.lbl_holder.data[self.slice_id][self.curr_lbl] = cnts_data

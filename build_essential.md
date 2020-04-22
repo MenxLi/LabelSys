@@ -3,12 +3,13 @@
 [Pyinstaller-Spec](http://pyinstaller.readthedocs.io/en/stable/spec-files.html#adding-data-files)
 
 ```Python
-data = [
+data_path = [
 ( "ui/*.ui", "./ui" ),
+( "ui/QTDark.stylesheet", "./ui" ),
 ( "utils/*.dll", "./utils" ),
 ( "utils/*.so", "./utils" ),
 ( "help.html", "./" ),
 ( "Pics", "./Pics" ), 
-( "config.json", "./" )
+( "conf.json", "./" )
 ]
 ```
