@@ -40,10 +40,14 @@ class CompareWidget(QWidget):
     def changeComboLabels(self, entry):# {{{
         self.R_part.curr_lbl = entry
         self.L_part.curr_lbl = entry
-        try:    # prevent triggering when clear
-            self.R_part._updateImg()
-            self.L_part._updateImg()
-        except: pass
+        if self.R_part._cache["data_loaded"]:
+            try:    # prevent triggering with blank entry
+                self.R_part._updateImg()
+            except: pass
+        if self.L_part._cache["data_loaded"]:
+            try:    # prevent triggering with blank entry
+                self.L_part._updateImg()
+            except: pass
 # }}}
     def save(self):# {{{
         if self.R_part.file_path == self.L_part.file_path:
@@ -53,6 +57,13 @@ class CompareWidget(QWidget):
             self.R_part.saveCurrentPatient()
         if self.L_part._cache["data_loaded"]:
             self.L_part.saveCurrentPatient()
+# }}}
+    def rebaseSliceId(self):# {{{
+        """Will be called by CompareWidgetVisualPart to sync slice idx"""
+        self.R_part.slice_id = 0
+        self.R_part._updateImg()
+        self.L_part.slice_id = 0
+        self.L_part._updateImg()
 # }}}
     def wheelEvent(self, event):# {{{
         modifier = QtWidgets.QApplication.keyboardModifiers()
@@ -164,7 +175,7 @@ class CompareWidgetVisualPart(QWidget):
             # in the older version of this tool header don't contain "config" attribute, Labels
             # attribute was used instead
             print("Warning: The header file does not contain config attribute, maybe this data was labeled with older version of the tool. \n You can ignore this warning if no error occurs, please save this file to overwrite previous one to add config attribute.")
-            self.config = self.parent.parent.config     # mainWindow configration file
+            self.config = self.parent.parent.config     # load mainWindow configration file
             #  self.config["labels"] = header["Labels"]
             #  for i in self.config["labels"]:
             #      self.config["label_colors"].append(self.COLOR)
@@ -181,6 +192,7 @@ class CompareWidgetVisualPart(QWidget):
 
         self.header = header
 
+        self.parent.rebaseSliceId()     # Sync silce by forcing slice id to 0
         self._updateImg()
 # }}}
     def nextSlice(self):# {{{
@@ -201,6 +213,8 @@ class CompareWidgetVisualPart(QWidget):
         return 0
 # }}}
     def _updateImg(self):# {{{
+        if not self._cache["data_loaded"]:
+            return
         im = F.map_mat_255(self.imgs[self.slice_id])
         slice_info = "Slice: "+ str(self.slice_id+1)+"/"+str(len(self.imgs))
         img_info = "Image size: {} x {}".format(*im.shape)
