@@ -8,6 +8,7 @@ data = [
 ( "utils/*.dll", "./utils" ),
 ( "utils/*.so", "./utils" ),
 ( "help.html", "./" ),
-( "Pics", "./Pics" )
+( "Pics", "./Pics" ), 
+( "config.json", "./" )
 ]
 ```
