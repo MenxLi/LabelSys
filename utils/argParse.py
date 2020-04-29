@@ -1,3 +1,9 @@
+#
+# Copyright (c) 2020 Mengxun Li.
+#
+# This file is part of LabelSys
+# (see https://bitbucket.org/Mons00n/mrilabelsys/).
+#
 """
 Parse argument from command line
 should be imported at the start of main file

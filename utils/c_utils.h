@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2020 Mengxun Li.
+ *
+ * This file is part of LabelSys
+ * (see https://bitbucket.org/Mons00n/mrilabelsys/).
+ */
 #ifndef C_UTIL_H
 #define C_UTIL_H
 

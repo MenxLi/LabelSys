@@ -1,3 +1,9 @@
+#
+# Copyright (c) 2020 Mengxun Li.
+#
+# This file is part of LabelSys
+# (see https://bitbucket.org/Mons00n/mrilabelsys/).
+#
 import vtk# {{{
 from vtk.util import vtkImageImportFromArray
 from vtk.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor

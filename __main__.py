@@ -1,3 +1,9 @@
+#
+# Copyright (c) 2020 Mengxun Li.
+#
+# This file is part of LabelSys
+# (see https://bitbucket.org/Mons00n/mrilabelsys/).
+#
 import sys, os
 from PyQt5.QtWidgets import QApplication
 from mainWindowGUI import MainWindow

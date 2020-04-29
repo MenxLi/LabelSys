@@ -1,3 +1,9 @@
+#
+# Copyright (c) 2020 Mengxun Li.
+#
+# This file is part of LabelSys
+# (see https://bitbucket.org/Mons00n/mrilabelsys/).
+#
 # {{{
 from PyQt5 import uic
 from PyQt5 import QtWidgets, QtCore
