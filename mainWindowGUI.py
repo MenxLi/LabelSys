@@ -578,7 +578,8 @@ class MainWindow(QMainWindow):
 
         slice_info = "Slice: "+ str(self.slice_id+1)+"/"+str(len(self.imgs))
         img_info = "Image size: {} x {}".format(*im.shape)
-        txt = slice_info + "\n" + img_info
+        thickness_info = "Thickness: {}".format(self.spacing)
+        txt = slice_info + "\n" + img_info + "\n" + thickness_info
 
         self.im_widget.readNpArray(im, txt)
         self.im_widget.reInitStyle()
