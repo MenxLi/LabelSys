@@ -90,14 +90,15 @@ class MainWindow(QMainWindow):
         """Unfinished function, will move all CONF attributes into self.config in the future"""
         self.config = {
             "labels": LABELS,
-            "default_series": SERIES,
             "label_modes": LBL_MODE,
-            "loading_mode": None,
             "label_colors": LBL_COLORS,
-            "label_steps": LBL_STEP
+            "label_steps": LBL_STEP,
+            "loading_mode": None,
+            "default_series": SERIES,
+            "2D_magnification":PREVIEW2D_MAG
         }
         if self.args.loading_mode != None:
-            # if not setup loading mode in the command line
+            # if not loading mode in the command line
             self.config["loading_mode"] = self.args.loading_mode
         else: self.config["loading_mode"] = CONF["Loading_mode"]
 # }}}
@@ -341,7 +342,9 @@ class MainWindow(QMainWindow):
         try:
             # update 2D preview window
             if self.preview_win_2d.isVisible():
-                self.preview_win_2d.nextSlice()
+                #  self.preview_win_2d.nextSlice()
+                self.preview_win_2d.slice_id = self.slice_id
+                self.preview_win_2d._updatePanel()
         except: pass
         return 0
 # }}}
@@ -412,7 +415,8 @@ class MainWindow(QMainWindow):
     def previewLabels2D(self):# {{{
         if not self.__cache["data_loaded"]:
             pass
-        self.preview_win_2d = Preview2DWindow(self, self.imgs, self.__getMasks(), self.slice_id)
+        self.preview_win_2d = Preview2DWindow(self, self.imgs, self.__getMasks(), self.slice_id,\
+                                              self.spacing, magnification = self.config["2D_magnification"])
         self.preview_win_2d.show()
 # }}}
     def openCompareWindow(self):# {{{

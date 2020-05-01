@@ -203,18 +203,19 @@ class Preview3DWindow(PreviewWindow):# {{{
 # }}}
 
 class Preview2DWindow(PreviewWindow):# {{{
-    def __init__(self, parent, imgs, masks, curr_slice_id = 0, spacing = [1,1,1]):# {{{
+    def __init__(self, parent, imgs, masks, curr_slice_id = 0, spacing = [1,1,1], magnification = 1):# {{{
         """
         - parent: mainwindow object
         """
         super().__init__(parent, imgs, masks, spacing)
 
         self.slice_id = curr_slice_id
+        self.mag = magnification
         self.lbl_color = dict()
         for lbl_id_ in range(len(LABELS)):
             self.lbl_color[lbl_id_+1] = [int(i*255) for i in LBL_COLORS[lbl_id_]]
 
-        self.__updatePanel()
+        self._updatePanel()
 # }}}
     def initUI(self):# {{{
         self.setWindowTitle("Preview-2D")
@@ -228,20 +229,18 @@ class Preview2DWindow(PreviewWindow):# {{{
 # }}}
     def nextSlice(self):# {{{
         self.slice_id = min(self.slice_id +1, len(self.imgs)-1)
-        self.__updatePanel()
-        #  self.parent.nextSlice()
+        self._updatePanel()
 # }}}
     def prevSlice(self):# {{{
         self.slice_id = max(self.slice_id -1, 0)
-        self.__updatePanel()
-        #  self.parent.prevSlice()
+        self._updatePanel()
 # }}}
     def updateInfo(self, masks, curr_slice_id):# {{{
         self.slice_id = curr_slice_id
         self.masks = self.generateMasks(masks)
-        self.__updatePanel()
+        self._updatePanel()
 # }}}
-    def __updatePanel(self):# {{{
+    def _updatePanel(self):# {{{
         self.__updateImg()
         self.__updateText()
 # }}}
@@ -262,7 +261,7 @@ class Preview2DWindow(PreviewWindow):# {{{
         for key, color in self.lbl_color.items():
             mask_ = mask == key
             im = F.overlap_mask(im, mask_, color, alpha = 0.4)
-        return cv.resize(im, None, fx = PREVIEW2D_MAG, fy = PREVIEW2D_MAG, interpolation = cv.INTER_NEAREST)
+        return cv.resize(im, None, fx = self.mag, fy = self.mag, interpolation = cv.INTER_NEAREST)
 # }}}
     #==============Event Handler================
     def wheelEvent(self, event):# {{{
