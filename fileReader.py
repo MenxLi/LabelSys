@@ -79,7 +79,11 @@ class DicomLoader(LoaderBase):# {{{
         """
         series = {}
         for slice in slices:
-            seriesDescript = slice["SeriesDescription"].value
+            try:
+                seriesDescript = slice["SeriesDescription"].value
+            except:
+                seriesDescript = str(slice[0x0020, 0x0011].value)    # Series Number
+
             try:
                 series[seriesDescript].append(slice)
             except KeyError:

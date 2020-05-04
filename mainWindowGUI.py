@@ -190,12 +190,18 @@ class MainWindow(QMainWindow):
             return 1
         file_path = Path(fname)
 
-        try:
+        if not self.args.dev:
+            # Do not quit when error occur while opening files
+            try:
+                self.fl = FolderLoader(file_path, mode = self.config["loading_mode"])
+                self.__updatePatient()
+            except Exception as excp:
+                print("An error happend when opening files: ", excp)
+                return 1
+        else:
             self.fl = FolderLoader(file_path, mode = self.config["loading_mode"])
             self.__updatePatient()
-        except Exception as excp:
-            print("An error happend when opening files: ", excp)
-            return 1
+
 
         self.central_widget.setEnabled(True)
 
