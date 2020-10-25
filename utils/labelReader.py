@@ -142,7 +142,7 @@ def _getFullCnt(contour_widget, img_shape):# {{{{{{
 def _getBackCvCoord(x, y, img_shape):# {{{{{{
     """Get coordinate in (col, row)
     - img_shape: (W, H)"""
-    return np.array([x, img_shape[1]-1-y])
+    return np.array([x, img_shape[0]-1-y])
 # }}}
 def drawMask(mask, cnt, open_curve, line_thickness):# {{{
     """

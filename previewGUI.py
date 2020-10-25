@@ -43,13 +43,19 @@ class PreviewWindow(QWidget):# {{{
         masks = []
         for mask_ in masks_raw:
             color = 1
-            mask = np.ma.zeros(self.imgs[0].shape[:2], np.uint8)
+            # mask = np.ma.zeros(self.imgs[0].shape[:2], np.uint8)
+            mask = np.ma.zeros(list(mask_.values())[0].shape[:2], np.uint8)
             for label in mask_.keys():
                 mask.mask = ~mask_[label]
                 mask += np.array(color).astype(np.uint8)
                 color += 1
             masks.append(mask.data)
-        return np.array(masks)
+        try:
+            return np.array(masks)
+        except ValueError:
+            # incompatible shape among images
+            # 3D preview will be unavaliable
+            return masks
 # }}}
 # }}}
 

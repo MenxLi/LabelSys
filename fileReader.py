@@ -12,6 +12,7 @@ import os
 import scipy.ndimage
 from pathlib import Path
 import cv2 as cv
+from scipy.ndimage import interpolation
 import utils.utils_ as F
 # }}}
 
@@ -132,6 +133,7 @@ class GeneralImageLoader(LoaderBase):# {{{
     refer to cv2.imread for supported type
     https://docs.opencv.org/4.2.0/d4/da8/group__imgcodecs.html
     """
+    MAX_IM_HEIGHT = 512
     def __init__(self, path):
         """
         - path: directory that contain multiple images
@@ -146,6 +148,11 @@ class GeneralImageLoader(LoaderBase):# {{{
         for path_ in  abs_paths:
             try:
                 im = cv.imread(path_)
+                # resize image if it is too big...
+                if im.shape[0] > self.MAX_IM_HEIGHT:
+                    new_im_size = (int(im.shape[1] * self.MAX_IM_HEIGHT/im.shape[0]), self.MAX_IM_HEIGHT)
+                    im = cv.resize(im, new_im_size, interpolation = cv.INTER_CUBIC)
+
                 if len(im.shape) == 3 and im.shape[-1] == 3:
                     im = cv.cvtColor(im, cv.COLOR_BGR2RGB)
                 arr.append(im)

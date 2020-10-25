@@ -71,7 +71,7 @@ class VtkWidget(QVTKRenderWindowInteractor):# {{{
             im_reader.SetFileName(im_path)
             self.actor = vtk.vtkImageActor()
             self.actor.GetMapper().SetInputConnection(im_reader.GetOutputPort())
-        elif len(self.im.shape == 2):# {{{
+        elif len(self.im.shape) == 2:# {{{
             #===============Update Image======================
             # https://gitlab.kitware.com/vtk/vtk/blob/741fffbf6490c34228dfe437f330d854b2494adc/Wrapping/Python/vtkmodules/util/vtkImageImportFromArray.py
             # import from numpy array
@@ -265,15 +265,15 @@ class VtkWidget(QVTKRenderWindowInteractor):# {{{
             cv.polylines(mask,[cv_cnt],False,1)
         return mask
 # }}}
-    def __getBackNpCoord(self, x, y, img_shape):# {{{
-        """Get coordinate in (row, col)
-        - img_shape: (W, H)"""
-        return np.array([img_shape[1]-1-y, x])
-# }}}
+    # def __getBackNpCoord(self, x, y, img_shape):# {{{
+        # """Get coordinate in (row, col)
+        # - img_shape: (W, H)"""
+        # return np.array([img_shape[1]-1-y, x])
+# # }}}
     def __getBackCvCoord(self, x, y, img_shape):# {{{
         """Get coordinate in (col, row)
         - img_shape: (W, H)"""
-        return np.array([x, img_shape[1]-1-y])
+        return np.array([x, img_shape[0]-1-y])
 # }}}
     def __clearCanvas(self):# {{{
         self.contours = []

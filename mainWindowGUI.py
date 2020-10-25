@@ -505,15 +505,11 @@ class MainWindow(QMainWindow):
         return self.config["label_colors"][idx]
 # }}}
     def __getMasks(self):# {{{
-        im_shape = self.imgs[0].shape
-        for im in self.imgs:
-            if im.shape != im_shape:
-               return None
         masks = []
         for slice_idx in range(len(self.imgs)):
             mask_data = {}
             for label in self.config["labels"]:
-                mask_data[label] = np.zeros(im_shape[:2], np.uint8)
+                mask_data[label] = np.zeros(self.imgs[slice_idx].shape[:2], np.uint8)
                 cnts_data = self.lbl_holder.data[slice_idx][label]
                 if cnts_data == []:
                     continue
@@ -584,6 +580,7 @@ class MainWindow(QMainWindow):
         if not self.__cache["output_set"]:
             self.output_path = os.path.abspath( self.fl.getPath() )
             self.__updateQLabelText()
+        self.CheckShapeCompatibility()
 # }}}
     def __updateImg(self):# {{{
         """update image showing on im_frame"""
@@ -651,6 +648,14 @@ class MainWindow(QMainWindow):
         file_path = os.path.realpath("help.html")
         webbrowser.open("file://"+file_path)
 # }}}
+    def CheckShapeCompatibility(self):
+        im_shape0 = self.imgs[0].shape
+        for im in self.imgs:
+            if im.shape != im_shape0:
+                print("Incompatible shape among images, 3D preview will be unavaliable.")
+                return False
+        return True
+
     #==============Event Handler================
     def eventFilter(self, receiver, event):# {{{
         """Globally defined event"""
