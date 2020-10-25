@@ -18,7 +18,7 @@ import tempfile, os, sys, __main__
 
 class VtkWidget(QVTKRenderWindowInteractor):# {{{
     if sys.platform == "win32":
-        _TEMP_FOLDER_NAME = "$TempDir$"
+        _TEMP_FOLDER_NAME = ".TempDir"
     else:
         _TEMP_FOLDER_NAME = ".TempDir"
     _PAR_PATH = os.path.abspath(os.path.join(__main__.__file__, os.pardir))
