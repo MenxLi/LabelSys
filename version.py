@@ -19,6 +19,7 @@ __VERSIONS__ =[ \
         ["1.0.1", "Fix curve initialization crash bug; Add individual curve initialization step; Add image/video loading support"],
         ["1.1.0", "Speed up loading and exporting process; Change data storing header file rule to include configration; Add compare widget; Add labeling panel preview; Change version naming rule"],
         ["1.2.0", "Support Color image reading, license change"],
-        ["1.2.1", "Bug fix - label interpretation error when dealing with non-square image"]
+        ["1.2.1", "Bug fix - label interpretation error when dealing with non-square image"],
+        ["1.2.1 - ToothSegmentation", "For tooth segmentation project"]
         ]
 __version__, __description__ = __VERSIONS__[-1]
