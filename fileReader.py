@@ -146,9 +146,9 @@ class GeneralImageLoader(LoaderBase):# {{{
         for path_ in  abs_paths:
             try:
                 im = cv.imread(path_)
-                if F.img_channel(im) != 1:
-                    arr.append(im[:, :, 0])
-                else: arr.append(im)
+                if len(im.shape) == 3 and im.shape[-1] == 3:
+                    im = cv.cvtColor(im, cv.COLOR_BGR2RGB)
+                arr.append(im)
             except: pass
         if arr != []:
             self.series[self.entry_base] = arr
@@ -184,10 +184,13 @@ class GeneralVideoLoader(LoaderBase):# {{{
         while(True):
             success, image = cap.read()
             if success:
-                if F.img_channel(image)==3:
-                    imgs.append(image[:, :, 0])
-                else:
-                    imgs.append(image)
+                #  if F.img_channel(image)==3:
+                #      imgs.append(image[:, :, 0])
+                #  else:
+                #      imgs.append(image)
+                if len(image.shape) == 3 and image.shape[-1] == 3:
+                    image = cv.cvtColor(image, cv.COLOR_BGR2RGB)
+                imgs.append(image)
             else:
                 break
         cap.release()
