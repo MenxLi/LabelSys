@@ -16,7 +16,7 @@ def readOneFolder(path, magnification = 1, line_thickness = 1):# {{{
     file_list = [x for x in os.listdir(path) if x.endswith(".json")]
     for file_name in sorted(file_list, key = lambda x : int(re.findall("\d+|$", x)[0])):
         file_path = os.path.join(path, file_name)
-        if file_name == "HEAD0.json":
+        if file_name == "HEAD_0.json":
             with open(file_path, "r") as _f:
                 header_data = json.load(_f)
         else:
