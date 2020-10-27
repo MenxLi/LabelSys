@@ -12,7 +12,7 @@
 
     <h2 class"toc_title">Table of content</h2>
     <ul id="toc_list">
-      <li><a href="#c_interface">Interface</a></li>
+      <li><a href="#c_interface">界面</a></li>
       <!--
       <li><a href="#c_example_mri">Example - MRILabeling of articular disc</a></li>
       <ul>
@@ -25,14 +25,24 @@
         <li><a href="#c_example_load">Load and revise</a></li>
       </ul>
     -->
-      <li><a href="#c_advanced">Advanced settings</a></li>
+      <li><a href="#c_example_toothSegment">牙齿分割标记</a></li>
+      <ul>
+        <li><a href="#c_example_open">打开图像</a></li>
+        <li><a href="#c_example_setup_info">初始设定</a></li>
+        <li><a href="#c_example_navigation">基本浏览操作</a></li>
+        <li><a href="#c_example_label">标记</a></li>
+        <li><a href="#c_example_preview">预览</a></li>
+        <li><a href="#c_example_export">导出</a></li>
+        <li><a href="#c_example_load">载入和修改</a></li>
+      </ul>
+      <li><a href="#c_advanced">高级设定</a></li>
     </ul>
 
     <hr>
 
 
     <section>
-      <h2 id="c_interface"> Interface </h2>
+      <h2 id="c_interface"> 界面 </h2>
       <figure>
         <img src="Pics/mainWindow.png" width="50%" height="50%">
         <figcaption>Main UI</figcaption>
@@ -46,38 +56,37 @@
       In the following part of this tutorial, panel.1-4 will be used to represent these interface panels.
     </section>
 
-    <!--
     <section>
-      <h2 id="c_example_mri">Example - MRILabeling of articular disc</h2>
+      <h2 id="c_example_mri">牙齿标注</h2>
 
-        <h3 id="c_example_open">Open DICOM files</h3>
-          To open dicom files for labeling, go to <a href="#panel_1">panel.1</a> -> File -> Open and choose the directory to open. <br>
+        <h3 id="c_example_open">打开图像</h3>
+          go to <a href="#panel_1">panel.1</a> -> File -> Open and choose the directory to open. <br>
           The directory to be opened can contain multiple patient images and should be structed as follows: <br>
           <div id="folder_hierarchy" style="margin: 20px;">
           Folder_to_open <br>
           |<br>
-          |--Patient0 <br>
-          |&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp|--slice0.dcm <br>
-          |&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp|--slice1.dcm <br>
-          |&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp|--slice2.dcm <br>
+          |--Chunk0 <br>
+          |&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp|--image0.jpg <br>
+          |&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp|--image1.jpg <br>
+          |&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp|--image2.jpg <br>
           |&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&#8735;... <br> 
           |<br>
-          |--Patient1 <br>
-          |&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp|--slice0.dcm <br>
+          |--Chunk1 <br>
+          |&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp|--image0.jpg <br>
           |&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&#8735;... <br>
           |<br>
-          |--Patient2 <br>
+          |--Chunk2 <br>
           |&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&#8735;... <br>
         &#8735;... <br>
           </div>
   
         <h3 id="c_example_setup_info">Settings before start</h3>
-          Before we start labeling, we need to setup labler's name, it's in <a href="#panel_1">panel.1</a> -> Settings -> Labeler name. 
-          Notice that it's better for labeler's name to be consistent through out the labeling process, i.e. one person just use one name. <br> 
-          We can also setup the output path of our labeling at <a href="#panel_1">panel.1</a> -> Settings -> Output path, 
-          however for this specific project, <font color="red">we do NOT need to change output path</font>, the default output path will be under each patient folder
+          设定标注者姓名：<a href="#panel_1">panel.1</a> -> Settings -> Labeler name. 
+          标注者姓名一次打开软件后只需设定一次，切换“病人”不需要重新设定。<br> 
+          设定输出路径（可选）: <a href="#panel_1">panel.1</a> -> Settings -> Output path, 
+          如果不设定输出路径则默认保存在每一个“Chunk”文件夹内
   
-        <h3 id="c_example_navigation">Navigation</h3>
+        <h3 id="c_example_navigation">基本浏览操作</h3>
           Navigation operation includes roaming between patients, slices and different image series of single patient, they are all in the upper part of <a href="#panel_2">panel.2</a>.
           Operations are also binded with mouse buttons:
           <ul>
@@ -93,7 +102,7 @@
           Note that during labeling process, image series can't be changed, so be sure that we are in the right image series before labeling, 
           In this project we will be using "SEG PD".
   
-        <h3 id="c_example_label">Label</h3>
+        <h3 id="c_example_label">进行标记</h3>
           <figure>
             <img src="Pics/LabelSelectPt.png" width="30%" height="30%">
             <figcaption>
@@ -112,50 +121,49 @@
           </ul>
           No manual saving is needed after labeling each slice, it will save automatically when initiating the curve or when changes are made to the curve.
           So feel free to change slices or labels after drawing the curve. 
-          <br><br>
+          <br><br>            
+          <del>
           In some circumstances, we may need multiply contours to label the object (i.e. the object is split), in this situation, use the "Add another contour"
           button in <a href="#panel_2">panel.2</a> to enable again contour initialization after one contour has been drawn.
           <br>
           To faciliate the labeling process, we can copy contour from previous slice as the contour initilization by pressing "Interp" button 
           in <a href="#panel_2">panel.2</a>
+        </del>
 
-        <h3 id="c_example_preview">Preview</h3>
+        <h3 id="c_example_preview">预览</h3>
           <figure>
             <img src="Pics/PreviewWindow.png" width=40% height=40%>
             <figcaption>Preview window</figcaption>
           </figure>
           <br>
           After labeling all the slices we may want to have a check and probably make some revisions before exporting the result, it can be achieved by preview.
-          Both 2D and 3D previews are provided.
+          <del>Both 2D and 3D previews are provided.</del> (本项目不需要3D预览，图片大小不同时无法进行3D预览)
           <br><br>
           Click on Preview button of <a href="#panel_2">panel.2</a> to open 2D preview window. 
           We can go back and forth between slices with mouse wheel in 2D preview window and make changes in <a href="#panel_4">panel.4</a> with 2D preview window opened, 
           the changes will be updated in realtime to the preview window. (Note that the image in 2D preview window can't be magnified)
           <br>
-          3D preview can be found in <a href="#panel_1">panel.1</a> -> View -> 3D Preview.
-          In the 3D preview window, we can zoom with mouse wheel, move the object with middle mouse button clicked and rotate with left button.
+          <del>3D preview can be found in <a href="#panel_1">panel.1</a> -> View -> 3D Preview.
+          In the 3D preview window, we can zoom with mouse wheel, move the object with middle mouse button clicked and rotate with left button.</del>
 
-        <h3 id="c_example_export">Export</h3>
+        <h3 id="c_example_export">导出</h3>
           To export labels, click on "Save" button on <a href="#panel_2">panel.2</a>, the exporting process will be started, 
           destination and progress can be checked at <a href="panel_3">panel.3</a>
           <br>
           The exporting should be done for each patient. 
           And the output will be saved in a folder named"Label-&lt;Labeler's name&gt;-&lt;File name&gt;"
 
-        <h3 id="c_example_load">Load and revise</h3>
+        <h3 id="c_example_load">载入和修改</h3>
           Sometimes we may want to revise our labels after we have exported.
           To do so, go to <a href="#panel_1">panel.1</a> -> Files -> Load and open the folder we have exported, then we can do the revision.
           <br>
           Please note that for revison, we can't load multiple patient at the same time, and we will lost all the data loaded in the current window.
 
     </section>
--->
     <section>
-      <h2 id="c_advanced">Advanced settings</h2>
+      <h2 id="c_advanced">高级设置</h2>
       Configuration files can be changed to modify the behavior of this program, they are in "config.json"
     </section>
-
-    <p>--This manual will be finished later--</p>
 
 
     <hr>
