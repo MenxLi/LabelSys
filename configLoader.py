@@ -14,6 +14,7 @@ with open("conf.json", "r") as f:
 
 LOADING_MODE = CONF["Loading_mode"]
 SERIES = CONF["Default_series"]
+MAX_IM_HEIGHT = CONF["Max_im_height"]   # Maximum image height, when image is bigger than this value it will be resize to this height
 
 LABELS = []
 LBL_COLORS = []

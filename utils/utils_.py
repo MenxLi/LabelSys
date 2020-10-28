@@ -22,7 +22,7 @@ except: pass
 # }}}
 
 def gray2rgb_(img):# {{{
-    new_img = np.concatenate((img[:,:,np.newaxis], img[:,:,np.newaxis], img[:,:,np.newaxis]), axis=2)
+    new_img = np.concatenate((img.copy()[:,:,np.newaxis], img.copy()[:,:,np.newaxis], img.copy()[:,:,np.newaxis]), axis=2)
     return new_img
 # }}}
 def removeDuplicate2d(duplicate):# {{{
@@ -170,6 +170,7 @@ def overlap_mask(img, mask, color = (255,0,0), alpha = 1):# {{{
         img = gray2rgb_(img)
     if img_channel(mask) == 1:
         mask = gray2rgb_(mask)
+    print(color)
     im = img.astype(float)
     channel = np.ones(img.shape[:2], np.float)
     color_ = np.concatenate((channel[:,:,np.newaxis]*color[0],channel[:,:,np.newaxis]*color[1],channel[:,:,np.newaxis]*color[2]), axis = 2)
