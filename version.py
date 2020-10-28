@@ -21,6 +21,6 @@ __VERSIONS__ =[ \
         ["1.2.0", "Support Color image reading, license change"],
         ["1.2.1", "Bug fix - label interpretation error when dealing with non-square image"],
         ["1.2.2", "Now support color panel preview, cursor can move out of the image when labeling; Add max_im_height to config file"],
-        ["1.2.2 - ToothSegmentation", "For tooth segmentation project"],
+        ["1.2.2 - ToothSegmentation", "For tooth segmentation project"]
         ]
 __version__, __description__ = __VERSIONS__[-1]
