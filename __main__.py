@@ -22,7 +22,7 @@ class Application(QApplication):
             return 1
 if __name__ == "__main__":
     app = Application([parser.prog])
-    font = QFont("Verdana", 10)
+    font = QFont("Verdana", 9)
     app.setFont(font)
     # set stylesheet
     #import qdarkstyle

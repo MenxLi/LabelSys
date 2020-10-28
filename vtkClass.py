@@ -13,6 +13,7 @@ from PyQt5.QtWidgets import *
 import numpy as np
 import cv2 as cv
 import utils.utils_ as F
+from configLoader import *
 import tempfile, os, sys, __main__
 # }}}
 
@@ -22,7 +23,7 @@ class VtkWidget(QVTKRenderWindowInteractor):# {{{
     else:
         _TEMP_FOLDER_NAME = ".TempDir"
     _PAR_PATH = os.path.abspath(os.path.join(__main__.__file__, os.pardir))
-    TEMP_DIR = os.path.join(_PAR_PATH, _TEMP_FOLDER_NAME)
+    TEMP_DIR = os.path.join(_PAR_PATH, _TEMP_FOLDER_NAME)       # temporary directory to save image
     def __init__(self, frame, parent):# {{{
         super().__init__(frame)
 
@@ -65,9 +66,11 @@ class VtkWidget(QVTKRenderWindowInteractor):# {{{
 
         self.im = arr
         if len(self.im.shape) == 3 and self.im.shape[2] == 3:
-            im_path = os.path.join(self.TEMP_DIR, "im.jpg")
+            #  im_path = os.path.join(self.TEMP_DIR, "im.jpg")
+            im_path = os.path.join(self.TEMP_DIR, "im.png")
             cv.imwrite(im_path, cv.cvtColor(self.im, cv.COLOR_RGB2BGR))
-            im_reader = vtk.vtkJPEGReader()
+            #  im_reader = vtk.vtkJPEGReader()
+            im_reader = vtk.vtkPNGReader()
             im_reader.SetFileName(im_path)
             self.actor = vtk.vtkImageActor()
             self.actor.GetMapper().SetInputConnection(im_reader.GetOutputPort())
@@ -332,8 +335,10 @@ class MyInteractorStyle(vtk.vtkInteractorStyleImage):# {{{
     def mouseMoveEvent(self, obj, event):# {{{
         if self.__mode == "Drawing" and self.__drawing:
             now_pt = self._getMousePos()
+            if now_pt == (0.0, 0.0, 0):
+                # the cursor move out of the image
+                now_pt = self.__prev_pt
             self.pts_raw.append(now_pt)
-
             self.lines.append(self.widget.drawLine(self.__prev_pt, now_pt))
             self.__prev_pt = now_pt
             return 0

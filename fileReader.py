@@ -14,6 +14,7 @@ from pathlib import Path
 import cv2 as cv
 from scipy.ndimage import interpolation
 import utils.utils_ as F
+from configLoader import MAX_IM_HEIGHT
 # }}}
 
 # Pydicom reading reference: https://pydicom.github.io/pydicom/stable/tutorials/dataset_basics.html
@@ -133,7 +134,7 @@ class GeneralImageLoader(LoaderBase):# {{{
     refer to cv2.imread for supported type
     https://docs.opencv.org/4.2.0/d4/da8/group__imgcodecs.html
     """
-    MAX_IM_HEIGHT = 512
+    MAX_IM_HEIGHT = MAX_IM_HEIGHT
     def __init__(self, path):
         """
         - path: directory that contain multiple images

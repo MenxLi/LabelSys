@@ -95,7 +95,8 @@ class MainWindow(QMainWindow):
             "label_steps": LBL_STEP,
             "loading_mode": None,
             "default_series": SERIES,
-            "2D_magnification":PREVIEW2D_MAG
+            "2D_magnification":PREVIEW2D_MAG,
+            "max_im_height":MAX_IM_HEIGHT
         }
         if self.args.loading_mode != None:
             # if not loading mode in the command line
@@ -553,10 +554,8 @@ class MainWindow(QMainWindow):
             mask = self.__getSingleMask(idx, label)
             if mask is None:
                 continue
-            # Currently only support 1 Channel image
-            #  im = F.overlap_mask(im, mask, color*255, alpha = 0.4)
-            im = F.overlap_mask(im, mask, (255,255,255), alpha = 0.5)
-        return im[:,:,0].copy(order='C') # Currently only support 1 Channel image
+            im = F.overlap_mask(im, mask, np.array(color)*255, alpha = 0.4)
+        return im.copy()
 # }}}
     def __updateComboSeries(self):# {{{
         """Update the series combobox when changing patient"""
