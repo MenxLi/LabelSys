@@ -138,6 +138,8 @@ class MainWindow(QMainWindow):
         self.act_op_interp.setShortcut("Ctrl+I")
         self.act_op_add_cnt.triggered.connect(self.addContour)
         self.act_op_add_cnt.setShortcut("Ctrl+A")
+        self.act_op_rotate.triggered.connect(self.rotateImage)
+        self.act_op_rotate.setShortcut("Ctrl+R")
 
         # Tools
         self.act_tool_compare.triggered.connect(self.openCompareWindow)
@@ -497,6 +499,25 @@ class MainWindow(QMainWindow):
         #          )
         self.lbl_holder.saveToFile(file_path, self.imgs, header)
         self.lbl_holder.SAVED = True
+# }}}
+    def rotateImage(self):# {{{
+        _has_label = False
+        for entry in self.config["labels"]:
+            if self.lbl_holder.data[self.slice_id][entry] != []:
+                _has_label = True
+                break
+        if _has_label:
+            if self._alertMsg("Rotate image will clear labels for current image, continue?"):
+                self.clearCurrentSlice()
+            else:
+                return False
+        self.imgs[self.slice_id] = self.imgs[self.slice_id][::-1]
+        if F.img_channel(self.imgs[self.slice_id]) == 3:
+            self.imgs[self.slice_id] = self.imgs[self.slice_id].transpose(1,0,2)
+        elif F.img_channel(self.imgs[self.slice_id]) == 1:
+            self.imgs[self.slice_id] = self.imgs[self.slice_id].transpose()
+        self.__updateImg()
+        return True
 # }}}
     def _getColor(self, label):# {{{
         try:
