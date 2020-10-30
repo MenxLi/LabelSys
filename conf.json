@@ -1,62 +1,74 @@
 {
     "Labels":{
-        "#15" :{
+        "#16" :{
             "value": 1, 
+            "color": [0.5, 0.2, 0.3], 
+            "mode": 0,
+            "label_step":40
+        },
+        "#15" :{
+            "value": 2, 
             "color": [1.0, 0.2, 1.0], 
             "mode": 0,
             "label_step":40
         },
         "#14" :{
-            "value": 2, 
+            "value": 3, 
             "color": [0.0, 0.0, 0.5], 
             "mode": 0,
             "label_step":40
         },
         "#13" :{
-            "value": 3, 
+            "value": 4, 
             "color": [0.0, 0.0, 1.0], 
             "mode": 0,
             "label_step":40
         },
         "#12" :{
-            "value": 4, 
+            "value": 5, 
             "color": [0.0, 1.0, 1.0], 
             "mode": 0,
             "label_step":40
         },
         "#11" :{
-            "value": 5, 
+            "value": 6, 
             "color": [0.0, 0.5, 0.5], 
             "mode": 0,
             "label_step":40
         },
         "#21" :{
-            "value": 6, 
+            "value": 7, 
             "color": [0.0, 0.5, 0.0], 
             "mode": 0,
             "label_step":40
         },
         "#22" :{
-            "value": 7, 
+            "value": 8, 
             "color": [0.5, 0.5, 1.0], 
             "mode": 0,
             "label_step":40
         },
         "#23" :{
-            "value": 8, 
+            "value": 9, 
             "color": [1.0, 1.0, 0.0], 
             "mode": 0,
             "label_step":40
         },
         "#24" :{
-            "value": 9, 
+            "value": 10, 
             "color": [0.8, 0.3, 1.0], 
             "mode": 0,
             "label_step":40
         },
         "#25" :{
-            "value": 10, 
+            "value": 11, 
             "color": [1.0, 0.0, 0.0], 
+            "mode": 0,
+            "label_step":40
+        },
+        "#26" :{
+            "value": 12, 
+            "color": [0.3, 0.0, 0.3], 
             "mode": 0,
             "label_step":40
         }
@@ -64,7 +76,7 @@
     "Loading_mode": 1,
     "2D_preview_mag":1,
     "Default_series":"SAG PD",
-    "Default_label":"Condyle",
+    "Default_label":"#15",
     "Max_im_height":384,
     "-----------Below are comments for your understanding--------":
     "-------don't change them---------",
