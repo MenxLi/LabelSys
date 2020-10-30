@@ -424,6 +424,7 @@
     <addaction name="act_op_next_patient"/>
     <addaction name="act_op_prev_patient"/>
     <addaction name="act_op_change_lbl"/>
+    <addaction name="act_op_change_lbl_reverse"/>
     <addaction name="act_op_save"/>
     <addaction name="act_op_clear"/>
     <addaction name="act_op_interp"/>
@@ -559,6 +560,11 @@
   <action name="act_op_rotate">
    <property name="text">
     <string>Rotate</string>
+   </property>
+  </action>
+  <action name="act_op_change_lbl_reverse">
+   <property name="text">
+    <string>Change label (Reverse)</string>
    </property>
   </action>
  </widget>

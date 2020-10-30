@@ -131,6 +131,8 @@ class MainWindow(QMainWindow):
         self.act_op_prev_patient.setShortcut("Left")
         self.act_op_change_lbl.triggered.connect(self.switchLabel)
         self.act_op_change_lbl.setShortcut("Tab")
+        self.act_op_change_lbl_reverse.triggered.connect(self.switchLabelReverse)
+        self.act_op_change_lbl_reverse.setShortcut("Shift+Tab")
         self.act_op_save.triggered.connect(self.saveCurrentPatient)
         self.act_op_save.setShortcut("Ctrl+S")
         self.act_op_clear.triggered.connect(self.clearCurrentSlice)
@@ -347,6 +349,11 @@ class MainWindow(QMainWindow):
     def switchLabel(self):# {{{
         """switch between labels, for shortcut use"""
         new_label_id = (self.config["labels"].index(self.curr_lbl) + 1)%len(self.config["labels"])
+        self.combo_label.setCurrentText(self.config["labels"][new_label_id]) # will trigger changeComboLabels()
+# }}}
+    def switchLabelReverse(self):# {{{
+        """switch between labels, for shortcut use"""
+        new_label_id = (self.config["labels"].index(self.curr_lbl) - 1)%len(self.config["labels"])
         self.combo_label.setCurrentText(self.config["labels"][new_label_id]) # will trigger changeComboLabels()
 # }}}
     def nextSlice(self):# {{{
