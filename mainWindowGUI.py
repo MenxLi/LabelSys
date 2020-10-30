@@ -95,6 +95,7 @@ class MainWindow(QMainWindow):
             "label_steps": LBL_STEP,
             "loading_mode": None,
             "default_series": SERIES,
+            "default_label":DEFAULT_LABEL,
             "2D_magnification":PREVIEW2D_MAG,
             "max_im_height":MAX_IM_HEIGHT
         }
@@ -314,6 +315,11 @@ class MainWindow(QMainWindow):
             self.im_widget.resetCamera()
 # }}}
     def changeComboLabels(self, entry):# {{{
+        """
+        Change label, be linked to self.combo_label.currentTextChange;
+        should not be called directly if aiming at change combo text, 
+        self.combo_label.setCurrentText(...) should be used instead.
+        """
         self.curr_lbl = entry
         try:    # prevent triggering when clear
             self.__updateImg()
@@ -349,6 +355,10 @@ class MainWindow(QMainWindow):
         self.slice_id += 1
         self.slider_im.setSliderPosition(self.slice_id)
         try:
+            # to be compatible with older version (1.2.2 and below)
+            self.combo_label.setCurrentText(self.config["default_label"])
+        except KeyError:pass
+        try:
             # update 2D preview window
             if self.preview_win_2d.isVisible():
                 #  self.preview_win_2d.nextSlice()
@@ -362,6 +372,10 @@ class MainWindow(QMainWindow):
             return 1
         self.slice_id -= 1
         self.slider_im.setSliderPosition(self.slice_id)
+        try:
+            # to be compatible with older version (1.2.2 and below)
+            self.combo_label.setCurrentText(self.config["default_label"])
+        except KeyError:pass
         try:
             # update 2D preview window
             if self.preview_win_2d.isVisible():
@@ -597,6 +611,10 @@ class MainWindow(QMainWindow):
         self.__updateImg()
         self.slider_im.setSliderPosition(self.slice_id)
         self.slider_im.setMaximum(len(self.imgs)-1)
+        try:
+            # to be compatible with older version (1.2.2 and below)
+            self.combo_label.setCurrentText(self.config["default_label"])
+        except KeyError:pass
         if not self.__cache["output_set"]:
             self.output_path = os.path.abspath( self.fl.getPath() )
             self.__updateQLabelText()
