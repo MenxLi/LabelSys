@@ -5,6 +5,7 @@
 # (see https://bitbucket.org/Mons00n/mrilabelsys/).
 #
 import sys, os
+from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QApplication
 from mainWindowGUI import MainWindow
 from utils.argParse import parser, args
@@ -21,6 +22,8 @@ class Application(QApplication):
             return 1
 if __name__ == "__main__":
     app = Application([parser.prog])
+    font = QFont("Verdana", 9)
+    app.setFont(font)
     # set stylesheet
     #import qdarkstyle
     #app.setStyleSheet(qdarkstyle.load_stylesheet_pyqt5())

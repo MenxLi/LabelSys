@@ -22,7 +22,7 @@ except: pass
 # }}}
 
 def gray2rgb_(img):# {{{
-    new_img = np.concatenate((img.copy()[:,:,np.newaxis], img.copy()[:,:,np.newaxis], img.copy()[:,:,np.newaxis]), axis=2)
+    new_img = np.concatenate((img[:,:,np.newaxis], img[:,:,np.newaxis], img[:,:,np.newaxis]), axis=2)
     return new_img
 # }}}
 def removeDuplicate2d(duplicate):# {{{

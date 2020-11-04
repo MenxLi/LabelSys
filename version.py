@@ -8,7 +8,7 @@
 __author__ = "Mengxun Li"
 __copyright__ = "Copyright 2020"
 __credits__ = ["Kumaradevan Punithakumar, Abhilash Hareendranathan"]
-__license__ = "2-Clause BSD"
+__license__ = "All right reserved"
 __maintainer__ = "Mengxun Li"
 __email__ = "mengxunli@whu.edu.cn | mengxun1@ualberta.ca"
 
@@ -17,6 +17,10 @@ __VERSIONS__ =[ \
         ["1.0-alpha", "Re-write the whole program using PyQt5 and vtk, under develpment"],
         ["1.0.0", "For MRI labeling - disc, condyle and eminence"],
         ["1.0.1", "Fix curve initialization crash bug; Add individual curve initialization step; Add image/video loading support"],
-        ["1.1.0", "Speed up loading and exporting process; Change data storing header file rule to include configration; Add compare widget; Add labeling panel preview; Change version naming rule"]
+        ["1.1.0", "Speed up loading and exporting process; Change data storing header file rule to include configration; Add compare widget; Add labeling panel preview; Change version naming rule"],
+        ["1.2.0", "Support Color image reading, license change"],
+        ["1.2.1", "Bug fix - label interpretation error when dealing with non-square image"],
+        ["1.2.2", "Now support color panel preview, cursor can move out of the image when labeling; Add max_im_height to config file"],
+        ["1.2.3", "Add rotation function in operation, support default label, support reverse switch label"]
         ]
 __version__, __description__ = __VERSIONS__[-1]

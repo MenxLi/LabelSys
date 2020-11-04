@@ -1,5 +1,7 @@
 # ignored files
 *_temp*
+$TempDir$
+.TempDir
 *.ipynb
 # cache files
 __pycache__

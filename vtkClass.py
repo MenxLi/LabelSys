@@ -13,11 +13,26 @@ from PyQt5.QtWidgets import *
 import numpy as np
 import cv2 as cv
 import utils.utils_ as F
+from configLoader import *
+import tempfile, os, sys, __main__
 # }}}
 
 class VtkWidget(QVTKRenderWindowInteractor):# {{{
+    if sys.platform == "win32":
+        _TEMP_FOLDER_NAME = ".TempDir"
+    else:
+        _TEMP_FOLDER_NAME = ".TempDir"
+    _PAR_PATH = os.path.abspath(os.path.join(__main__.__file__, os.pardir))
+    TEMP_DIR = os.path.join(_PAR_PATH, _TEMP_FOLDER_NAME)       # temporary directory to save image
     def __init__(self, frame, parent):# {{{
         super().__init__(frame)
+
+        # Create temporary directory for color image storage,
+        # The color image will be stored in this directory then be read by VTK
+        if not os.path.exists(self.TEMP_DIR):
+            print("Temporary directory created: ", self.TEMP_DIR)
+            os.mkdir(self.TEMP_DIR)
+
         self.master = frame
         self.parent = parent
 
@@ -47,25 +62,35 @@ class VtkWidget(QVTKRenderWindowInteractor):# {{{
         Read numpy array and display in the window
         - txt: text to be shown on the screen
         """
-        # https://gitlab.kitware.com/vtk/vtk/blob/741fffbf6490c34228dfe437f330d854b2494adc/Wrapping/Python/vtkmodules/util/vtkImageImportFromArray.py
+        self.__clearCanvas()
 
         self.im = arr
+        if len(self.im.shape) == 3 and self.im.shape[2] == 3:
+            #  im_path = os.path.join(self.TEMP_DIR, "im.jpg")
+            im_path = os.path.join(self.TEMP_DIR, "im.png")
+            cv.imwrite(im_path, cv.cvtColor(self.im, cv.COLOR_RGB2BGR))
+            #  im_reader = vtk.vtkJPEGReader()
+            im_reader = vtk.vtkPNGReader()
+            im_reader.SetFileName(im_path)
+            self.actor = vtk.vtkImageActor()
+            self.actor.GetMapper().SetInputConnection(im_reader.GetOutputPort())
+        elif len(self.im.shape) == 2:# {{{
+            #===============Update Image======================
+            # https://gitlab.kitware.com/vtk/vtk/blob/741fffbf6490c34228dfe437f330d854b2494adc/Wrapping/Python/vtkmodules/util/vtkImageImportFromArray.py
+            # import from numpy array
+            importer = vtkImageImportFromArray.vtkImageImportFromArray()
+            importer.SetArray(arr)
+            importer.Update()
 
-        self.__clearCanvas()
-        #===============Update Image======================
-        # import from numpy array
-        importer = vtkImageImportFromArray.vtkImageImportFromArray()
-        importer.SetArray(arr)
-        importer.Update()
+            # flip image along y axis
+            flipY_filter = vtk.vtkImageFlip()
+            flipY_filter.SetFilteredAxis(1)
+            flipY_filter.SetInputConnection(importer.GetOutputPort())
+            flipY_filter.Update()
 
-        # flip image along y axis
-        flipY_filter = vtk.vtkImageFlip()
-        flipY_filter.SetFilteredAxis(1)
-        flipY_filter.SetInputConnection(importer.GetOutputPort())
-        flipY_filter.Update()
-
-        self.actor = vtk.vtkImageActor()
-        self.actor.GetMapper().SetInputConnection(flipY_filter.GetOutputPort())
+            self.actor = vtk.vtkImageActor()
+            self.actor.GetMapper().SetInputConnection(flipY_filter.GetOutputPort())
+            # }}}
         # Add actor to renderer, reset camera and render
         self.ren.AddActor(self.actor)
         if not self.camera_set:
@@ -243,15 +268,15 @@ class VtkWidget(QVTKRenderWindowInteractor):# {{{
             cv.polylines(mask,[cv_cnt],False,1)
         return mask
 # }}}
-    def __getBackNpCoord(self, x, y, img_shape):# {{{
-        """Get coordinate in (row, col)
-        - img_shape: (W, H)"""
-        return np.array([img_shape[1]-1-y, x])
-# }}}
+    # def __getBackNpCoord(self, x, y, img_shape):# {{{
+        # """Get coordinate in (row, col)
+        # - img_shape: (W, H)"""
+        # return np.array([img_shape[1]-1-y, x])
+# # }}}
     def __getBackCvCoord(self, x, y, img_shape):# {{{
         """Get coordinate in (col, row)
         - img_shape: (W, H)"""
-        return np.array([x, img_shape[1]-1-y])
+        return np.array([x, img_shape[0]-1-y])
 # }}}
     def __clearCanvas(self):# {{{
         self.contours = []
@@ -310,8 +335,10 @@ class MyInteractorStyle(vtk.vtkInteractorStyleImage):# {{{
     def mouseMoveEvent(self, obj, event):# {{{
         if self.__mode == "Drawing" and self.__drawing:
             now_pt = self._getMousePos()
+            if now_pt == (0.0, 0.0, 0):
+                # the cursor move out of the image
+                now_pt = self.__prev_pt
             self.pts_raw.append(now_pt)
-
             self.lines.append(self.widget.drawLine(self.__prev_pt, now_pt))
             self.__prev_pt = now_pt
             return 0

@@ -12,7 +12,9 @@ import os
 import scipy.ndimage
 from pathlib import Path
 import cv2 as cv
+from scipy.ndimage import interpolation
 import utils.utils_ as F
+from configLoader import MAX_IM_HEIGHT
 # }}}
 
 # Pydicom reading reference: https://pydicom.github.io/pydicom/stable/tutorials/dataset_basics.html
@@ -79,7 +81,11 @@ class DicomLoader(LoaderBase):# {{{
         """
         series = {}
         for slice in slices:
-            seriesDescript = slice["SeriesDescription"].value
+            try:
+                seriesDescript = slice["SeriesDescription"].value
+            except:
+                seriesDescript = str(slice[0x0020, 0x0011].value)    # Series Number
+
             try:
                 series[seriesDescript].append(slice)
             except KeyError:
@@ -128,6 +134,7 @@ class GeneralImageLoader(LoaderBase):# {{{
     refer to cv2.imread for supported type
     https://docs.opencv.org/4.2.0/d4/da8/group__imgcodecs.html
     """
+    MAX_IM_HEIGHT = MAX_IM_HEIGHT
     def __init__(self, path):
         """
         - path: directory that contain multiple images
@@ -142,9 +149,14 @@ class GeneralImageLoader(LoaderBase):# {{{
         for path_ in  abs_paths:
             try:
                 im = cv.imread(path_)
-                if F.img_channel(im) != 1:
-                    arr.append(im[:, :, 0])
-                else: arr.append(im)
+                # resize image if it is too big...
+                if im.shape[0] > self.MAX_IM_HEIGHT:
+                    new_im_size = (int(im.shape[1] * self.MAX_IM_HEIGHT/im.shape[0]), self.MAX_IM_HEIGHT)
+                    im = cv.resize(im, new_im_size, interpolation = cv.INTER_CUBIC)
+
+                if len(im.shape) == 3 and im.shape[-1] == 3:
+                    im = cv.cvtColor(im, cv.COLOR_BGR2RGB)
+                arr.append(im)
             except: pass
         if arr != []:
             self.series[self.entry_base] = arr
@@ -180,10 +192,13 @@ class GeneralVideoLoader(LoaderBase):# {{{
         while(True):
             success, image = cap.read()
             if success:
-                if F.img_channel(image)==3:
-                    imgs.append(image[:, :, 0])
-                else:
-                    imgs.append(image)
+                #  if F.img_channel(image)==3:
+                #      imgs.append(image[:, :, 0])
+                #  else:
+                #      imgs.append(image)
+                if len(image.shape) == 3 and image.shape[-1] == 3:
+                    image = cv.cvtColor(image, cv.COLOR_BGR2RGB)
+                imgs.append(image)
             else:
                 break
         cap.release()

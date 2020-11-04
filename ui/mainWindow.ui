@@ -388,7 +388,7 @@
      <x>0</x>
      <y>0</y>
      <width>1024</width>
-     <height>22</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_file">
@@ -424,10 +424,12 @@
     <addaction name="act_op_next_patient"/>
     <addaction name="act_op_prev_patient"/>
     <addaction name="act_op_change_lbl"/>
+    <addaction name="act_op_change_lbl_reverse"/>
     <addaction name="act_op_save"/>
     <addaction name="act_op_clear"/>
     <addaction name="act_op_interp"/>
     <addaction name="act_op_add_cnt"/>
+    <addaction name="act_op_rotate"/>
    </widget>
    <widget class="QMenu" name="menu_help">
     <property name="title">
@@ -553,6 +555,16 @@
   <action name="act_2D_preview">
    <property name="text">
     <string>2D Preview</string>
+   </property>
+  </action>
+  <action name="act_op_rotate">
+   <property name="text">
+    <string>Rotate</string>
+   </property>
+  </action>
+  <action name="act_op_change_lbl_reverse">
+   <property name="text">
+    <string>Change label (Reverse)</string>
    </property>
   </action>
  </widget>

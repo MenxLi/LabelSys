@@ -90,14 +90,17 @@ class MainWindow(QMainWindow):
         """Unfinished function, will move all CONF attributes into self.config in the future"""
         self.config = {
             "labels": LABELS,
-            "default_series": SERIES,
             "label_modes": LBL_MODE,
-            "loading_mode": None,
             "label_colors": LBL_COLORS,
-            "label_steps": LBL_STEP
+            "label_steps": LBL_STEP,
+            "loading_mode": None,
+            "default_series": SERIES,
+            "default_label":DEFAULT_LABEL,
+            "2D_magnification":PREVIEW2D_MAG,
+            "max_im_height":MAX_IM_HEIGHT
         }
         if self.args.loading_mode != None:
-            # if not setup loading mode in the command line
+            # if not loading mode in the command line
             self.config["loading_mode"] = self.args.loading_mode
         else: self.config["loading_mode"] = CONF["Loading_mode"]
 # }}}
@@ -128,6 +131,8 @@ class MainWindow(QMainWindow):
         self.act_op_prev_patient.setShortcut("Left")
         self.act_op_change_lbl.triggered.connect(self.switchLabel)
         self.act_op_change_lbl.setShortcut("Tab")
+        self.act_op_change_lbl_reverse.triggered.connect(self.switchLabelReverse)
+        self.act_op_change_lbl_reverse.setShortcut("Shift+Tab")
         self.act_op_save.triggered.connect(self.saveCurrentPatient)
         self.act_op_save.setShortcut("Ctrl+S")
         self.act_op_clear.triggered.connect(self.clearCurrentSlice)
@@ -136,6 +141,8 @@ class MainWindow(QMainWindow):
         self.act_op_interp.setShortcut("Ctrl+I")
         self.act_op_add_cnt.triggered.connect(self.addContour)
         self.act_op_add_cnt.setShortcut("Ctrl+A")
+        self.act_op_rotate.triggered.connect(self.rotateImage)
+        self.act_op_rotate.setShortcut("Ctrl+R")
 
         # Tools
         self.act_tool_compare.triggered.connect(self.openCompareWindow)
@@ -189,12 +196,18 @@ class MainWindow(QMainWindow):
             return 1
         file_path = Path(fname)
 
-        try:
+        if not self.args.dev:
+            # Do not quit when error occur while opening files
+            try:
+                self.fl = FolderLoader(file_path, mode = self.config["loading_mode"])
+                self.__updatePatient()
+            except Exception as excp:
+                print("An error happend when opening files: ", excp)
+                return 1
+        else:
             self.fl = FolderLoader(file_path, mode = self.config["loading_mode"])
             self.__updatePatient()
-        except Exception as excp:
-            print("An error happend when opening files: ", excp)
-            return 1
+
 
         self.central_widget.setEnabled(True)
 
@@ -304,6 +317,11 @@ class MainWindow(QMainWindow):
             self.im_widget.resetCamera()
 # }}}
     def changeComboLabels(self, entry):# {{{
+        """
+        Change label, be linked to self.combo_label.currentTextChange;
+        should not be called directly if aiming at change combo text, 
+        self.combo_label.setCurrentText(...) should be used instead.
+        """
         self.curr_lbl = entry
         try:    # prevent triggering when clear
             self.__updateImg()
@@ -333,15 +351,26 @@ class MainWindow(QMainWindow):
         new_label_id = (self.config["labels"].index(self.curr_lbl) + 1)%len(self.config["labels"])
         self.combo_label.setCurrentText(self.config["labels"][new_label_id]) # will trigger changeComboLabels()
 # }}}
+    def switchLabelReverse(self):# {{{
+        """switch between labels, for shortcut use"""
+        new_label_id = (self.config["labels"].index(self.curr_lbl) - 1)%len(self.config["labels"])
+        self.combo_label.setCurrentText(self.config["labels"][new_label_id]) # will trigger changeComboLabels()
+# }}}
     def nextSlice(self):# {{{
         if self.slice_id >= len(self.imgs)-1:
             return 1
         self.slice_id += 1
         self.slider_im.setSliderPosition(self.slice_id)
         try:
+            # to be compatible with older version (1.2.2 and below)
+            self.combo_label.setCurrentText(self.config["default_label"])
+        except KeyError:pass
+        try:
             # update 2D preview window
             if self.preview_win_2d.isVisible():
-                self.preview_win_2d.nextSlice()
+                #  self.preview_win_2d.nextSlice()
+                self.preview_win_2d.slice_id = self.slice_id
+                self.preview_win_2d._updatePanel()
         except: pass
         return 0
 # }}}
@@ -350,6 +379,10 @@ class MainWindow(QMainWindow):
             return 1
         self.slice_id -= 1
         self.slider_im.setSliderPosition(self.slice_id)
+        try:
+            # to be compatible with older version (1.2.2 and below)
+            self.combo_label.setCurrentText(self.config["default_label"])
+        except KeyError:pass
         try:
             # update 2D preview window
             if self.preview_win_2d.isVisible():
@@ -412,7 +445,8 @@ class MainWindow(QMainWindow):
     def previewLabels2D(self):# {{{
         if not self.__cache["data_loaded"]:
             pass
-        self.preview_win_2d = Preview2DWindow(self, self.imgs, self.__getMasks(), self.slice_id)
+        self.preview_win_2d = Preview2DWindow(self, self.imgs, self.__getMasks(), self.slice_id,\
+                                              self.spacing, magnification = self.config["2D_magnification"])
         self.preview_win_2d.show()
 # }}}
     def openCompareWindow(self):# {{{
@@ -487,6 +521,25 @@ class MainWindow(QMainWindow):
         self.lbl_holder.saveToFile(file_path, self.imgs, header)
         self.lbl_holder.SAVED = True
 # }}}
+    def rotateImage(self):# {{{
+        _has_label = False
+        for entry in self.config["labels"]:
+            if self.lbl_holder.data[self.slice_id][entry] != []:
+                _has_label = True
+                break
+        if _has_label:
+            if self._alertMsg("Rotate image will clear labels for current image, continue?"):
+                self.clearCurrentSlice()
+            else:
+                return False
+        self.imgs[self.slice_id] = self.imgs[self.slice_id][::-1]
+        if F.img_channel(self.imgs[self.slice_id]) == 3:
+            self.imgs[self.slice_id] = self.imgs[self.slice_id].transpose(1,0,2)
+        elif F.img_channel(self.imgs[self.slice_id]) == 1:
+            self.imgs[self.slice_id] = self.imgs[self.slice_id].transpose()
+        self.__updateImg()
+        return True
+# }}}
     def _getColor(self, label):# {{{
         try:
             idx = self.config["labels"].index(label)
@@ -495,15 +548,11 @@ class MainWindow(QMainWindow):
         return self.config["label_colors"][idx]
 # }}}
     def __getMasks(self):# {{{
-        im_shape = self.imgs[0].shape
-        for im in self.imgs:
-            if im.shape != im_shape:
-               return None
         masks = []
         for slice_idx in range(len(self.imgs)):
             mask_data = {}
             for label in self.config["labels"]:
-                mask_data[label] = np.zeros(im_shape[:2], np.uint8)
+                mask_data[label] = np.zeros(self.imgs[slice_idx].shape[:2], np.uint8)
                 cnts_data = self.lbl_holder.data[slice_idx][label]
                 if cnts_data == []:
                     continue
@@ -547,10 +596,8 @@ class MainWindow(QMainWindow):
             mask = self.__getSingleMask(idx, label)
             if mask is None:
                 continue
-            # Currently only support 1 Channel image
-            #  im = F.overlap_mask(im, mask, color*255, alpha = 0.4)
-            im = F.overlap_mask(im, mask, (255,255,255), alpha = 0.5)
-        return im[:,:,0].copy(order='C') # Currently only support 1 Channel image
+            im = F.overlap_mask(im, mask, np.array(color)*255, alpha = 0.4)
+        return im.copy()
 # }}}
     def __updateComboSeries(self):# {{{
         """Update the series combobox when changing patient"""
@@ -571,9 +618,14 @@ class MainWindow(QMainWindow):
         self.__updateImg()
         self.slider_im.setSliderPosition(self.slice_id)
         self.slider_im.setMaximum(len(self.imgs)-1)
+        try:
+            # to be compatible with older version (1.2.2 and below)
+            self.combo_label.setCurrentText(self.config["default_label"])
+        except KeyError:pass
         if not self.__cache["output_set"]:
             self.output_path = os.path.abspath( self.fl.getPath() )
             self.__updateQLabelText()
+        self.CheckShapeCompatibility()
 # }}}
     def __updateImg(self):# {{{
         """update image showing on im_frame"""
@@ -641,6 +693,14 @@ class MainWindow(QMainWindow):
         file_path = os.path.realpath("help.html")
         webbrowser.open("file://"+file_path)
 # }}}
+    def CheckShapeCompatibility(self):
+        im_shape0 = self.imgs[0].shape
+        for im in self.imgs:
+            if im.shape != im_shape0:
+                print("Incompatible shape among images, 3D preview will be unavaliable.")
+                return False
+        return True
+
     #==============Event Handler================
     def eventFilter(self, receiver, event):# {{{
         """Globally defined event"""
