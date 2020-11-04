@@ -65,7 +65,8 @@ class VtkWidget(QVTKRenderWindowInteractor):# {{{
         self.__clearCanvas()
 
         self.im = arr
-        if len(self.im.shape) == 3 and self.im.shape[2] == 3:
+        if len(self.im.shape) == 3 and self.im.shape[2] == 3:# {{{
+            # read from image
             #  im_path = os.path.join(self.TEMP_DIR, "im.jpg")
             im_path = os.path.join(self.TEMP_DIR, "im.png")
             cv.imwrite(im_path, cv.cvtColor(self.im, cv.COLOR_RGB2BGR))
@@ -74,6 +75,7 @@ class VtkWidget(QVTKRenderWindowInteractor):# {{{
             im_reader.SetFileName(im_path)
             self.actor = vtk.vtkImageActor()
             self.actor.GetMapper().SetInputConnection(im_reader.GetOutputPort())
+            # }}}
         elif len(self.im.shape) == 2:# {{{
             #===============Update Image======================
             # https://gitlab.kitware.com/vtk/vtk/blob/741fffbf6490c34228dfe437f330d854b2494adc/Wrapping/Python/vtkmodules/util/vtkImageImportFromArray.py
@@ -105,15 +107,27 @@ class VtkWidget(QVTKRenderWindowInteractor):# {{{
         txtprop.SetFontFamilyToCourier()
         txtprop.SetFontSize(12)
         self.t_actor.SetDisplayPosition(5,5)
-
         self.ren.AddActor(self.t_actor)
+
+        # show label
+        self.t_actor_label = vtk.vtkTextActor()
+        self.t_actor_label.SetInput(self.parent.curr_lbl)
+        txtprop_label = self.t_actor_label.GetTextProperty()
+        txtprop_label.SetFontFamilyToArial()
+        txtprop_label.BoldOn()
+        txtprop_label.SetColor(0,1,0)
+        txtprop_label.SetFontSize(32)
+        #  txtprop_label.ShadowOn()
+        #  txtprop_label.SetShadowOffset(4, 4)
+        self.t_actor_label.SetDisplayPosition(5,50)
+        self.ren.AddActor(self.t_actor_label)
 
         self.ren_win.Render()
 # }}}
     def resetCamera(self):# {{{
         self.ren.ResetCamera()
         self.ren_win.Render()
-# }}}
+        # }}}
     def contourWidget(self, color=[1, 0, 0], contourWidgetEndInteraction=None):# {{{
         """Create a template widget for drawing contours"""
         contourRep = vtk.vtkOrientedGlyphContourRepresentation()
