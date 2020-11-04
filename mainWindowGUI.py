@@ -528,7 +528,10 @@ class MainWindow(QMainWindow):
                 _has_label = True
                 break
         if _has_label:
-            if self._alertMsg("Rotate image will clear labels for current image, continue?"):
+            if self._alertMsg("Rotate image will clear all labels for current image, continue?"):
+                self.clearCurrentSlice()
+                for lbl in self.config["labels"]:
+                    self.lbl_holder.data[self.slice_id][lbl] = []
                 self.clearCurrentSlice()
             else:
                 return False
