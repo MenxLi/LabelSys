@@ -319,7 +319,7 @@ class MainWindow(QMainWindow):
     def changeComboLabels(self, entry):# {{{
         """
         Change label, be linked to self.combo_label.currentTextChange;
-        should not be called directly if aiming at change combo text, 
+        should not be called directly if aiming at change combo text,
         self.combo_label.setCurrentText(...) should be used instead.
         """
         self.curr_lbl = entry
