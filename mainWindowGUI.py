@@ -319,7 +319,7 @@ class MainWindow(QMainWindow):
     def changeComboLabels(self, entry):# {{{
         """
         Change label, be linked to self.combo_label.currentTextChange;
-        should not be called directly if aiming at change combo text, 
+        should not be called directly if aiming at change combo text,
         self.combo_label.setCurrentText(...) should be used instead.
         """
         self.curr_lbl = entry
@@ -528,7 +528,10 @@ class MainWindow(QMainWindow):
                 _has_label = True
                 break
         if _has_label:
-            if self._alertMsg("Rotate image will clear labels for current image, continue?"):
+            if self._alertMsg("Rotate image will clear all labels for current image, continue?"):
+                self.clearCurrentSlice()
+                for lbl in self.config["labels"]:
+                    self.lbl_holder.data[self.slice_id][lbl] = []
                 self.clearCurrentSlice()
             else:
                 return False
