@@ -119,6 +119,8 @@ class MainWindow(QMainWindow):
         self.act_2D_preview.triggered.connect(self.previewLabels2D)
         self.act_2D_preview.setShortcut("Ctrl+P")
         self.act_3D_preview.triggered.connect(self.previewLabels3D)
+        self.act_check_preview.triggered.connect(lambda : self.check_preview.setChecked(not self.check_preview.isChecked()))
+        self.act_check_preview.setShortcut("Space")
 
         # Operation
         self.act_op_next_slice.triggered.connect(self.nextSlice)

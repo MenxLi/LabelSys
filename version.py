@@ -23,6 +23,7 @@ __VERSIONS__ =[ \
         ["1.2.2", "Now support color panel preview, cursor can move out of the image when labeling; Add max_im_height to config file"],
         ["1.3.0", "Add rotation function oin operation, support default label, support reverse switch label"],
         ["1.3.1", "Add on-panel label"],
-        ["1.3.2", "Bug fix: rotate will not clear all labels"]
+        ["1.3.2", "Bug fix: rotate will not clear all labels"],
+        ["1.3.3", "Add known issue into source code, add preview on panel shortcut and manual button, preview on panel will update on contour end interaction"]
         ]
 __version__, __description__ = __VERSIONS__[-1]

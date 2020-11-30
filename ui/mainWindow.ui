@@ -310,7 +310,7 @@
            </font>
           </property>
           <property name="text">
-           <string>Show labels on the panel (Experimental)</string>
+           <string>Show labels on the panel</string>
           </property>
          </widget>
         </item>
@@ -406,6 +406,7 @@
     <addaction name="act_fullscreen"/>
     <addaction name="act_2D_preview"/>
     <addaction name="act_3D_preview"/>
+    <addaction name="act_check_preview"/>
    </widget>
    <widget class="QMenu" name="menu_settings">
     <property name="title">
@@ -565,6 +566,11 @@
   <action name="act_op_change_lbl_reverse">
    <property name="text">
     <string>Change label (Reverse)</string>
+   </property>
+  </action>
+  <action name="act_check_preview">
+   <property name="text">
+    <string>Show labels on the panel</string>
    </property>
   </action>
  </widget>

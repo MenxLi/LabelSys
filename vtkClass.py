@@ -57,12 +57,13 @@ class VtkWidget(QVTKRenderWindowInteractor):# {{{
         self.colors = vtk.vtkNamedColors()
         self.contours = []
 # }}}
-    def readNpArray(self, arr, txt = ""):# {{{
+    def readNpArray(self, arr, txt = "", clear_canvas = True):# {{{
         """
         Read numpy array and display in the window
         - txt: text to be shown on the screen
         """
-        self.__clearCanvas()
+        if clear_canvas:
+            self.__clearCanvas()
 
         self.im = arr
         if len(self.im.shape) == 3 and self.im.shape[2] == 3:# {{{
@@ -101,6 +102,11 @@ class VtkWidget(QVTKRenderWindowInteractor):# {{{
             self.camera_set = True
 
         #===============Update Text=======================
+        if txt is None:
+            # not render text
+            self.ren_win.Render()
+            return 0
+
         self.t_actor = vtk.vtkTextActor()
         self.t_actor.SetInput(txt)
         txtprop = self.t_actor.GetTextProperty()
@@ -176,7 +182,7 @@ class VtkWidget(QVTKRenderWindowInteractor):# {{{
             # for compare_win
             color = self.parent._getColor(self.parent.parent.combo_label.currentText())
 
-        contour_widget = self.contourWidget(color = color, contourWidgetEndInteraction = self.__saveContour)
+        contour_widget = self.contourWidget(color = color, contourWidgetEndInteraction = self.__endInteraction)
         contour_widget.On()
         contour_widget.Initialize(pd,1)
         contour_widget.Render()
@@ -184,7 +190,7 @@ class VtkWidget(QVTKRenderWindowInteractor):# {{{
         if save:
             # save on drawing contour but not save when loading contour with
             # self.loadContour
-            self.__saveContour(None, None)
+            self.__endInteraction(None, None)
         return 0
 # }}}
     def loadContour(self, pts, open_curve):# {{{
@@ -212,7 +218,7 @@ class VtkWidget(QVTKRenderWindowInteractor):# {{{
     def setStyleSampleStep(self, step = 20):# {{{
         self.style._setSampleStep(step)
 # }}}
-    def __saveContour(self, obj, event):# {{{
+    def __endInteraction(self, obj, event):# {{{
         data = []
         for contour in self.contours:
             rep = contour.GetContourRepresentation()
@@ -235,6 +241,12 @@ class VtkWidget(QVTKRenderWindowInteractor):# {{{
                     }
             data.append(contour_data)
         self.parent.saveCurrentSlice(data)
+        # Update image in case of preview on panel is enabled
+        if not self.parent.check_preview.isChecked():
+            im = F.map_mat_255(self.parent.imgs[self.parent.slice_id])
+        else:
+            im = self.parent._getMarkedImg(self.parent.slice_id)
+            self.readNpArray(im, None, clear_canvas=False)
 # }}}
     def __getFullCnt(self, contour_widget, img_shape):# {{{
         """
@@ -273,7 +285,7 @@ class VtkWidget(QVTKRenderWindowInteractor):# {{{
             for ipt_id in range(rep.GetNumberOfIntermediatePoints(pt_id)):
                 rep.GetIntermediatePointWorldPosition(pt_id, ipt_id, point)
                 all_pts.append(self.__getBackCvCoord(*point[:2], img_shape))
-        all_pts = np.array(all_pts).astype(np.int)
+        all_pts = np.rint(np.array(all_pts))
         if mode == "Close":
             cv_cnt = np.array([[arr] for arr in F.removeDuplicate2d(all_pts)])
             cv.fillPoly(mask, pts = [cv_cnt], color = 1)
