@@ -1,7 +1,13 @@
 {
     "Labels":{
+        "#18" :{
+            "value": 28,
+            "color": [1.00, 1.00, 1.00],
+            "mode": 0,
+            "label_step": 40
+        },
         "#17" :{
-            "value": 1, 
+            "value": 0, 
             "color": [1.00, 0.00, 0.00], 
             "mode": 0,
             "label_step":40
@@ -83,6 +89,18 @@
             "color": [0.27, 0.00, 1.00], 
             "mode": 0,
             "label_step":40
+        },
+        "#28" :{
+            "value": 29,
+            "color": [1.00, 1.00, 1.00],
+            "mode": 0,
+            "label_step": 40
+        },
+        "#38" :{
+            "value": 30,
+            "color": [1.00, 1.00, 1.00],
+            "mode": 0,
+            "label_step": 40
         },
         "#37" :{
             "value": 14, 
@@ -167,6 +185,12 @@
             "color": [1.00, 0.00, 0.23], 
             "mode": 0,
             "label_step":40
+        },
+        "#48" :{
+            "value": 31,
+            "color": [1.00, 1.00, 1.00],
+            "mode": 0,
+            "label_step": 40
         }
     },
     "Loading_mode": 1,
