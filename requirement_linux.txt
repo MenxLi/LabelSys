@@ -4,4 +4,4 @@ pydicom==1.4.2
 PyQt5==5.14.1
 PyQt5-sip==12.7.1
 scipy==1.4.1
-vtk==8.1.2
+vtk
