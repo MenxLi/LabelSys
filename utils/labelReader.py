@@ -10,6 +10,13 @@ except ModuleNotFoundError:
     USE_SKIMAGE = False
 import vtk
 
+def checkFolderEligibility(fpath: str):
+    flag = False
+    for fname in os.listdir(fpath):
+        if fname == "HEAD_0.json":
+            flag = True
+    return flag
+
 def readOneFolder(path, magnification = 1, line_thickness = 1):# {{{
     imgs = []
     masks = []

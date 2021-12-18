@@ -5,6 +5,8 @@
 # (see https://bitbucket.org/Mons00n/mrilabelsys/).
 #
 # import{{{
+from typing import List, Tuple
+from numpy.lib.arraysetops import isin
 import vtk
 from vtk.util import vtkImageImportFromArray
 from vtk.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
@@ -215,7 +217,7 @@ class VtkWidget(QVTKRenderWindowInteractor):# {{{
     def reInitStyle(self):# {{{
         self.style._reinitState()
 # }}}
-    def setStyleSampleStep(self, step = 20):# {{{
+    def setStyleSampleStep(self, step = 1):# {{{
         self.style._setSampleStep(step)
 # }}}
     def __endInteraction(self, obj, event):# {{{
@@ -377,7 +379,8 @@ class MyInteractorStyle(vtk.vtkInteractorStyleImage):# {{{
                 interp_pts = self.__linearInterp(*[pos[:2] for pos in self.pts_raw[i-1:i+1]], mode = "")
                 full_curve += [[pt[0], pt[1], MyInteractorStyle.HEIGHT] for pt in interp_pts[1:] ]
             # Sampling inside full_curve
-            self.pts = full_curve[::self.sample_step]
+            # self.pts = full_curve[::self.sample_step]
+            self.pts = self._sampleCurve(full_curve, self.sample_step)
             if np.linalg.norm(np.array(self.pts[-1]) - np.array(full_curve[-1])) > self.sample_step * 0.4:
                 # when last point is too far from initialization, add last point
                 self.pts.append(full_curve[-1])
@@ -412,6 +415,37 @@ class MyInteractorStyle(vtk.vtkInteractorStyleImage):# {{{
     def forceDrawing(self):# {{{
         self.__mode = "Drawing"
 # }}}
+
+    def _sampleCurve(self, curve: List[Tuple[int, int]], sample_step: int) -> List[Tuple[int, int]]:
+        """Sample a curve in equally distributed interval of intergral curvature
+
+        Args:
+            curve (List[Tuple[int, int]]): [description]
+            sample_step (int): [description]
+
+        Returns:
+            List[Tuple[int, int]]: [description]
+        """
+        # Calculate curvature
+        if not isinstance(curve, np.ndarray):
+            curve = np.array(curve)
+        x_t = np.gradient(curve[:, 0])
+        y_t = np.gradient(curve[:, 1])
+        xx_t = np.gradient(x_t)
+        yy_t = np.gradient(y_t)
+        curvature = np.abs(xx_t * y_t - x_t * yy_t) / (x_t * x_t + y_t * y_t)**1.5
+
+        # Decided where to sample
+        counter = 0
+        idx = [0]
+        for i in range(len(curvature)):
+            counter += curvature[i]
+            if counter >= sample_step:
+                counter = 0
+                idx.append(i)
+        idx.append(len(curve)-1)
+        return curve[idx]
+
     def _setSampleStep(self, step):# {{{
         self.sample_step = step
 # }}}

@@ -21,6 +21,9 @@ class Application(QApplication):
             print("An exception occured: ", exp)
             return 1
 if __name__ == "__main__":
+    pyqt5_lib = "/home/monsoon/Documents/Code/.venv/mainEnv/lib/python3.8/site-packages/cv2/qt/plugins/platforms"
+    if os.path.exists(os.path.dirname(pyqt5_lib)):
+        os.environ['QT_QPA_PLATFORM_PLUGIN_PATH'] = pyqt5_lib
     app = Application([parser.prog])
     font = QFont("Verdana", 9)
     app.setFont(font)
