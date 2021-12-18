@@ -5,8 +5,10 @@
 # (see https://bitbucket.org/Mons00n/mrilabelsys/).
 #
 import json
+import os
 
-with open("conf.json", "r") as f:
+_CURR_DIR = os.path.dirname(__file__)
+with open(os.path.join(_CURR_DIR, "conf.json"), "r") as f:
     CONF = json.load(f)
 
 # CNT_OPEN = CONF["Contour_mode"]["Open"]

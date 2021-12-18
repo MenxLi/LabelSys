@@ -14,9 +14,9 @@ from vtk.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 from PyQt5.QtWidgets import *
 import numpy as np
 import cv2 as cv
-import utils.utils_ as F
-from configLoader import *
-import tempfile, os, sys, __main__
+from .utils import utils_ as F
+from .configLoader import *
+import os, sys
 # }}}
 
 class VtkWidget(QVTKRenderWindowInteractor):# {{{
@@ -24,7 +24,7 @@ class VtkWidget(QVTKRenderWindowInteractor):# {{{
         _TEMP_FOLDER_NAME = ".TempDir"
     else:
         _TEMP_FOLDER_NAME = ".TempDir"
-    _PAR_PATH = os.path.abspath(os.path.join(__main__.__file__, os.pardir))
+    _PAR_PATH = os.path.abspath(os.path.join(__file__, os.pardir))
     TEMP_DIR = os.path.join(_PAR_PATH, _TEMP_FOLDER_NAME)       # temporary directory to save image
     def __init__(self, frame, parent):# {{{
         super().__init__(frame)

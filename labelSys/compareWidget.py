@@ -9,9 +9,9 @@ from PyQt5 import uic
 from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import Qt, pyqtSignal, QObject, QEvent
-from labelResultHolder import LabelHolder
-from vtkClass import VtkWidget
-from utils import utils_ as F
+from .labelResultHolder import LabelHolder
+from .vtkClass import VtkWidget
+from .utils import utils_ as F
 
 import os, sys
 from pathlib import Path

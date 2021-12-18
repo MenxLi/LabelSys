@@ -13,8 +13,8 @@ import scipy.ndimage
 from pathlib import Path
 import cv2 as cv
 from scipy.ndimage import interpolation
-import utils.utils_ as F
-from configLoader import MAX_IM_HEIGHT
+from .utils import utils_ as F
+from .configLoader import MAX_IM_HEIGHT
 # }}}
 
 # Pydicom reading reference: https://pydicom.github.io/pydicom/stable/tutorials/dataset_basics.html

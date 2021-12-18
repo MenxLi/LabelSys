@@ -27,5 +27,6 @@ __VERSIONS__ =[ \
         ["1.3.3", "Add known issue into source code, add preview on panel shortcut and manual button, preview on panel will update on contour end interaction"],
         ["1.3.4", "Change interpolation method to equally-spaced points on curvature integral."],
         ["1.3.5", "Liscense change; Add load file selection to console args; Default label can be set to \"\" to prevent label change while changing slices; Not raise error when select incorrect loading directory."],
+        ["1.4.0", "Using setup.py"]
         ]
 __version__, __description__ = __VERSIONS__[-1]

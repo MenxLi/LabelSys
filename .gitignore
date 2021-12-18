@@ -1,7 +1,7 @@
 # ignored files
 *_temp*
 $TempDir$
-.TempDir
+*.TempDir
 *.ipynb
 # cache files
 __pycache__
@@ -11,3 +11,4 @@ __pycache__
 build/
 dist/
 *.spec
+*.egg-info

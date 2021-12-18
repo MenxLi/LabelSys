@@ -10,23 +10,23 @@ from pathlib import Path
 import os,sys
 import copy
 
-from version import __version__
-from fileReader import FolderLoader
-from utils.labelReader import checkFolderEligibility
-from configLoader import *
-import utils.utils_ as F
-from utils import specificUtils as SU
-from labelResultHolder import LabelHolder
-from previewGUI import Preview3DWindow, Preview2DWindow
-from settingsGUI import SettingsDialog
-from compareWidget import CompareWidget
+from .version import __version__
+from .fileReader import FolderLoader
+from .utils.labelReader import checkFolderEligibility
+from .configLoader import *
+from .utils import utils_ as F
+from .utils import specificUtils as SU
+from .labelResultHolder import LabelHolder
+from .previewGUI import Preview3DWindow, Preview2DWindow
+from .settingsGUI import SettingsDialog
+from .compareWidget import CompareWidget
+from .vtkClass import VtkWidget
 
 import numpy as np
 from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import Qt, pyqtSignal, QObject, QEvent
 from PyQt5 import uic
-from vtkClass import VtkWidget
 import cv2 as cv
 # }}}
 LOCAL_DIR = os.path.dirname(os.path.realpath(__file__))

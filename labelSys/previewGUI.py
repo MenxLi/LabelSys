@@ -11,8 +11,8 @@ from PyQt5.QtWidgets import *
 from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtGui import QImage, QPixmap
 import numpy as np
-from configLoader import *
-import utils.utils_ as F
+from .configLoader import *
+from .utils import utils_ as F
 import cv2 as cv
 # }}}
 

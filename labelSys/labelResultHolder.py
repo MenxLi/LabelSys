@@ -5,8 +5,8 @@
 # (see https://bitbucket.org/Mons00n/mrilabelsys/).
 #
 # import{{{
-from utils.base64ImageConverter import imgEncodeB64, imgDecodeB64
-from configLoader import *
+from .utils.base64ImageConverter import imgEncodeB64, imgDecodeB64
+from .configLoader import *
 import os
 import vtk
 import cv2 as cv
