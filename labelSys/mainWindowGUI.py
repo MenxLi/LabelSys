@@ -702,7 +702,8 @@ class MainWindow(QMainWindow):
         else: return False
 # }}}
     def showHelpManual(self):# {{{
-        file_path = os.path.realpath("help.html")
+        file_path = os.path.join(os.path.dirname(__file__), "help.html")
+        file_path = os.path.realpath(file_path)
         webbrowser.open("file://"+file_path)
 # }}}
     def CheckShapeCompatibility(self):
