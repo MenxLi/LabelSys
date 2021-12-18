@@ -6,7 +6,7 @@
 #
 
 __author__ = "Mengxun Li"
-__copyright__ = "Copyright 2020"
+__copyright__ = "Copyright 2020-2021"
 __credits__ = ["Kumaradevan Punithakumar"]
 __license__ = "All right reserved"
 __maintainer__ = "Mengxun Li"
@@ -25,6 +25,7 @@ __VERSIONS__ =[ \
         ["1.3.1", "Add on-panel label"],
         ["1.3.2", "Bug fix: rotate will not clear all labels"],
         ["1.3.3", "Add known issue into source code, add preview on panel shortcut and manual button, preview on panel will update on contour end interaction"],
-        ["1.3.4", "Change interpolation method"]
+        ["1.3.4", "Change interpolation method to equally-spaced points on curvature integral."],
+        ["1.3.5", "Liscense change; Add load file selection to console args; Default label can be set to \"\" to prevent label change while changing slices; Not raise error when select incorrect loading directory."],
         ]
 __version__, __description__ = __VERSIONS__[-1]

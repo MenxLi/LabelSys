@@ -12,6 +12,7 @@ import copy
 
 from version import __version__
 from fileReader import FolderLoader
+from utils.labelReader import checkFolderEligibility
 from configLoader import *
 import utils.utils_ as F
 from utils import specificUtils as SU
@@ -81,7 +82,10 @@ class MainWindow(QMainWindow):
 
         if self.args.dev:
             print("Developing mode...")
-            self.loadPatients()
+            if args.load:
+                self.loadLabeledFile(args.file)
+            else:
+                self.loadPatients(args.file)
         else:
             print("Welcome to LabelSys v"+__version__)
             print("For help see: Help -> manual")
@@ -106,11 +110,11 @@ class MainWindow(QMainWindow):
 # }}}
     def initMenu(self):# {{{
         # File
-        self.act_open.triggered.connect(self.loadPatients)
+        self.act_open.triggered.connect(lambda: self.loadPatients())
         self.act_open.setShortcut("Ctrl+O")
         self.act_quit.triggered.connect(self.quitApp)
         self.act_quit.setShortcut("Ctrl+Q")
-        self.act_load.triggered.connect(self.loadLabeledFile)
+        self.act_load.triggered.connect(lambda: self.loadLabeledFile())
         self.act_load.setShortcut("Ctrl+L")
 
         # View
@@ -188,11 +192,9 @@ class MainWindow(QMainWindow):
         self.im_widget = VtkWidget(self.im_frame, self)# }}}
 # }}}
     # Load images{{{
-    def loadPatients(self):# {{{
+    def loadPatients(self, fname: str = None):# {{{
         """Load patients folder, and call initPanelAct() to initialize the panel"""
-        if self.args.dev:
-            fname = self.args.file
-        else:
+        if fname is None:
             fname = QFileDialog.getExistingDirectory(self, "Select Directory")
         if fname == "":
             return 1
@@ -216,10 +218,14 @@ class MainWindow(QMainWindow):
         self.__cache["data_loaded"] = True
         return 0
 # }}}
-    def loadLabeledFile(self):# {{{
+    def loadLabeledFile(self, fname: str = None):# {{{
         """Load a labeld file for one patient"""
-        fname = QFileDialog.getExistingDirectory(self, "Select loading directory")
+        if fname is None:
+            fname = QFileDialog.getExistingDirectory(self, "Select loading directory")
         if fname == "":
+            return 1
+        if not checkFolderEligibility(fname):
+            print("The selected folder is not eligiable: ", fname)
             return 1
         self.central_widget.setEnabled(True)
         self.__disableWidgets(
@@ -365,7 +371,8 @@ class MainWindow(QMainWindow):
         self.slider_im.setSliderPosition(self.slice_id)
         try:
             # to be compatible with older version (1.2.2 and below)
-            self.combo_label.setCurrentText(self.config["default_label"])
+            if self.config["default_label"] != "":
+                self.combo_label.setCurrentText(self.config["default_label"])
         except KeyError:pass
         try:
             # update 2D preview window
