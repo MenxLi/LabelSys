@@ -150,7 +150,7 @@ class GeneralImageLoader(LoaderBase):# {{{
             try:
                 im = cv.imread(path_)
                 # resize image if it is too big...
-                if im.shape[0] > self.MAX_IM_HEIGHT:
+                if self.MAX_IM_HEIGHT > 0 and im.shape[0] > self.MAX_IM_HEIGHT:
                     new_im_size = (int(im.shape[1] * self.MAX_IM_HEIGHT/im.shape[0]), self.MAX_IM_HEIGHT)
                     im = cv.resize(im, new_im_size, interpolation = cv.INTER_CUBIC)
 

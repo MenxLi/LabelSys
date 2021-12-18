@@ -7,7 +7,7 @@
 
 __author__ = "Mengxun Li"
 __copyright__ = "Copyright 2020"
-__credits__ = ["Kumaradevan Punithakumar, Abhilash Hareendranathan"]
+__credits__ = ["Kumaradevan Punithakumar"]
 __license__ = "All right reserved"
 __maintainer__ = "Mengxun Li"
 __email__ = "mengxunli@whu.edu.cn | mengxun1@ualberta.ca"
@@ -24,6 +24,7 @@ __VERSIONS__ =[ \
         ["1.3.0", "Add rotation function oin operation, support default label, support reverse switch label"],
         ["1.3.1", "Add on-panel label"],
         ["1.3.2", "Bug fix: rotate will not clear all labels"],
-        ["1.3.3", "Add known issue into source code, add preview on panel shortcut and manual button, preview on panel will update on contour end interaction"]
+        ["1.3.3", "Add known issue into source code, add preview on panel shortcut and manual button, preview on panel will update on contour end interaction"],
+        ["1.3.4", "Change interpolation method"]
         ]
 __version__, __description__ = __VERSIONS__[-1]
