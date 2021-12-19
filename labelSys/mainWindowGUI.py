@@ -21,6 +21,7 @@ from .previewGUI import Preview3DWindow, Preview2DWindow
 from .settingsGUI import SettingsDialog
 from .compareWidget import CompareWidget
 from .vtkClass import VtkWidget
+from .configLoader import _UI_DIR
 
 import numpy as np
 from PyQt5 import QtWidgets, QtCore
@@ -38,7 +39,7 @@ class MainWindow(QMainWindow):
         if not args.dev:
             sys.stdout = EmittingStream(textWritten = self.stdoutStream)
         # load UI
-        ui_path = os.path.join(LOCAL_DIR, "ui",  "mainWindow.ui")
+        ui_path = os.path.join(_UI_DIR,  "mainWindow.ui")
         uic.loadUi(ui_path, self)
         self.args = args
 
@@ -702,7 +703,7 @@ class MainWindow(QMainWindow):
         else: return False
 # }}}
     def showHelpManual(self):# {{{
-        file_path = os.path.join(os.path.dirname(__file__), "help.html")
+        file_path = os.path.join(_DOC_DIR, "help.html")
         file_path = os.path.realpath(file_path)
         webbrowser.open("file://"+file_path)
 # }}}

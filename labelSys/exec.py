@@ -17,6 +17,7 @@ except KeyError:
 from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QApplication
 from .mainWindowGUI import MainWindow
+from .configLoader import _UI_DIR
 from .utils.argParse import parser, args
 
 if not QT_QPA_PLATFORM_PLUGIN_PATH is None:
@@ -39,7 +40,7 @@ def main():
     #import qdarkstyle
     #app.setStyleSheet(qdarkstyle.load_stylesheet_pyqt5())
     CURR_DIR = os.path.dirname(__file__)
-    with open(os.path.join(CURR_DIR, "ui", "QTDark.stylesheet")) as f:
+    with open(os.path.join(_UI_DIR, "QTDark.stylesheet")) as f:
         app.setStyleSheet(f.read())
     w = MainWindow(args)
     app.installEventFilter(w)

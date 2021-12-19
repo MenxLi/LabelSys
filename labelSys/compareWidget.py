@@ -12,6 +12,7 @@ from PyQt5.QtCore import Qt, pyqtSignal, QObject, QEvent
 from .labelResultHolder import LabelHolder
 from .vtkClass import VtkWidget
 from .utils import utils_ as F
+from .configLoader import _UI_DIR
 
 import os, sys
 from pathlib import Path
@@ -24,7 +25,7 @@ class CompareWidget(QWidget):
         self.initUI()
 # }}}
     def initUI(self):# {{{
-        ui_path = os.path.join("ui", "compareWidget.ui")
+        ui_path = os.path.join(_UI_DIR, "compareWidget.ui")
         uic.loadUi(ui_path, self)
         self.setWindowTitle("Compare Widget")
         self.L_part = CompareWidgetVisualPart(self.frame_L, self)
@@ -135,7 +136,7 @@ class CompareWidgetVisualPart(QWidget):
         self.file_path = ""
 # }}}
     def initUI(self):# {{{
-        ui_path = os.path.join("ui", "compareVisualWidget.ui")
+        ui_path = os.path.join(_UI_DIR, "compareVisualWidget.ui")
         uic.loadUi(ui_path, self)
         layout = QGridLayout()
         layout.addWidget(self, 0,0)

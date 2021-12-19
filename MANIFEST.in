@@ -1,6 +1,6 @@
 include README.md
 recursive-include labelSys conf.json
-recursive-include labelSys help.html
+recursive-include labelSys/docs *
 recursive-include labelSys/ui *
 recursive-include labelSys/Pics *
 recursive-include labelSys/utils *.so

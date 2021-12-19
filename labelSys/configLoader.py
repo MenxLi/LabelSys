@@ -10,6 +10,8 @@ import os
 _CURR_DIR = os.path.dirname(__file__)
 with open(os.path.join(_CURR_DIR, "conf.json"), "r") as f:
     CONF = json.load(f)
+_UI_DIR = os.path.join(_CURR_DIR, "ui")
+_DOC_DIR = os.path.join(_CURR_DIR, "docs")
 
 # CNT_OPEN = CONF["Contour_mode"]["Open"]
 # CNT_CLOSE = CONF["Contour_mode"]["Close"]
