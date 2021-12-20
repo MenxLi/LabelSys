@@ -21,7 +21,8 @@ from .previewGUI import Preview3DWindow, Preview2DWindow
 from .settingsGUI import SettingsDialog
 from .compareWidget import CompareWidget
 from .vtkClass import VtkWidget
-from .configLoader import _UI_DIR
+from .coreWidgets import WidgetCore
+from .configLoader import _UI_DIR, _DOC_DIR
 
 import numpy as np
 from PyQt5 import QtWidgets, QtCore
@@ -32,7 +33,7 @@ import cv2 as cv
 # }}}
 LOCAL_DIR = os.path.dirname(os.path.realpath(__file__))
 
-class MainWindow(QMainWindow):
+class MainWindow(QMainWindow, WidgetCore):
     # Init{{{
     def __init__(self,args):# {{{
         super().__init__()
@@ -150,6 +151,10 @@ class MainWindow(QMainWindow):
         self.act_op_add_cnt.setShortcut("Ctrl+A")
         self.act_op_rotate.triggered.connect(self.rotateImage)
         self.act_op_rotate.setShortcut("Ctrl+R")
+        self.act_op_add_bbox.triggered.connect(self.addBBox)
+        self.act_op_add_bbox.setShortcut("Ctrl+B")
+        self.act_op_edit_comment.triggered.connect(self.editComment)
+        self.act_op_edit_comment.setShortcut("Ctrl+C")
 
         # Tools
         self.act_tool_compare.triggered.connect(self.openCompareWindow)
@@ -186,6 +191,8 @@ class MainWindow(QMainWindow):
         self.btn_interp.clicked.connect(self.interpCurrentSlice)
         self.btn_preview.clicked.connect(self.previewLabels2D)
         self.btn_add_cnt.clicked.connect(self.addContour)
+        self.btn_add_bbox.clicked.connect(self.addBBox)
+        self.btn_comment.clicked.connect(self.editComment)
         self.slider_im.valueChanged.connect(self.changeSliderValue)
 # }}}
     def initImageUI(self):# {{{
@@ -419,10 +426,10 @@ class MainWindow(QMainWindow):
         self.tb_console.insertPlainText(text)
         self.tb_console.verticalScrollBar().setValue(self.tb_console.verticalScrollBar().maximum())
 # }}}
-    def clearCurrentSlice(self):# {{{
+    def clearCurrentSlice(self):
         self.lbl_holder.data[self.slice_id][self.curr_lbl] = []
         self.__updateImg()
-# }}}
+        
     def interpCurrentSlice(self):# {{{
         prev_mask = self.__getSingleMask(self.slice_id-1, self.combo_label.currentText())
         next_mask = self.__getSingleMask(self.slice_id+1, self.combo_label.currentText())
@@ -486,6 +493,12 @@ class MainWindow(QMainWindow):
     def addContour(self):# {{{
         self.im_widget.style.forceDrawing()
 # }}}
+    def addBBox(self):
+        self._warnDialog("This function has not been implemented yet")
+    
+    def editComment(self):
+        self._warnDialog("This function has not been implemented yet")
+
     def saveCurrentSlice(self, cnts_data):# {{{
         """
         Will be triggered automatically when modifying the contour, will be
@@ -690,17 +703,6 @@ class MainWindow(QMainWindow):
                 return 1
         else:
             return 0
-# }}}
-    def _alertMsg(self,msg, title = "Alert", func = lambda x : None):# {{{
-        msg_box = QMessageBox()
-        msg_box.setText(msg)
-        msg_box.setWindowTitle(title)
-        msg_box.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
-        msg_box.buttonClicked.connect(func)
-        return_value = msg_box.exec()
-        if return_value == QMessageBox.Ok:
-            return True
-        else: return False
 # }}}
     def showHelpManual(self):# {{{
         file_path = os.path.join(_DOC_DIR, "help.html")
