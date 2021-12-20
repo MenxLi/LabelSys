@@ -4,7 +4,7 @@
             "value": 1, 
             "color": [1.0, 0.0, 0.0], 
             "mode": 0,
-            "label_step":1
+            "label_step":1.2
         },
         "Condyle" :{
             "value": 2, 
