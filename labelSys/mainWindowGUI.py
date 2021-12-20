@@ -22,7 +22,8 @@ from .settingsGUI import SettingsDialog
 from .compareWidget import CompareWidget
 from .vtkClass import VtkWidget
 from .coreWidgets import WidgetCore
-from .configLoader import _UI_DIR, _DOC_DIR
+from .configLoader import _UI_DIR, _DOC_DIR, CLASSES
+from .classificationGUI import CommentGUI
 
 import numpy as np
 from PyQt5 import QtWidgets, QtCore
@@ -103,7 +104,8 @@ class MainWindow(QMainWindow, WidgetCore):
             "default_series": SERIES,
             "default_label":DEFAULT_LABEL,
             "2D_magnification":PREVIEW2D_MAG,
-            "max_im_height":MAX_IM_HEIGHT
+            "max_im_height":MAX_IM_HEIGHT,
+            "classes": CLASSES
         }
         if self.args.loading_mode != None:
             # if not loading mode in the command line
@@ -497,7 +499,12 @@ class MainWindow(QMainWindow, WidgetCore):
         self._warnDialog("This function has not been implemented yet")
     
     def editComment(self):
-        self._warnDialog("This function has not been implemented yet")
+        def saveComments(txt: str):
+            self.lbl_holder.comments[self.slice_id] = txt
+            self.__updateImg()
+        self.comment_gui = CommentGUI(self, self.config["classes"], saveComments,
+            comments=self.lbl_holder.comments[self.slice_id])
+        self.comment_gui.show()
 
     def saveCurrentSlice(self, cnts_data):# {{{
         """
@@ -663,7 +670,12 @@ class MainWindow(QMainWindow, WidgetCore):
         slice_info = "Slice: "+ str(self.slice_id+1)+"/"+str(len(self.imgs))
         img_info = "Image size: {} x {}".format(*im.shape)
         thickness_info = "Thickness: {}".format(self.spacing)
-        txt = slice_info + "\n" + img_info + "\n" + thickness_info
+        comment = self.lbl_holder.comments[self.slice_id]
+        if comment is None:
+            comment_info = "Comment: <none>"
+        else:
+            comment_info = f"Comment: {comment}"
+        txt = slice_info + "\n" + img_info + "\n" + thickness_info + "\n" + comment_info
 
         self.im_widget.readNpArray(im, txt)
         self.im_widget.reInitStyle()

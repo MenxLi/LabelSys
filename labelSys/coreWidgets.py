@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import QWidget, QMessageBox, QDesktopWidget
 
-class WidgetCore(QWidget):
+class WidgetCore():
     def _warnDialog(self, messege, info_msg = ""):
         msg_box = QMessageBox()
         msg_box.setIcon(QMessageBox.Warning)

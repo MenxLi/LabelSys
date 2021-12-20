@@ -29,5 +29,6 @@ __VERSIONS__ =[ \
         ["1.3.5", "Liscense change; Add load file selection to console args; Default label can be set to \"\" to prevent label change while changing slices; Not raise error when select incorrect loading directory."],
         ["1.4.0", "Using setup.py for distribution"],
         ["1.4.1", "Bug fix - relative path"],
+        ["1.4.1-TMJ-ped", "UI change & add comments"]
         ]
 __version__, __description__ = __VERSIONS__[-1]

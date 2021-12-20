@@ -127,7 +127,7 @@ class VtkWidget(QVTKRenderWindowInteractor):# {{{
         txtprop_label.SetFontSize(32)
         #  txtprop_label.ShadowOn()
         #  txtprop_label.SetShadowOffset(4, 4)
-        self.t_actor_label.SetDisplayPosition(5,50)
+        self.t_actor_label.SetDisplayPosition(5,70)
         self.ren.AddActor(self.t_actor_label)
 
         self.ren_win.Render()
