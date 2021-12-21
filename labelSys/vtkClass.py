@@ -438,11 +438,15 @@ class MyInteractorStyle(vtk.vtkInteractorStyleImage):# {{{
         # Calculate curvature
         if not isinstance(curve, np.ndarray):
             curve = np.array(curve)
+        epsilon = 1e-6
         x_t = np.gradient(curve[:, 0])
         y_t = np.gradient(curve[:, 1])
         xx_t = np.gradient(x_t)
         yy_t = np.gradient(y_t)
-        curvature = np.abs(xx_t * y_t - x_t * yy_t) / (x_t * x_t + y_t * y_t)**1.5
+        curvature = np.abs(xx_t * y_t - x_t * yy_t) / (x_t * x_t + y_t * y_t + epsilon)**2.5
+        kernel = np.array([1]*7)/7
+
+        curvature = np.convolve(curvature, kernel, mode = "same")
 
         # Decided where to sample
         counter = 0

@@ -26,7 +26,7 @@ setup(
 
     include_package_data = True,
 
-    install_requires = ["PyQt5", "numpy", "opencv-python", "pydicom", "vtk"],
+    install_requires = ["PyQt5", "numpy", "opencv-python", "pydicom", "vtk", "scipy"],
 
     entry_points = {
         "console_scripts":[
