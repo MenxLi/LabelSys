@@ -4,19 +4,19 @@
             "value": 1, 
             "color": [1.0, 0.0, 0.0], 
             "mode": 0,
-            "label_step":1
+            "label_step":2
         },
         "Condyle" :{
             "value": 2, 
             "color": [1.0, 1.0, 0.0], 
             "mode": 1,
-            "label_step":1.8
+            "label_step":3
         },
         "Eminence" :{
             "value": 3, 
             "color": [0.0, 1.0, 1.0], 
             "mode": 1,
-            "label_step":1.8
+            "label_step":3
         }
     },
     "Loading_mode": 0,

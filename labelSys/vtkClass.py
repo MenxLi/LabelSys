@@ -226,7 +226,7 @@ class VtkWidget(QVTKRenderWindowInteractor):# {{{
     def reInitStyle(self):# {{{
         self.style._reinitState()
 # }}}
-    def setStyleSampleStep(self, step = 1):# {{{
+    def setStyleSampleStep(self, step = 2):# {{{
         self.style._setSampleStep(step)
 # }}}
     def __endInteraction(self, obj, event):# {{{
@@ -444,7 +444,7 @@ class MyInteractorStyle(vtk.vtkInteractorStyleImage):# {{{
         xx_t = np.gradient(x_t)
         yy_t = np.gradient(y_t)
         curvature = np.abs(xx_t * y_t - x_t * yy_t) / (x_t * x_t + y_t * y_t + epsilon)**2.5
-        kernel = np.array([1]*7)/7
+        kernel = np.array([1])
 
         curvature = np.convolve(curvature, kernel, mode = "same")
 
