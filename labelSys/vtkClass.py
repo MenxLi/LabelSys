@@ -230,7 +230,9 @@ class VtkWidget(QVTKRenderWindowInteractor):# {{{
     def reInitStyle(self):# {{{
         self.style._reinitState()
 # }}}
-    def setStyleSampleStep(self, step = 2):# {{{
+    def setStyleSampleStep(self, step = 1):# {{{
+        STEP_SHAPE_MODIFIER = 128
+        step *= self.im.shape[0]/STEP_SHAPE_MODIFIER
         self.style._setSampleStep(step)
 # }}}
     def __endInteraction(self, obj, event):# {{{
@@ -391,6 +393,7 @@ class MyInteractorStyle(vtk.vtkInteractorStyleImage):# {{{
             for i in range(1, len(self.pts_raw)):
                 interp_pts = self.__linearInterp(*[pos[:2] for pos in self.pts_raw[i-1:i+1]], mode = "")
                 full_curve += [[pt[0], pt[1], MyInteractorStyle.HEIGHT] for pt in interp_pts[1:] ]
+            full_curve = self.__removeDuplicate2d(full_curve)
             # Sampling inside full_curve
             # self.pts = full_curve[::self.sample_step]
             self.pts = self._sampleCurve(full_curve, self.sample_step)
@@ -451,6 +454,15 @@ class MyInteractorStyle(vtk.vtkInteractorStyleImage):# {{{
         kernel = np.array([1])
 
         curvature = np.convolve(curvature, kernel, mode = "same")
+        curvature = np.abs(curvature)
+
+        # None maximum compression
+        window_width = 5
+        for i in range(0, len(curvature), window_width):
+            clip = curvature[i:i+window_width]
+            max_idx = np.argmax(clip)
+            clip *= np.eye(len(clip))[max_idx]
+            curvature[i:i+window_width] = clip
 
         # Decided where to sample
         counter = 0
