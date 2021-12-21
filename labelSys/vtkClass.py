@@ -8,9 +8,8 @@
 from typing import List, Tuple
 from numpy.lib.arraysetops import isin
 import vtk
-from vtk.util import vtkImageImportFromArray
+from vtk.util.vtkImageImportFromArray import vtkImageImportFromArray
 from vtk.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
-#from vtk.qt.QVTKOpenGLWidget import QVTKOpenGLWidget
 from PyQt5.QtWidgets import *
 import numpy as np
 import cv2 as cv
@@ -83,7 +82,7 @@ class VtkWidget(QVTKRenderWindowInteractor):# {{{
             #===============Update Image======================
             # https://gitlab.kitware.com/vtk/vtk/blob/741fffbf6490c34228dfe437f330d854b2494adc/Wrapping/Python/vtkmodules/util/vtkImageImportFromArray.py
             # import from numpy array
-            importer = vtkImageImportFromArray.vtkImageImportFromArray()
+            importer = vtkImageImportFromArray()
             importer.SetArray(arr)
             importer.Update()
 
@@ -108,7 +107,15 @@ class VtkWidget(QVTKRenderWindowInteractor):# {{{
             # not render text
             self.ren_win.Render()
             return 0
+        self.updateText(txt)
 
+    def updateText(self, txt: str):
+        if txt is None:
+            return
+        try:
+            self.ren.RemoveActor(self.t_actor)
+            self.ren.RemoveActor(self.t_actor_label)
+        except: pass
         self.t_actor = vtk.vtkTextActor()
         self.t_actor.SetInput(txt)
         txtprop = self.t_actor.GetTextProperty()
@@ -127,7 +134,9 @@ class VtkWidget(QVTKRenderWindowInteractor):# {{{
         txtprop_label.SetFontSize(32)
         #  txtprop_label.ShadowOn()
         #  txtprop_label.SetShadowOffset(4, 4)
-        self.t_actor_label.SetDisplayPosition(5,50)
+        win_size = self.ren_win.GetSize()
+        # self.t_actor_label.SetDisplayPosition(5,70)
+        self.t_actor_label.SetDisplayPosition(5,win_size[1]-40)
         self.ren.AddActor(self.t_actor_label)
 
         self.ren_win.Render()

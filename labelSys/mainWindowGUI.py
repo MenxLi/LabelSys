@@ -23,6 +23,7 @@ from .compareWidget import CompareWidget
 from .vtkClass import VtkWidget
 from .coreWidgets import WidgetCore
 from .configLoader import _UI_DIR, _DOC_DIR
+from .commentGUI import CommentGUI
 
 import numpy as np
 from PyQt5 import QtWidgets, QtCore
@@ -34,6 +35,7 @@ import cv2 as cv
 LOCAL_DIR = os.path.dirname(os.path.realpath(__file__))
 
 class MainWindow(QMainWindow, WidgetCore):
+    resized = QtCore.pyqtSignal()
     # Init{{{
     def __init__(self,args):# {{{
         super().__init__()
@@ -103,7 +105,7 @@ class MainWindow(QMainWindow, WidgetCore):
             "default_series": SERIES,
             "default_label":DEFAULT_LABEL,
             "2D_magnification":PREVIEW2D_MAG,
-            "max_im_height":MAX_IM_HEIGHT
+            "max_im_height":MAX_IM_HEIGHT,
         }
         if self.args.loading_mode != None:
             # if not loading mode in the command line
@@ -178,6 +180,7 @@ class MainWindow(QMainWindow, WidgetCore):
         self.curr_lbl = str(self.combo_label.currentText())
         self.__updateQLabelText()
 
+        self.resized.connect(self.__updateVTKText)
         self.combo_series.currentTextChanged.connect(self.changeComboSeries)
         self.combo_label.currentTextChanged.connect(self.changeComboLabels)
         self.check_crv.stateChanged.connect(self.changeCheckCrv)
@@ -203,7 +206,7 @@ class MainWindow(QMainWindow, WidgetCore):
     def loadPatients(self, fname: str = None):# {{{
         """Load patients folder, and call initPanelAct() to initialize the panel"""
         if fname is None:
-            fname = QFileDialog.getExistingDirectory(self, "Select Directory")
+            fname = QFileDialog.getExistingDirectory(self, "Select data directory to open")
         if fname == "":
             return 1
         file_path = Path(fname)
@@ -229,7 +232,7 @@ class MainWindow(QMainWindow, WidgetCore):
     def loadLabeledFile(self, fname: str = None):# {{{
         """Load a labeld file for one patient"""
         if fname is None:
-            fname = QFileDialog.getExistingDirectory(self, "Select loading directory")
+            fname = QFileDialog.getExistingDirectory(self, "Select labeled directory to load")
         if fname == "":
             return 1
         if not checkFolderEligibility(fname):
@@ -497,7 +500,14 @@ class MainWindow(QMainWindow, WidgetCore):
         self._warnDialog("This function has not been implemented yet")
     
     def editComment(self):
-        self._warnDialog("This function has not been implemented yet")
+        def saveComments(txt: str):
+            if txt == "":
+                txt = None
+            self.lbl_holder.comments[self.slice_id] = txt
+            self.__updateVTKText()
+        self.comment_gui = CommentGUI(self, saveComments,
+            current_comment=self.lbl_holder.comments[self.slice_id])
+        self.comment_gui.show()
 
     def saveCurrentSlice(self, cnts_data):# {{{
         """
@@ -660,12 +670,8 @@ class MainWindow(QMainWindow, WidgetCore):
         else:
             im = self._getMarkedImg(self.slice_id)
 
-        slice_info = "Slice: "+ str(self.slice_id+1)+"/"+str(len(self.imgs))
-        img_info = "Image size: {} x {}".format(*im.shape)
-        thickness_info = "Thickness: {}".format(self.spacing)
-        txt = slice_info + "\n" + img_info + "\n" + thickness_info
-
-        self.im_widget.readNpArray(im, txt)
+        self.im_widget.readNpArray(im)
+        self.__updateVTKText()
         self.im_widget.reInitStyle()
         idx = self.config["labels"].index(self.curr_lbl)
         self.im_widget.setStyleSampleStep(self.config["label_steps"][idx])
@@ -675,7 +681,19 @@ class MainWindow(QMainWindow, WidgetCore):
         if cnts_data != []:
             for cnt in cnts_data:
                 self.im_widget.loadContour(cnt["Points"], cnt["Open"])
-# }}}
+    
+    def __updateVTKText(self):
+        slice_info = "Slice: "+ str(self.slice_id+1)+"/"+str(len(self.imgs))
+        img_info = "Image size: {} x {}".format(*self.imgs[self.slice_id].shape)
+        thickness_info = "Thickness: {}".format(self.spacing)
+        comment = self.lbl_holder.comments[self.slice_id]
+        if comment is None:
+            comment_info = "Comment: <none>"
+        else:
+            comment_info = f"Comment: {comment}"
+        txt = slice_info + "\n" + img_info + "\n" + thickness_info + "\n" + comment_info
+        self.im_widget.updateText(txt)
+
     def __updateQLabelText(self):# {{{
         self.lbl_wd.setText("Console -- LABELER: {} || OUTPUT_PATH: {}".\
                 format(self.labeler_name, str(self.output_path)))
@@ -738,7 +756,7 @@ class MainWindow(QMainWindow, WidgetCore):
             self.im_widget.style.mouseMoveEvent(None, None)
         return super().eventFilter(receiver, event)
 # }}}
-    def wheelEvent(self, event):# {{{
+    def wheelEvent(self, event):
         if not self.__cache["data_loaded"]:
             return
         modifier = QtWidgets.QApplication.keyboardModifiers()
@@ -752,7 +770,10 @@ class MainWindow(QMainWindow, WidgetCore):
                 self.im_widget.style.OnMouseWheelBackward()
             else:
                 self.nextSlice()
-# }}}
+
+    def resizeEvent(self, a0) -> None:
+        self.resized.emit()
+        return super().resizeEvent(a0)
 
 class EmittingStream(QObject):
     """Reference: https://stackoverflow.com/questions/8356336/how-to-capture-output-of-pythons-interpreter-and-show-in-a-text-widget"""

@@ -19,18 +19,6 @@
             "label_step":1.8
         }
     },
-    "Classifications":{
-        "Bone marrow oedema":{
-            "short_title":"BMO",
-            "class":["0-Absent", "1-Present"],
-            "description":"Compared to the mandibular ramus, hyperintense marrow signalling within the condyle on T2w FS or STIR images, and/or hypointense signaling on pre-contrast T1w images without FS."
-        },
-        "Bone marrow enhancement":{
-            "short_title": "BME",
-            "class":["0-Absent", "1-Present"],
-            "description":"Compared to the mandibular ramus, hyperintense marrow signalling within the condyle on post-contrast T1w Fs images."
-        }
-    },
     "Loading_mode": 0,
     "2D_preview_mag":1,
     "Default_series":"SAG PD",
