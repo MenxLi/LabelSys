@@ -31,9 +31,9 @@ class VtkWidget(QVTKRenderWindowInteractor):# {{{
 
         # Create temporary directory for color image storage,
         # The color image will be stored in this directory then be read by VTK
-        if not os.path.exists(self.TEMP_DIR):
-            print("Temporary directory created: ", self.TEMP_DIR)
-            os.mkdir(self.TEMP_DIR)
+        # if not os.path.exists(self.TEMP_DIR):
+            # print("Temporary directory created: ", self.TEMP_DIR)
+            # os.mkdir(self.TEMP_DIR)
 
         self.master = frame
         self.parent = parent
@@ -68,18 +68,18 @@ class VtkWidget(QVTKRenderWindowInteractor):# {{{
             self.__clearCanvas()
 
         self.im = arr
-        if len(self.im.shape) == 3 and self.im.shape[2] == 3:# {{{
-            # read from image
-            #  im_path = os.path.join(self.TEMP_DIR, "im.jpg")
-            im_path = os.path.join(self.TEMP_DIR, "im.png")
-            cv.imwrite(im_path, cv.cvtColor(self.im, cv.COLOR_RGB2BGR))
-            #  im_reader = vtk.vtkJPEGReader()
-            im_reader = vtk.vtkPNGReader()
-            im_reader.SetFileName(im_path)
-            self.actor = vtk.vtkImageActor()
-            self.actor.GetMapper().SetInputConnection(im_reader.GetOutputPort())
-            # }}}
-        elif len(self.im.shape) == 2:# {{{
+        # if len(self.im.shape) == 3 and self.im.shape[2] == 3:# {{{
+            # # read from image
+            # #  im_path = os.path.join(self.TEMP_DIR, "im.jpg")
+            # im_path = os.path.join(self.TEMP_DIR, "im.png")
+            # cv.imwrite(im_path, cv.cvtColor(self.im, cv.COLOR_RGB2BGR))
+            # #  im_reader = vtk.vtkJPEGReader()
+            # im_reader = vtk.vtkPNGReader()
+            # im_reader.SetFileName(im_path)
+            # self.actor = vtk.vtkImageActor()
+            # self.actor.GetMapper().SetInputConnection(im_reader.GetOutputPort())
+            # # }}}
+        # elif len(self.im.shape) == 2:# {{{
             #===============Update Image======================
             # # https://gitlab.kitware.com/vtk/vtk/blob/741fffbf6490c34228dfe437f330d854b2494adc/Wrapping/Python/vtkmodules/util/vtkImageImportFromArray.py
             # # import from numpy array
@@ -95,9 +95,9 @@ class VtkWidget(QVTKRenderWindowInteractor):# {{{
 
             # self.actor = vtk.vtkImageActor()
             # self.actor.GetMapper().SetInputConnection(flipY_filter.GetOutputPort())
-            img_vtk = vtkImageImportFromArray(self.im)
-            self.actor = vtk.tvkImageActor()
-            self.actor.GetMapper().SetInputConnection(img_vtk.GetOutputPort())
+        img_vtk = numpyArrayAsVtkImageData(self.im)
+        self.actor = vtk.vtkImageActor()
+        self.actor.GetMapper().SetInputData(img_vtk)
             # }}}
         # Add actor to renderer, reset camera and render
         self.ren.AddActor(self.actor)
@@ -551,8 +551,8 @@ def numpyArrayAsVtkImageData(source_numpy_array):
 
     # Note: don't flip (take out next two lines) if input is RGB.
     # Likewise, BGRA->RGBA would require a different reordering here.
-    if channel_count > 1:
-        source_numpy_array = np.flip(source_numpy_array, 2)
+    # if channel_count > 1:
+        # source_numpy_array = np.flip(source_numpy_array, 2)
 
     depth_array = numpy_support.numpy_to_vtk(source_numpy_array.ravel(), deep=True, array_type = vtk_datatype)
     depth_array.SetNumberOfComponents(channel_count)
