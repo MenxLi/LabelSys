@@ -4,11 +4,11 @@
 # This file is part of LabelSys
 # (see https://bitbucket.org/Mons00n/mrilabelsys/).
 #
-import vtkmodules.all as vtk# {{{
-# from vtk.util import vtkImageImportFromArray
-# from vtk.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
-# from vtkmodules.all.util import vtkImageImportFromArray
-# from vtkmodules.all.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
+import vtk
+from vtk.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
+# import vtkmodules.all as vtk# {{{
+# from vtkmodules.util import vtkImageImportFromArray
+# from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 from PyQt5.QtWidgets import *
 from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtGui import QImage, QPixmap
@@ -17,8 +17,8 @@ from .configLoader import *
 from .utils import utils_ as F
 import cv2 as cv
 # }}}
-vtkImageImportFromArray = vtk.util.vtkImageImportFromArray
-QVTKRenderWindowInteractor = vtk.qt.QVTKRenderWindowInteractor 
+# vtkImageImportFromArray = vtk.util.vtkImageImportFromArray
+# QVTKRenderWindowInteractor = vtk.qt.QVTKRenderWindowInteractor 
 
 class PreviewWindow(QWidget):# {{{
     def __init__(self, parent, imgs, masks, spacing = [1,1,1]):# {{{

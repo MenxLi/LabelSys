@@ -7,11 +7,13 @@
 # import{{{
 from typing import List, Tuple
 from numpy.lib.arraysetops import isin
-import vtkmodules.all as vtk
-# from vtkmodules.all.util import vtkImageImportFromArray
-# from vtkmodules.all.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
+# import vtkmodules.all as vtk
+# from vtkmodules.util import vtkImageImportFromArray
+# from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
+import vtk
 # from vtk.util import vtkImageImportFromArray
-# from vtk.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
+from vtk.util.vtkImageImportFromArray import vtkImageImportFromArray
+from vtk.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 #from vtk.qt.QVTKOpenGLWidget import QVTKOpenGLWidget
 from PyQt5.QtWidgets import *
 import numpy as np
@@ -20,8 +22,8 @@ from .utils import utils_ as F
 from .configLoader import *
 import os, sys
 # }}}
-vtkImageImportFromArray = vtk.util.vtkImageImportFromArray
-QVTKRenderWindowInteractor = vtk.qt.QVTKRenderWindowInteractor 
+# vtkImageImportFromArray = vtk.util.vtkImageImportFromArray
+# QVTKRenderWindowInteractor = vtk.qt.QVTKRenderWindowInteractor 
 
 class VtkWidget(QVTKRenderWindowInteractor):# {{{
     if sys.platform == "win32":
@@ -87,7 +89,7 @@ class VtkWidget(QVTKRenderWindowInteractor):# {{{
             #===============Update Image======================
             # https://gitlab.kitware.com/vtk/vtk/blob/741fffbf6490c34228dfe437f330d854b2494adc/Wrapping/Python/vtkmodules/util/vtkImageImportFromArray.py
             # import from numpy array
-            importer = vtkImageImportFromArray.vtkImageImportFromArray()
+            importer = vtkImageImportFromArray()
             importer.SetArray(arr)
             importer.Update()
 
