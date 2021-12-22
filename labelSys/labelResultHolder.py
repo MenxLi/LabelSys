@@ -52,17 +52,20 @@ class LabelHolder:
             else:
                 with open(file_path, "r") as f_:
                     slice_data = json.load(f_)
-                img = imgDecodeB64(slice_data["Image"], accelerate=True)
+                if "Image" in slice_data:               # Older version compatbility (<1.5.4)
+                    img = imgDecodeB64(slice_data["Image"], accelerate=True)
+                else:
+                    img = np.load(file_path[:-4] + "npz")["img"]
                 imgs.append(img)
                 data_ = slice_data["Data"]
                 data.append(data_)
                 if "Comment" in slice_data:
-                    comments_ = slice_data["Comment"]  # Older version compatablility
+                    comments_ = slice_data["Comment"]  # Older version compatablility (<1.5.1)
                 else:
                     comments_ = None
                 comments.append(comments_)
                 if "Classification" in slice_data:
-                    c_comments_ = slice_data["Classification"]  # Older version compatablility
+                    c_comments_ = slice_data["Classification"]  # Older version compatablility (<1.5.3)
                 else:
                     c_comments_ = None
                 class_comments.append(c_comments_)
@@ -105,15 +108,17 @@ class LabelHolder:
         for i in range(len(imgs)):
             print("Saving...{}/{}".format(i+1, len(imgs)))
             file_name = "Slice_"+str(i+1)+".json"
-            im_string = imgEncodeB64(imgs[i], accelerate= True)
+            img_name = "Slice_"+str(i+1)+".npz"
+            # im_string = imgEncodeB64(imgs[i], accelerate= True)
             js_data = {
                     "Data": self.data[i],
                     "Comment": self.comments[i],
                     "Classification": self.class_comments[i],
-                    "Image": im_string,
+                    # "Image": im_string,
                     }
             with open(os.path.join(path, file_name), "w") as f:
                 json.dump(js_data, f)
+            np.savez_compressed(os.path.join(path, img_name), img = imgs[i])
         print("Exporting finished!\nDestination: ", path)
 # }}}
     def __getBackNpCoord(self, x, y, img_shape):# {{{

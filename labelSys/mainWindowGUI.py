@@ -690,7 +690,8 @@ class MainWindow(QMainWindow, WidgetCore):
     
     def __updateVTKText(self):
         slice_info = "Slice: "+ str(self.slice_id+1)+"/"+str(len(self.imgs))
-        img_info = "Image size: {} x {}".format(*self.imgs[self.slice_id].shape)
+        img_info = "Image size: {} x {} ({dtype})".format(*self.imgs[self.slice_id].shape, 
+            dtype = self.imgs[self.slice_id].dtype)
         thickness_info = "Thickness: {}".format(self.spacing)
         comment = self.lbl_holder.comments[self.slice_id]
         class_comment = self.lbl_holder.class_comments[self.slice_id]
