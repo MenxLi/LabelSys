@@ -34,3 +34,5 @@ for _label in CONF["Labels"].keys():
 # Magnification for preview
 PREVIEW2D_MAG = CONF["2D_preview_mag"]
 
+CLASSIFICATIONS = CONF["Classifications"]
+

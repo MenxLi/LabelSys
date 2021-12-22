@@ -35,11 +35,13 @@ class LabelHolder:
                 self.data[-1][entry] = []
             self.data[-1]["SOPInstanceUID"] = ids
         self.comments = [None]*len(self.data)
+        self.class_comments = [None]*len(self.data)
 # }}}
     def loadFile(self, path):# {{{
         imgs = []
         data = []
         comments = []
+        class_comments = []
         file_list = [x for x in os.listdir(path) if x.endswith('.json')]
         for file_name in sorted(file_list, key = lambda x : int(re.findall('\d+|$', x)[0])):
             # Sort according to slice number "SliceXXX.json"
@@ -59,8 +61,14 @@ class LabelHolder:
                 else:
                     comments_ = None
                 comments.append(comments_)
+                if "Classification" in slice_data:
+                    c_comments_ = slice_data["Classification"]  # Older version compatablility
+                else:
+                    c_comments_ = None
+                class_comments.append(c_comments_)
         self.data = data
         self.comments = comments
+        self.class_comments = class_comments
         self.SAVED = True
         return  header_data, imgs
 # }}}
@@ -101,6 +109,7 @@ class LabelHolder:
             js_data = {
                     "Data": self.data[i],
                     "Comment": self.comments[i],
+                    "Classification": self.class_comments[i],
                     "Image": im_string,
                     }
             with open(os.path.join(path, file_name), "w") as f:

@@ -19,6 +19,13 @@
             "label_step":2
         }
     },
+    "Classifications":{
+        "Class0":{
+            "short_title": "c0",
+            "class": ["Good", "fair"],
+            "description": "This is a classification"
+        }
+    },
     "Loading_mode": 0,
     "2D_preview_mag":1,
     "Default_series":"SAG PD",

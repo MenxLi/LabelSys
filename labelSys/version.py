@@ -32,5 +32,6 @@ __VERSIONS__ =[ \
         ["1.5.0", "UI updates, add comment functionality"],
         ["1.5.1", "Performance optimization with better color image loading."],
         ["1.5.2", "Resample stratagy update"],
+        ["1.5.3", "Add classification functionality"],
         ]
 __version__, __description__ = __VERSIONS__[-1]
