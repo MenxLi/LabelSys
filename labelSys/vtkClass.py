@@ -451,7 +451,7 @@ class MyInteractorStyle(vtk.vtkInteractorStyleImage):# {{{
         xx_t = np.gradient(x_t)
         yy_t = np.gradient(y_t)
         curvature = np.abs(xx_t * y_t - x_t * yy_t) / (x_t * x_t + y_t * y_t + epsilon)**2.5
-        kernel = np.array([1])
+        kernel = np.array([0.1, 0.15, 0.5, 0.15, 0.1])
 
         curvature = np.convolve(curvature, kernel, mode = "same")
         curvature = np.abs(curvature)
