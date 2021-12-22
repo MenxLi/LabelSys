@@ -194,6 +194,18 @@
         }
     },
     "Loading_mode": 1,
+    "Classifications":{
+        "Image class":{
+            "short_title": "C",
+            "class": ["Bite", "Bite-side", "Occlusal", "Occlusal-angle", "AnteriorTeeth"],
+            "description": "拍摄对象的水平位置，例如拍摄左侧上颌，则选择Left."
+        },
+        "Horizontal position":{
+            "short_title": "HP",
+            "class": ["Left", "Middle", "Right"],
+            "description": "拍摄对象的水平位置，例如拍摄左侧上颌，则选择Left."
+        }
+    },
     "2D_preview_mag":1,
     "Default_series":"SAG PD",
     "Default_label":"#15",

@@ -106,6 +106,7 @@ class MainWindow(QMainWindow, WidgetCore):
             "default_label":DEFAULT_LABEL,
             "2D_magnification":PREVIEW2D_MAG,
             "max_im_height":MAX_IM_HEIGHT,
+            "classifications": CLASSIFICATIONS
         }
         if self.args.loading_mode != None:
             # if not loading mode in the command line
@@ -500,12 +501,17 @@ class MainWindow(QMainWindow, WidgetCore):
         self._warnDialog("This function has not been implemented yet")
     
     def editComment(self):
-        def saveComments(txt: str):
-            if txt == "":
-                txt = None
-            self.lbl_holder.comments[self.slice_id] = txt
+        def saveComments(classification_txt: str, comment_txt: str):
+            if comment_txt == "":
+                comment_txt = None
+            self.lbl_holder.comments[self.slice_id] = comment_txt
+            if classification_txt == "":
+                classification_txt = None
+            self.lbl_holder.class_comments[self.slice_id] = classification_txt
             self.__updateVTKText()
         self.comment_gui = CommentGUI(self, saveComments,
+            classes= self.config["classifications"],
+            current_classes_str=self.lbl_holder.class_comments[self.slice_id],
             current_comment=self.lbl_holder.comments[self.slice_id])
         self.comment_gui.show()
 
@@ -684,14 +690,21 @@ class MainWindow(QMainWindow, WidgetCore):
     
     def __updateVTKText(self):
         slice_info = "Slice: "+ str(self.slice_id+1)+"/"+str(len(self.imgs))
-        img_info = "Image size: {} x {}".format(*self.imgs[self.slice_id].shape)
+        img_info = "Image size: {} x {} ({dtype})".format(*self.imgs[self.slice_id].shape, 
+            dtype = self.imgs[self.slice_id].dtype)
         thickness_info = "Thickness: {}".format(self.spacing)
         comment = self.lbl_holder.comments[self.slice_id]
+        class_comment = self.lbl_holder.class_comments[self.slice_id]
         if comment is None:
             comment_info = "Comment: <none>"
         else:
             comment_info = f"Comment: {comment}"
-        txt = slice_info + "\n" + img_info + "\n" + thickness_info + "\n" + comment_info
+        if class_comment is None:
+            class_comment_info = "Classification: <none>"
+        else:
+            class_comment_info = f"Classification: {class_comment}"
+        show_txt = [slice_info, img_info, thickness_info, class_comment_info, comment_info]
+        txt = "\n".join(show_txt)
         self.im_widget.updateText(txt)
 
     def __updateQLabelText(self):# {{{
