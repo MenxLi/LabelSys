@@ -1,19 +1,16 @@
 {
     "Labels":{
         "Label1" :{
-            "value": 1, 
             "color": [1.0, 0.0, 0.0], 
             "mode": 0,
             "label_step":1
         },
         "Label2" :{
-            "value": 2, 
             "color": [1.0, 1.0, 0.0], 
-            "mode": 1,
+            "mode": 0,
             "label_step":2
         },
         "Label3" :{
-            "value": 3, 
             "color": [0.0, 1.0, 1.0], 
             "mode": 1,
             "label_step":2
@@ -21,19 +18,33 @@
     },
     "Classifications":{
         "Class0":{
-            "short_title": "c0",
+            "short_title": "Image quality",
             "class": ["Good", "fair"],
-            "description": "This is a classification"
+            "description": "This is a image classification"
+        },
+        "Class1":{
+            "short_title": "Image size",
+            "class": ["Large", "small"],
+            "description": "This is a image classification"
         }
     },
-    "Loading_mode": 0,
+    "Draw_contour": 0,
+    "Loading_mode": 1,
     "2D_preview_mag":1,
     "Default_series":"SAG PD",
-    "Default_label":"",
+    "Default_label":"Label2",
     "Max_im_height":1024,
+
     "-----------Below are comments for your understanding--------":
-    "-------don't change them---------",
+    "---------------------don't change them----------------------",
+
     "__Contour_mode": {"Open": 1, "Close": 0},
-    "__Loading_mode": {"DICOMs":0, "Images":1, "Video":2}
+    "__Draw_contour": {"Click mode": 0, "Draw mode": 1},
+    "__Loading_mode": {"DICOMs":0, "Images":1, "Video":2},
+    "__Others":{
+        "0": "Label step only work when Draw contour is 1",
+        "1": "Default series only work with MRI",
+        "2": "Classifications are image wide"
+    }
 }
 

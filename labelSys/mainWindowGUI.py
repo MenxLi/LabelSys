@@ -108,7 +108,8 @@ class MainWindow(QMainWindow, WidgetCore):
             "default_label":DEFAULT_LABEL,
             "2D_magnification":PREVIEW2D_MAG,
             "max_im_height":MAX_IM_HEIGHT,
-            "classifications": CLASSIFICATIONS
+            "classifications": CLASSIFICATIONS,
+            "draw_contour": DRAW_CONTOUR,
         }
         if self.args.loading_mode != None:
             # if not loading mode in the command line

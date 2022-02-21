@@ -1,5 +1,6 @@
 from warnings import warn
 from typing import List, Tuple, Union
+
 from .base64ImageConverter import imgDecodeB64
 import numpy as np
 import cv2 as cv
@@ -12,6 +13,94 @@ except ModuleNotFoundError:
     print("Skimage not found, trying to use opencv instead...")
     USE_SKIMAGE = False
 
+
+class LabelData(object):
+    def __init__(self, param_dict: dict) -> None:
+        self.header: dict = {}
+        self.images: List[np.ndarray] = []
+        self.masks: List[dict] = []
+        self.contours: List[dict] = []
+        self.classifications: List[dict] = []
+        self.comments: List[str] = []
+        for k, v in param_dict.items():
+            setattr(self, k, v)
+    
+    def __str__(self):
+        length_string = f"LabelData({len(self)})"
+        reader_string = f"Reader: {self.header['Labeler']}"
+        version_info = f"Application version: {self.header['Version']}"
+        label_info = f"Number of avaliable labels: {len(self.header['Config']['labels'])}"
+        to_show = [length_string, version_info, reader_string, label_info]
+        return "\n".join(to_show)
+    __repr__ = __str__
+
+    def __len__(self):
+        return len(self.images)
+    
+    def colorMask(self, idx: int):
+        masks = self.masks[idx]
+        image = self.images[idx]
+        c_mask = np.zeros((image.shape[:2], 3), float)
+        config = self.header["Config"]
+        for k, c in zip(config["labels"], config["label_colors"]):
+            msk = masks[k]
+        raise NotImplementedError
+
+    def avalLabels(self):
+        return self.header["Config"]["labels"]
+
+class LabelSysReader(object):
+    MAGNIFICATION = 1
+    LINE_THICKNESS = 1
+    def __init__(self, folder_list: List[str]) -> None:
+        self.fl = folder_list
+    
+    def __getitem__(self, key):
+        if isinstance(key, int):
+            return self.read(self.fl[key], self.MAGNIFICATION, self.LINE_THICKNESS)
+        elif isinstance(key, slice):
+            start = key.start
+            stop = key.stop
+            step = key.step
+            return LabelSysReader(self.fl[start: stop: step])
+        else:
+            raise TypeError("Invalid argument type.")
+    
+    def __len__(self):
+        return len(self.fl)
+
+    def read(self, path: str, magnification: Union[float, int] = 1, line_thickness: int = 1):
+        images = []
+        masks = []
+        contours = []
+        classifications = []
+        comments = []
+
+        file_list = [x for x in os.listdir(path) if x.endswith(".json")]
+        for file_name in sorted(file_list, key = lambda x : int(re.findall("\d+|$", x)[0])):
+            file_path = os.path.join(path, file_name)
+            if file_name == "HEAD_0.json":
+                with open(file_path, "r") as _f:
+                    header = json.load(_f)
+            else:
+                d = readDataSlice(file_path, magnification, line_thickness)
+                images.append(d["img"])
+                masks.append(d["msks"])
+                contours.append(d["cnts"])
+                comments.append(d["comment"])
+                classifications.append(d["classification"])
+        return LabelData({
+            "header": header,
+            "images": images,
+            "masks": masks,
+            "contours": contours,
+            "comments": comments,
+            "classifications": classifications
+        })
+    
+    def toCOCO(self):
+        raise NotImplementedError
+
 def checkFolderEligibility(fpath: str):
     flag = False
     for fname in os.listdir(fpath):
@@ -19,20 +108,20 @@ def checkFolderEligibility(fpath: str):
             flag = True
     return flag
 
-def readOneFolder(path: str, magnification: Union[float, int] = 1, line_thickness: int = 1) -> Tuple[List[np.ndarray],List[dict]]:# {{{
-    imgs = []
-    masks = []
-    file_list = [x for x in os.listdir(path) if x.endswith(".json")]
-    for file_name in sorted(file_list, key = lambda x : int(re.findall("\d+|$", x)[0])):
-        file_path = os.path.join(path, file_name)
-        if file_name == "HEAD_0.json":
-            with open(file_path, "r") as _f:
-                header_data = json.load(_f)
-        else:
-            img, mask = readDataSlice(file_path, magnification, line_thickness)
-            imgs.append(img)
-            masks.append(mask)
-    return imgs, masks
+# def readOneFolder(path: str, magnification: Union[float, int] = 1, line_thickness: int = 1) -> Tuple[List[np.ndarray],List[dict]]:# {{{
+    # imgs = []
+    # masks = []
+    # masks_cnt = []
+    # comments = []
+    # classifications = []
+    # file_list = [x for x in os.listdir(path) if x.endswith(".json")]
+    # for file_name in sorted(file_list, key = lambda x : int(re.findall("\d+|$", x)[0])):
+        # file_path = os.path.join(path, file_name)
+        # if file_name == "HEAD_0.json":
+            # with open(file_path, "r") as _f:
+                # header_data = json.load(_f)
+        # else:
+    # return imgs, masks
 # }}}
 def readDataSlice(file_path: str, magnification: Union[int, float] = 1, line_thickness: int = 1):# {{{
     """
@@ -72,15 +161,29 @@ def readDataSlice(file_path: str, magnification: Union[int, float] = 1, line_thi
         img = cv.resize(img_ori_uint8, tuple(new_im_size[::-1]), interpolation = cv.INTER_LINEAR)
 
     masks = dict()
+    cnts = dict()
     for label, data in slice_data["Data"].items():
         if not isinstance(data, list):
             # SOPInstanceUID
             continue
         if data == []:
-            masks[label] = np.zeros(img.shape[:2])
+            masks[label], cnts[label] = (np.zeros(img.shape[:2]), None)
         else:
-            masks[label] = _readOneLabel(img_ori.shape[:2], data, magnification, line_thickness)
-    return img, masks
+            masks[label], cnts[label] = _readOneLabel(img_ori.shape[:2], data, magnification, line_thickness)
+    
+    classification: str = slice_data["Classification"]
+    class_dict = {}
+    if not classification is None:
+        for c in classification.split("&"):
+            k, v = c.split(":")
+            class_dict[k] = v
+    return {
+        "img": img,
+        "msks": masks,
+        "cnts": cnts,
+        "comment": slice_data["Comment"],
+        "classification": class_dict
+    }
 # }}}
 def _readOneLabel(ori_im_size, data, magnification, line_thickness):# {{{
     """
@@ -91,6 +194,7 @@ def _readOneLabel(ori_im_size, data, magnification, line_thickness):# {{{
     """
     new_im_size = (np.array(ori_im_size)*magnification).astype(np.int)
     mask = np.zeros(new_im_size[:2], np.uint8)
+    cnts = []
     for d in data:
         open_curve = d["Open"]
         pts = d["Points"]
@@ -130,8 +234,10 @@ def _readOneLabel(ori_im_size, data, magnification, line_thickness):# {{{
         contour_widget.Initialize(pd, 1)
 
         cnt = _getFullCnt(contour_widget, ori_im_size) # All points on the contour
-        mask = drawMask(mask, np.array(cnt)*magnification, open_curve, line_thickness)
-    return mask
+        cnt = np.array(cnt)*magnification
+        mask = drawMask(mask, cnt, open_curve, line_thickness)
+        cnts.append(cnt)
+    return mask, cnts
 # }}}
 def _getFullCnt(contour_widget, img_shape):# {{{{{{
     """

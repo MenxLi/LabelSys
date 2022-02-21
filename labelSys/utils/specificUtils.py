@@ -12,6 +12,7 @@ import datetime
 import cv2 as cv
 import numpy as np
 from decimal import Decimal
+from ..version import __version__
 
 def createHeader(labeler, series, config,  time = str(datetime.datetime.now()), spacing = (1,1,1)):
     head_info = {
@@ -19,7 +20,8 @@ def createHeader(labeler, series, config,  time = str(datetime.datetime.now()), 
             "Time":time,
             "Spacing":spacing,
             "Series": series,
-            "Config": config
+            "Config": config,
+            "Version": __version__
     }
     return head_info
 

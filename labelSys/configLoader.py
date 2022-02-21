@@ -25,6 +25,7 @@ LOADING_MODE = CONF["Loading_mode"]
 SERIES = CONF["Default_series"]
 DEFAULT_LABEL = CONF["Default_label"]
 MAX_IM_HEIGHT = CONF["Max_im_height"]   # Maximum image height, when image is bigger than this value it will be resize to this height
+DRAW_CONTOUR = CONF["Draw_contour"]
 
 LABELS = []
 LBL_COLORS = []
