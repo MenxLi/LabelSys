@@ -18,7 +18,7 @@ from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QApplication
 from .mainWindowGUI import MainWindow
 from .configLoader import _UI_DIR
-from .utils.argParse import parser, args
+from .argParse import parser, args
 
 if not QT_QPA_PLATFORM_PLUGIN_PATH is None:
     os.environ["QT_QPA_PLATFORM_PLUGIN_PATH"] = QT_QPA_PLATFORM_PLUGIN_PATH

@@ -6,9 +6,14 @@
 #
 import json
 import os
+from .argParse import parser, args
 
 _CURR_DIR = os.path.dirname(__file__)
-with open(os.path.join(_CURR_DIR, "conf.json"), "r") as f:
+if args.config_file:
+    CONF_PATH = args.config_file
+else:
+    CONF_PATH = os.path.join(_CURR_DIR, "conf.json")
+with open(CONF_PATH, "r", encoding="utf-8") as f:
     CONF = json.load(f)
 _UI_DIR = os.path.join(_CURR_DIR, "ui")
 _DOC_DIR = os.path.join(_CURR_DIR, "docs")

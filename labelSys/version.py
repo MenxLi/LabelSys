@@ -34,5 +34,6 @@ __VERSIONS__ =[ \
         ["1.5.2", "Resample stratagy update"],
         ["1.5.3", "Add classification functionality"],
         ["1.5.4", "Saving format change, now using .npz for image saving; Add dtype to on-panel img info"],
+        ["1.5.5", "Add -c to argparse"],
         ]
 __version__, __description__ = __VERSIONS__[-1]

@@ -84,12 +84,14 @@ class MainWindow(QMainWindow, WidgetCore):
         self.initImageUI()
         self.initPanel()
 
-        if self.args.dev:
-            print("Developing mode...")
+        if args.file:
             if args.load:
                 self.loadLabeledFile(args.file)
             else:
                 self.loadPatients(args.file)
+
+        if self.args.dev:
+            print("Developing mode...")
         else:
             print("Welcome to LabelSys v"+__version__)
             print("For help see: Help -> manual")
@@ -689,6 +691,8 @@ class MainWindow(QMainWindow, WidgetCore):
                 self.im_widget.loadContour(cnt["Points"], cnt["Open"])
     
     def __updateVTKText(self):
+        if not hasattr(self, "imgs") or not self.imgs:
+            return
         slice_info = "Slice: "+ str(self.slice_id+1)+"/"+str(len(self.imgs))
         img_info = "Image size: {} x {} ({dtype})".format(*self.imgs[self.slice_id].shape, 
             dtype = self.imgs[self.slice_id].dtype)
