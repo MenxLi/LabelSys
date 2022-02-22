@@ -56,12 +56,23 @@ class VtkWidget(QVTKRenderWindowInteractor, WidgetCore):
         self.colors = vtk.vtkNamedColors()
         self.contours = []
 
+        self.setStyleAuto()
+        self.style: InteractionStyleBase
+    
+    def setStyleAuto(self):
+        is_draw = self.__isDraw()
         # change key binding
-        if self.getMainWindow().config["draw_contour"]:
+        if is_draw:
             self.setStyle(DrawContourInteractorStyle)
         else:
             self.setStyle(PtContourInteractorStyle)
-        self.style: InteractionStyleBase
+        self.reInitStyle()
+
+        # If using DrawContourInteractorStyle
+        if hasattr(self.getMainWindow(), "curr_lbl"):
+            if self.getMainWindow().curr_lbl in self.getMainWindow().config["labels"]:
+                lbl_idx = self.getMainWindow().config["labels"].index(self.getMainWindow().curr_lbl)
+                self.setStyleSampleStep(self.getMainWindow().config["label_steps"][lbl_idx])
     
     def setStyle(self, style_: InteractionStyleBase):
         if hasattr(self, "style"):
@@ -345,6 +356,9 @@ class VtkWidget(QVTKRenderWindowInteractor, WidgetCore):
 
     def __isOpen(self):
         return self.parent.check_crv.isChecked()
+
+    def __isDraw(self):
+        return self.parent.check_draw.isChecked()
     
     def mouseDoubleClickEvent(self, *args):
         self.style.doubleClickEvent(*args)

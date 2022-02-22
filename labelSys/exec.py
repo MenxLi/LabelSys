@@ -47,8 +47,11 @@ def main():
     sys.exit(app.exec_())
 
 def main_():
-    # For linux, if following error occurred:
-    # "This application failed to start because no Qt platform plugin could be initialized."
+    """
+    For linux, if following error occurred:
+    "This application failed to start because no Qt platform plugin could be initialized."
+    call this function to start the program
+    """
     _QT_QPA_PLATFORM_PLUGIN_PATH="/home/monsoon/Documents/Code/.venv/mainEnv/lib/python3.8/site-packages/cv2/qt/plugins/platforms"
     os.environ["QT_QPA_PLATFORM_PLUGIN_PATH"] = _QT_QPA_PLATFORM_PLUGIN_PATH
     main()

@@ -5,6 +5,7 @@
 # (see https://bitbucket.org/Mons00n/mrilabelsys/).
 #
 # Import {{{
+from ensurepip import version
 import webbrowser
 from pathlib import Path
 import os,sys
@@ -41,6 +42,7 @@ class MainWindow(QMainWindow, WidgetCore):
         super().__init__()
         if not args.dev:
             sys.stdout = EmittingStream(textWritten = self.stdoutStream)
+            sys.stderr = EmittingStream(textWritten = self.stdoutStream)
         # load UI
         ui_path = os.path.join(_UI_DIR,  "mainWindow.ui")
         uic.loadUi(ui_path, self)
@@ -89,12 +91,20 @@ class MainWindow(QMainWindow, WidgetCore):
                 self.loadLabeledFile(args.file)
             else:
                 self.loadPatients(args.file)
+        
+        welcome_msg = "\
+---------------------------------------------\n\
+Welcome to LabelSys v{version},\n\
+ - Using Configuration file at: \n\
+    {conf_path},\n\
+ - For help see: Help -> manual\n\
+---------------------------------------------\n\
+".format(version = __version__,conf_path = CONF_PATH)
 
         if self.args.dev:
             print("Developing mode...")
-        else:
-            print("Welcome to LabelSys v"+__version__)
-            print("For help see: Help -> manual")
+        print(welcome_msg)
+
 # }}}
     def __configSetup(self):# {{{
         """Unfinished function, will move all CONF attributes into self.config in the future"""
@@ -109,7 +119,8 @@ class MainWindow(QMainWindow, WidgetCore):
             "2D_magnification":PREVIEW2D_MAG,
             "max_im_height":MAX_IM_HEIGHT,
             "classifications": CLASSIFICATIONS,
-            "draw_contour": DRAW_CONTOUR,
+            # "draw_contour": DRAW_CONTOUR,
+            "label_draw": LBL_DRAW,
         }
         if self.args.loading_mode != None:
             # if not loading mode in the command line
@@ -188,6 +199,7 @@ class MainWindow(QMainWindow, WidgetCore):
         self.combo_series.currentTextChanged.connect(self.changeComboSeries)
         self.combo_label.currentTextChanged.connect(self.changeComboLabels)
         self.check_crv.stateChanged.connect(self.changeCheckCrv)
+        self.check_draw.stateChanged.connect(self.changeCheckDraw)
         self.check_preview.stateChanged.connect(self.changeCheckPreview)
         self.btn_next_slice.clicked.connect(self.nextSlice)
         self.btn_prev_slice.clicked.connect(self.prevSlice)
@@ -196,7 +208,7 @@ class MainWindow(QMainWindow, WidgetCore):
         self.btn_save.clicked.connect(self.saveCurrentPatient)
         self.btn_clear.clicked.connect(self.clearCurrentSlice)
         self.btn_interp.clicked.connect(self.interpCurrentSlice)
-        self.btn_preview.clicked.connect(self.previewLabels2D)
+        # self.btn_preview.clicked.connect(self.previewLabels2D)
         self.btn_add_cnt.clicked.connect(self.addContour)
         self.btn_add_bbox.clicked.connect(self.addBBox)
         self.btn_comment.clicked.connect(self.editComment)
@@ -353,6 +365,12 @@ class MainWindow(QMainWindow, WidgetCore):
                 self.check_crv.setChecked(True)
             elif mode == 0:
                 self.check_crv.setChecked(False)
+            draw_mode = self.config["label_draw"][self.config["labels"].index(self.curr_lbl)]
+            if draw_mode == 1:
+                self.check_draw.setChecked(True)
+            elif draw_mode == 0:
+                self.check_draw.setChecked(False)
+            self.im_widget.setStyleAuto()      # May change label drawing mode
         except: pass
 # }}}
     def changeCheckCrv(self, i):# {{{
@@ -361,13 +379,21 @@ class MainWindow(QMainWindow, WidgetCore):
         else:
             self.config["label_modes"][self.config["labels"].index(self.curr_lbl)] = 0
 # }}}
+    def changeCheckDraw(self, i):# {{{
+        if self.check_draw.isChecked():
+            self.config["label_draw"][self.config["labels"].index(self.curr_lbl)] = 1
+        else:
+            self.config["label_draw"][self.config["labels"].index(self.curr_lbl)] = 0
+        self.im_widget.setStyleAuto()          # May change label drawing mode
+# }}}
     def changeCheckPreview(self):# {{{
         self.__updateImg()
 # }}}
     def changeSliderValue(self):# {{{
         """Triggered when slider_im changes value"""
         self.slice_id = self.slider_im.value()
-        self.__updateImg()
+        # self.__updateImg()
+        self.changeComboLabels(self.combo_label.currentText())  # A hack to update checkboxes and image
 # }}}
     def switchLabel(self):# {{{
         """switch between labels, for shortcut use"""
@@ -660,7 +686,8 @@ class MainWindow(QMainWindow, WidgetCore):
         self.slice_id = 0
         self.__updateComboSeries()
         self.__readSeries()
-        self.__updateImg()
+        # self.__updateImg()
+        self.changeComboLabels(self.combo_label.currentText())  # A hack to update checkboxes and update image
         self.slider_im.setSliderPosition(self.slice_id)
         self.slider_im.setMaximum(len(self.imgs)-1)
         try:

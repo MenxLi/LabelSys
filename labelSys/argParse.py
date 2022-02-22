@@ -11,7 +11,12 @@ should be imported at the start of main file
 import argparse
 from .version import __version__, __description__
 
-parser = argparse.ArgumentParser(description = "LabeySys v{}, \n{}".format(__version__, __description__))
+description = "\
+    LabelSys v{version}: \n\
+    LabelSys is a labeling software developed by Li, Mengxun (mengxunli@whu.edu.cn)\
+    ".format(version = __version__)
+
+parser = argparse.ArgumentParser(description = description)
 parser.add_argument("-d", "--dev", action = "store_true", default = False)
 parser.add_argument("-l", "--load", action = "store_true", default = False)
 parser.add_argument("-f", "--file", type = str, default = "")

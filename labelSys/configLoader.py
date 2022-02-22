@@ -25,17 +25,38 @@ LOADING_MODE = CONF["Loading_mode"]
 SERIES = CONF["Default_series"]
 DEFAULT_LABEL = CONF["Default_label"]
 MAX_IM_HEIGHT = CONF["Max_im_height"]   # Maximum image height, when image is bigger than this value it will be resize to this height
-DRAW_CONTOUR = CONF["Draw_contour"]
+# DRAW_CONTOUR = CONF["Draw_contour"]
 
 LABELS = []
 LBL_COLORS = []
 LBL_MODE = []
+LBL_DRAW = []
 LBL_STEP = []
 for _label in CONF["Labels"].keys():
     LABELS.append(_label)
-    LBL_COLORS.append(CONF["Labels"][_label]["color"])
-    LBL_MODE.append(CONF["Labels"][_label]["mode"])
-    LBL_STEP.append(CONF["Labels"][_label]["label_step"])
+    if "color" in CONF["Labels"][_label]:
+        # Label color
+        LBL_COLORS.append(CONF["Labels"][_label]["color"])
+    else:
+        LBL_COLORS.append([1.0, 0.0, 0.0])
+
+    if "mode" in CONF["Labels"][_label]:
+        # Open or close contour
+        LBL_MODE.append(CONF["Labels"][_label]["mode"])
+    else:
+        LBL_MODE.append(0)
+
+    if "draw" in CONF["Labels"][_label]:
+        # Draw the contour or click to add points
+        LBL_DRAW.append(CONF["Labels"][_label]["draw"])
+    else:
+        LBL_DRAW.append(1)
+
+    if "label_step" in CONF["Labels"][_label]:
+        # Drawing resample step
+        LBL_STEP.append(CONF["Labels"][_label]["label_step"])
+    else:
+        LBL_STEP.append(1)
 
 # Magnification for preview
 PREVIEW2D_MAG = CONF["2D_preview_mag"]

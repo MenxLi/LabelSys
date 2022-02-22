@@ -17,7 +17,7 @@ class ClassLine(QWidget, WidgetCore):
         h_layout = QHBoxLayout()
         v_layout = QVBoxLayout()
 
-        v_layout.addWidget(QLabel(self.name))
+        v_layout.addWidget(QLabel(f"{self.name} ({self.short_name})"))
         self.rbs = [QRadioButton("<none>")]
         self.rbs += [QRadioButton(c) for c in self.classes]
         self.rbs[0].setChecked(True)
