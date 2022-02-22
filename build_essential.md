@@ -2,7 +2,7 @@
 
 [Pyinstaller-Spec](http://pyinstaller.readthedocs.io/en/stable/spec-files.html#adding-data-files)
 
-`pyi-makespec -F --collect-submodules=pydicom`
+`pyi-makespec -F --collect-submodules=pydicom -i ./labelSys/icons/main.ico ./run.py`
 ```Python
 data_path = [
 ( "labelSys/ui/*", "./labelSys/ui" ),
