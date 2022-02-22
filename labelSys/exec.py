@@ -16,6 +16,7 @@ except KeyError:
     QT_QPA_PLATFORM_PLUGIN_PATH = None
 from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QApplication
+from PyQt5.QtCore import QTextCodec
 from .mainWindowGUI import MainWindow
 from .configLoader import _UI_DIR
 from .argParse import parser, args
@@ -33,6 +34,8 @@ class Application(QApplication):
             print("An exception occured: ", exp)
             return 1
 def main():
+    codec = QTextCodec.codecForName("UTF-8")
+    QTextCodec.setCodecForLocale(codec)
     app = Application([parser.prog])
     font = QFont("Verdana", 9)
     app.setFont(font)
