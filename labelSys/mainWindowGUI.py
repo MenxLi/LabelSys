@@ -23,13 +23,14 @@ from .settingsGUI import SettingsDialog
 from .compareWidget import CompareWidget
 from .vtkClass import VtkWidget
 from .coreWidgets import WidgetCore
-from .configLoader import _UI_DIR, _DOC_DIR
+from .configLoader import _ICON_DIR, _DOC_DIR, _UI_DIR
 from .commentGUI import CommentGUI
 
 import numpy as np
 from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import Qt, pyqtSignal, QObject, QEvent
+from PyQt5.QtGui import QIcon
 from PyQt5 import uic
 import cv2 as cv
 # }}}
@@ -40,6 +41,7 @@ class MainWindow(QMainWindow, WidgetCore):
     # Init{{{
     def __init__(self,args):# {{{
         super().__init__()
+        self.setWindowIcon(QIcon(os.path.join(_ICON_DIR, "main.ico")))
         if not args.dev:
             sys.stdout = EmittingStream(textWritten = self.stdoutStream)
             sys.stderr = EmittingStream(textWritten = self.stdoutStream)

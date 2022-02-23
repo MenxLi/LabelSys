@@ -17,6 +17,7 @@ with open(CONF_PATH, "r", encoding="utf-8") as f:
     CONF = json.load(f)
 _UI_DIR = os.path.join(_CURR_DIR, "ui")
 _DOC_DIR = os.path.join(_CURR_DIR, "docs")
+_ICON_DIR = os.path.join(_CURR_DIR, "icons")
 
 # CNT_OPEN = CONF["Contour_mode"]["Open"]
 # CNT_CLOSE = CONF["Contour_mode"]["Close"]

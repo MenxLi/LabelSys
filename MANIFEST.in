@@ -2,6 +2,7 @@ include README.md
 recursive-include labelSys conf.json
 recursive-include labelSys/docs *
 recursive-include labelSys/ui *
+recursive-include labelSys/icons *
 recursive-include labelSys/Pics *
 recursive-include labelSys/utils *.so
 recursive-include labelSys/utils *.dll

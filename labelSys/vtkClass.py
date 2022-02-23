@@ -6,10 +6,18 @@
 #
 # import{{{
 from typing import List, Tuple
-import vtk
-from vtk.util.vtkImageImportFromArray import vtkImageImportFromArray
-from vtk.util import numpy_support
-from vtk.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
+from vtkmodules.vtkCommonCore import \
+    VTK_INT, VTK_UNSIGNED_CHAR, VTK_UNSIGNED_INT, VTK_UNSIGNED_SHORT, \
+    VTK_UNSIGNED_LONG, VTK_CHAR, VTK_SHORT, VTK_FLOAT, VTK_DOUBLE, VTK_UNSIGNED_LONG_LONG, VTK_LONG_LONG, \
+    VTK_SIZEOF_LONG, VTK_LONG
+from vtkmodules.vtkCommonCore import vtkPoints
+from vtkmodules.vtkCommonColor import vtkNamedColors
+from vtkmodules.vtkRenderingCore import vtkRenderer, vtkImageActor, vtkTextActor, vtkActor, vtkPolyDataMapper
+from vtkmodules.vtkCommonDataModel import vtkPolyData, vtkCellArray, vtkImageData
+from vtkmodules.vtkInteractionWidgets import vtkContourWidget, vtkOrientedGlyphContourRepresentation
+from vtkmodules.vtkFiltersSources import vtkLineSource
+from vtkmodules.util import numpy_support
+from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 from PyQt5.QtWidgets import *
 import numpy as np
 import cv2 as cv
@@ -45,7 +53,7 @@ class VtkWidget(QVTKRenderWindowInteractor, WidgetCore):
         self.master.setLayout(layout)
 
         self.ren_win = self.GetRenderWindow()
-        self.ren = vtk.vtkRenderer()
+        self.ren = vtkRenderer()
         self.camera_set = False
         self.ren_win.AddRenderer(self.ren)
         self.iren = self.ren_win.GetInteractor()
@@ -53,7 +61,7 @@ class VtkWidget(QVTKRenderWindowInteractor, WidgetCore):
         self.iren.Initialize()
 
         # Attribute
-        self.colors = vtk.vtkNamedColors()
+        self.colors = vtkNamedColors()
         self.contours = []
 
         self.setStyleAuto()
@@ -121,7 +129,7 @@ class VtkWidget(QVTKRenderWindowInteractor, WidgetCore):
             # self.actor = vtk.vtkImageActor()
             # self.actor.GetMapper().SetInputConnection(flipY_filter.GetOutputPort())
         img_vtk = numpyArrayAsVtkImageData(self.im)
-        self.actor = vtk.vtkImageActor()
+        self.actor = vtkImageActor()
         self.actor.GetMapper().SetInputData(img_vtk)
             
         # Add actor to renderer, reset camera and render
@@ -145,7 +153,7 @@ class VtkWidget(QVTKRenderWindowInteractor, WidgetCore):
             self.ren.RemoveActor(self.t_actor)
             self.ren.RemoveActor(self.t_actor_label)
         except: pass
-        self.t_actor = vtk.vtkTextActor()
+        self.t_actor = vtkTextActor()
         self.t_actor.SetInput(txt)
         txtprop = self.t_actor.GetTextProperty()
         txtprop.SetFontFamilyToCourier()
@@ -154,7 +162,7 @@ class VtkWidget(QVTKRenderWindowInteractor, WidgetCore):
         self.ren.AddActor(self.t_actor)
 
         # show label
-        self.t_actor_label = vtk.vtkTextActor()
+        self.t_actor_label = vtkTextActor()
         self.t_actor_label.SetInput(self.parent.curr_lbl)
         txtprop_label = self.t_actor_label.GetTextProperty()
         txtprop_label.SetFontFamilyToArial()
@@ -176,10 +184,10 @@ class VtkWidget(QVTKRenderWindowInteractor, WidgetCore):
         
     def contourWidget(self, color=[1, 0, 0], contourWidgetEndInteraction=None):
         """Create a template widget for drawing contours"""
-        contourRep = vtk.vtkOrientedGlyphContourRepresentation()
+        contourRep = vtkOrientedGlyphContourRepresentation()
         contourRep.GetLinesProperty().SetColor(color)
 
-        contour_widget = vtk.vtkContourWidget()
+        contour_widget = vtkContourWidget()
         contour_widget.SetInteractor(self.iren)
         contour_widget.SetRepresentation(contourRep)
         contour_widget.AddObserver('EndInteractionEvent', contourWidgetEndInteraction)
@@ -197,9 +205,9 @@ class VtkWidget(QVTKRenderWindowInteractor, WidgetCore):
         """
         if pts ==[]:
             return 1
-        pd = vtk.vtkPolyData()
-        points = vtk.vtkPoints()
-        lines = vtk.vtkCellArray()
+        pd = vtkPolyData()
+        points = vtkPoints()
+        lines = vtkCellArray()
         for i in range(len(pts)):
             points.InsertPoint(i, pts[i])
 
@@ -240,13 +248,13 @@ class VtkWidget(QVTKRenderWindowInteractor, WidgetCore):
         self.style._reinitState()
 
     def drawLine(self, pt0, pt1, color = [0.5,1,1], lw = 4):
-        line_source = vtk.vtkLineSource()
+        line_source = vtkLineSource()
         line_source.SetPoint1(pt0)
         line_source.SetPoint2(pt1)
         line_source.Update()
-        mapper = vtk.vtkPolyDataMapper()
+        mapper = vtkPolyDataMapper()
         mapper.SetInputConnection(line_source.GetOutputPort())
-        actor = vtk.vtkActor()
+        actor = vtkActor()
         actor.GetProperty().SetColor(*color)
         actor.SetMapper(mapper)
         actor.GetProperty().SetLineWidth(lw)
@@ -381,20 +389,20 @@ def numpyArrayAsVtkImageData(source_numpy_array):
     else:
         channel_count = 1
 
-    output_vtk_image = vtk.vtkImageData()
+    output_vtk_image = vtkImageData()
     output_vtk_image.SetDimensions(source_numpy_array.shape[1], source_numpy_array.shape[0], channel_count)
 
     vtk_type_by_numpy_type = {
-        np.uint8: vtk.VTK_UNSIGNED_CHAR,
-        np.uint16: vtk.VTK_UNSIGNED_SHORT,
-        np.uint32: vtk.VTK_UNSIGNED_INT,
-        np.uint64: vtk.VTK_UNSIGNED_LONG if vtk.VTK_SIZEOF_LONG == 64 else vtk.VTK_UNSIGNED_LONG_LONG,
-        np.int8: vtk.VTK_CHAR,
-        np.int16: vtk.VTK_SHORT,
-        np.int32: vtk.VTK_INT,
-        np.int64: vtk.VTK_LONG if vtk.VTK_SIZEOF_LONG == 64 else vtk.VTK_LONG_LONG,
-        np.float32: vtk.VTK_FLOAT,
-        np.float64: vtk.VTK_DOUBLE
+        np.uint8: VTK_UNSIGNED_CHAR,
+        np.uint16: VTK_UNSIGNED_SHORT,
+        np.uint32: VTK_UNSIGNED_INT,
+        np.uint64: VTK_UNSIGNED_LONG if VTK_SIZEOF_LONG == 64 else VTK_UNSIGNED_LONG_LONG,
+        np.int8: VTK_CHAR,
+        np.int16: VTK_SHORT,
+        np.int32: VTK_INT,
+        np.int64: VTK_LONG if VTK_SIZEOF_LONG == 64 else VTK_LONG_LONG,
+        np.float32: VTK_FLOAT,
+        np.float64: VTK_DOUBLE
     }
     vtk_datatype = vtk_type_by_numpy_type[source_numpy_array.dtype.type]
 

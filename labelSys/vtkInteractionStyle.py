@@ -1,15 +1,18 @@
-import vtk
+# import vtk
 import numpy as np
 from typing import List, Tuple, Union
 import time
+from vtkmodules.vtkRenderingCore import vtkPropPicker
+from vtkmodules.vtkInteractionWidgets import vtkContourWidget
+from vtkmodules.vtkInteractionStyle import vtkInteractorStyleImage
 
 
-class InteractionStyleBase(vtk.vtkInteractorStyleImage):
+class InteractionStyleBase(vtkInteractorStyleImage):
     HEIGHT = 0 # Z/W position of the curve
     def __init__(self, widget):
         super().__init__()
         self.widget = widget
-        self.picker = vtk.vtkPropPicker()
+        self.picker = vtkPropPicker()
 
         # Right button for move
         self.AddObserver("RightButtonPressEvent", lambda obj, event: self.OnMiddleButtonDown())
@@ -68,7 +71,7 @@ class PtContourInteractorStyle(InteractionStyleBase):
     def __init__(self, widget):
         super().__init__(widget)
         self.pts: List[Tuple[float, float, float]] = []
-        self.tmp_cnt: Union[None, vtk.vtkContourWidget] = None
+        self.tmp_cnt: Union[None, vtkContourWidget] = None
         self._reinitState()
     
     def leftButtonPressEvent(self, obj, event):
@@ -108,7 +111,7 @@ class PtContourInteractorStyle(InteractionStyleBase):
             # self.widget.ren.RemoveActor(self.tmp_cnt)
             self.tmp_cnt = None
     
-    def __getPtsInCnt(self, cnt: vtk.vtkContourWidget) -> List[Tuple[float, float, float]]:
+    def __getPtsInCnt(self, cnt: vtkContourWidget) -> List[Tuple[float, float, float]]:
         rep = cnt.GetContourRepresentation()
         cnt_pts = []
         point = np.empty(3)

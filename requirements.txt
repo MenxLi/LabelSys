@@ -1,0 +1,7 @@
+numpy
+opencv-python>=4.2
+pydicom
+PyQt5
+PyQt5-sip
+scipy
+vtk>9
