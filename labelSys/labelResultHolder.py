@@ -5,6 +5,7 @@
 # (see https://bitbucket.org/Mons00n/mrilabelsys/).
 #
 # import{{{
+from typing import List, Union
 from .utils.base64ImageConverter import imgEncodeB64, imgDecodeB64
 from .configLoader import *
 import os
@@ -23,8 +24,10 @@ class LabelHolder:
     HOlding the label result
     """
     def __init__(self):# {{{
-        self.data = None
-        self.SAVED = True
+        self.data: List[dict] = None
+        self.SAVED: bool = True
+        self.comments: List[Union[None, str]]
+        self.class_comments: List[Union[None, str]]
 # }}}
     def initialize(self, entries, SOPInstanceUIDs):# {{{
         self.data = []
@@ -75,6 +78,8 @@ class LabelHolder:
         self.SAVED = True
         return  header_data, imgs
 # }}}
+    def ssss(self):
+        pass
     def saveToFile(self, path, imgs, head_info):# {{{
         """
         - path: directory to store all the data for current patient

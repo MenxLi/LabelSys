@@ -538,15 +538,19 @@
     <addaction name="act_op_prev_slice"/>
     <addaction name="act_op_next_patient"/>
     <addaction name="act_op_prev_patient"/>
+    <addaction name="separator"/>
     <addaction name="act_op_change_lbl"/>
     <addaction name="act_op_change_lbl_reverse"/>
-    <addaction name="act_op_save"/>
-    <addaction name="act_op_clear"/>
+    <addaction name="act_op_toAnotherLbl"/>
+    <addaction name="separator"/>
     <addaction name="act_op_interp"/>
     <addaction name="act_op_add_cnt"/>
     <addaction name="act_op_rotate"/>
     <addaction name="act_op_add_bbox"/>
     <addaction name="act_op_edit_comment"/>
+    <addaction name="separator"/>
+    <addaction name="act_op_clear"/>
+    <addaction name="act_op_save"/>
    </widget>
    <widget class="QMenu" name="menu_help">
     <property name="title">
@@ -697,6 +701,11 @@
   <action name="act_op_edit_comment">
    <property name="text">
     <string>Edit comment</string>
+   </property>
+  </action>
+  <action name="act_op_toAnotherLbl">
+   <property name="text">
+    <string>To another label</string>
    </property>
   </action>
  </widget>

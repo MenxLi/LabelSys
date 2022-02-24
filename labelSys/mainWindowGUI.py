@@ -5,6 +5,7 @@
 # (see https://bitbucket.org/Mons00n/mrilabelsys/).
 #
 # Import {{{
+from typing import List
 import webbrowser
 from pathlib import Path
 import os,sys, platform
@@ -158,6 +159,8 @@ Welcome to LabelSys v{version},\n\
         self.act_op_change_lbl.setShortcut("Tab")
         self.act_op_change_lbl_reverse.triggered.connect(self.switchLabelReverse)
         self.act_op_change_lbl_reverse.setShortcut("Shift+Tab")
+        self.act_op_toAnotherLbl.triggered.connect(self.queryToAnotherLabel)
+        self.act_op_change_lbl_reverse.setShortcut("Shift+Tab")
         self.act_op_save.triggered.connect(self.saveCurrentPatient)
         self.act_op_save.setShortcut("Ctrl+S")
         self.act_op_clear.triggered.connect(self.clearCurrentSlice)
@@ -265,6 +268,11 @@ Welcome to LabelSys v{version},\n\
         header, self.imgs = self.lbl_holder.loadFile(Path(fname))
         try:
             self.config = header["Config"]
+            # To compat oler version (<1.6.0)
+            if "classifications" not in self.config.keys():
+                self.config["classifications"] = [None]*len(self.imgs)
+            if "label_draw" not in self.config.keys():
+                self.config["label_draw"] = [1]*len(self.imgs)
         except KeyError:
             # In the older version of this tool header don't contain "config" attribute, Labels
             # attribute was used instead
@@ -373,12 +381,21 @@ Welcome to LabelSys v{version},\n\
             self.im_widget.setStyleAuto()      # May change label drawing mode
         except: pass
 # }}}
-    def querySwitchCurrentLabel(self):
+    def queryToAnotherLabel(self):
         """Change current label selection while retain the contours,
         would be useful if someone did some labeling already, 
         and found they are working in a wrong label.
         """
-        pass
+        aval_labels:List[str] = self.config["labels"]
+        item, ok = QInputDialog.getItem(self, "Select label name.", "Avaliable labels", \
+            aval_labels, aval_labels.index(self.curr_lbl), False)
+        if ok and item!=self.curr_lbl:
+            data = self.lbl_holder.data[self.slice_id]
+            data[item] += data[self.curr_lbl]
+            data[self.curr_lbl] = []
+            self.combo_label.setCurrentText(item)
+        else:
+            self._warnDialog("Failed.")
 
     def changeCheckCrv(self, i):# {{{
         if self.check_crv.isChecked():
@@ -551,7 +568,7 @@ Welcome to LabelSys v{version},\n\
             current_comment=self.lbl_holder.comments[self.slice_id])
         self.comment_gui.show()
 
-    def saveCurrentSlice(self, cnts_data):# {{{
+    def saveCurrentSlice(self, cnts_data: List[dict]):# {{{
         """
         Will be triggered automatically when modifying the contour, will be
         called by vtkClass

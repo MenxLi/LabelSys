@@ -13,4 +13,3 @@ dist/
 *.spec
 *.egg-info
 
-labelSys/confPath.txt
