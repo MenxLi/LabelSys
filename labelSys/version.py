@@ -38,6 +38,7 @@ __VERSIONS__ =[ \
         ["1.6.0", "Add new click interaction style, new labelReader API, more entry on config file"],
         ["1.6.1", "Set configure file as optional positional argument"],
         ["1.6.2", "Able to generate default conf; double the default label step;"],
-        ["1.6.3", "Add to another contour in 'operation', old label loading compatability"],
+        ["1.6.3", "Add 'to another label' in 'operation', old label loading compatability; set default labeler name to platform.node()"],
+        ["1.6.4", "LabelReader API update, doc-zh update"],
         ]
 __version__, __description__ = __VERSIONS__[-1]

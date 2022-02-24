@@ -189,7 +189,8 @@ Welcome to LabelSys v{version},\n\
         self.act_set_settings.setShortcut("Ctrl+Alt+S")
 
         # Help
-        self.act_manual.triggered.connect(self.showHelpManual)
+        self.act_manual.triggered.connect(self.showHelpManual_en)
+        self.act_manual_zh.triggered.connect(self.showHelpManual_zh)
 # }}}
     def initPanel(self):# {{{
         """Init the whole panel, will be called on loading the patients"""
@@ -791,8 +792,13 @@ Welcome to LabelSys v{version},\n\
         else:
             return 0
 # }}}
-    def showHelpManual(self):# {{{
+    def showHelpManual_en(self):# {{{
         file_path = os.path.join(_DOC_DIR, "help.html")
+        file_path = os.path.realpath(file_path)
+        webbrowser.open("file://"+file_path)
+# }}}
+    def showHelpManual_zh(self):# {{{
+        file_path = os.path.join(_DOC_DIR, "help-zh.html")
         file_path = os.path.realpath(file_path)
         webbrowser.open("file://"+file_path)
 # }}}

@@ -1,0 +1,347 @@
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <link rel="stylesheet" type="text/css" href="style.css">
+    </head>
+  <body>
+
+    <section>
+        <h1>LabelSys使用手册 (v1.6.x)</h1>
+
+        <h2 class="toc_title">目录</h2>
+        <ul id="toc_list">
+            <li><a href="#c_intro">概述</a></li>
+            <li><a href="#c_installation">安装</a></li>
+            <li><a href="#c_preparation">标注准备</a></li>
+            <li><a href="#c_interface">软件界面</a></li>
+            <li><a href="#c_workflow">常规标注流程</a></li>
+            <li><a href="#c_api">API</a></li>
+        </ul>
+    </section>
+
+    <hr class="section">
+    <section>
+        <h1 id="c_intro">概述</h1>
+        <p>
+            LabelSys 标注软件为作者标注软件为作者于 2020 年初在加拿大阿尔伯塔大学工作时编写的医学图像分割标注软
+            件，于 2020 年五月完成第一版，起初被用于 MRI 图像的数据标注。 也可以用于普通 DICOM 格式、常见图像格式及常见视频格式文件的标注。
+            软件的设计目标为大体量医学图像标记，功能较为专一，有体积小、功能易用、效率高的优
+            势，利用配置文件定义软件行为以应用于不同的数据集。使用软件也可以方便的对所标记的数据进行对比、修改。
+            软件主要使用 Python 编写，图形用户界面主要基于 PyQt5 和 VTK，易于方便地跨平台使用。
+        </p>
+    </section>
+
+    <hr class="section">
+    <section>
+        <h1 id="c_installation">安装</h1>
+        <p>
+            本软件可以直接使用发布者编译的二进制版本（二进制版本使用PyInstaller打包发布）<br>
+            除此以外，也可以使用Python包管理软件setuptools/pip/wheel工具以Module形式进行安装
+        </p>
+        <h2>使用打包程序</h2>
+        <p>
+            无需安装 使用二进制文件。
+        </p>
+        <h2>Python pip安装</h2>
+        <p>
+            <pre>
+            <code class="code">
+                $ git clone -b dev https://github.com/MenxLi/LabelSys
+                $ cd LabelSys
+                $ pip install -r requirements.txt
+                $ pip install .
+            </code>
+            </pre>
+        </p>
+    </section>
+
+    <hr class="section">
+    <section>
+        <h1 id="c_preparation">标注准备</h1>
+        <h2>文件准备</h2>
+        <p>
+            LabelSys支持3种不同类型的文件类型，分别为：DICOM文件、二维图像文件、视频文件。二维图像文件及视频文件使用OpenCV读取，支持的文件后缀可见
+            <a href="https://docs.opencv.org/3.4/d4/da8/group__imgcodecs.html">cv.imread</a>及
+            <a href="https://docs.opencv.org/3.4/d8/dfe/classcv_1_1VideoCapture.html">cv.VideoCapture</a>
+        </p>
+        <p>根据文件类型不同，需要打开的文件夹结构如下</p>
+        <ul>
+            <li>
+                <p>对于Dicom文件</p>
+                <div class="file_tree">
+                    <pre>
+                        [<b>需要打开的文件夹</b>]
+                        |
+                        |--[病例]0
+                        | |--[slice0].dcm
+                        | |--[slice1].dcm
+                        | |--[slice2].dcm
+                        | ∟...
+                        |
+                        |--[病例]1
+                        | |--[slice0].dcm
+                        | ∟...
+                        |
+                        |--[病例]2
+                        |
+                        ∟...
+                        ∟...
+                    </pre>
+                </div>
+            </li>
+            <li>
+                <p>对于图像文件</p>
+                <div class="file_tree">
+                    <pre>
+                        [<b>需要打开的文件夹</b>]
+                        |
+                        |--[病例]0
+                        | |--[image0].jpg
+                        | |--[image1].jpg
+                        | |--[image2].jpg
+                        | ∟...
+                        |
+                        |--[病例]1
+                        | |--[image0].jpg
+                        | ∟...
+                        |
+                        |--[病例]2
+                        |
+                        ∟...
+                        ∟...
+                    </pre>
+                </div>
+            </li>
+            <li>
+                <p>对于视频文件</p>
+                <div class="file_tree">
+                    <pre>
+                        [<b>需要打开的文件夹</b>]
+                        |
+                        |--[病例]0.mp4
+                        |
+                        |--[病例]1.mp4
+                        |
+                        |--[病例]2.mp4
+                        |
+                        ∟...
+                    </pre>
+                </div>
+            </li>
+            <li>
+                <p>除此之外，若要读取已保存的标签文件（见 <a href="">使用LabelSys软件读取标注文件</a>）</p>
+                <div class="file_tree">
+                    <pre>
+                        [<b>需要打开的文件夹(Label-[单个患者数据]-[标注者名])</b>]
+                        |
+                        |--HEAD_0.json
+                        |
+                        |--Slice_1.json
+                        |
+                        |--Slice_1.npz
+                        |
+                        ∟...
+                    </pre>
+                </div>
+            </li>
+        </ul>
+
+        <h2>标注配置文件</h2>
+        <p>LabelSys软件使用Json配置文件定义标注的标签种类和软件行为，
+            其中数据标签信息的设置位于“Labels”项目中， 一个典型的数据标签如下：
+        </p>
+        <pre>
+        <code class="code">
+            "Label_name" :{
+                "color": [1.0, 0.0, 0.0],
+                "draw": 1,
+                "mode": 0,
+                "label_step":1
+            }
+        </code>
+        </pre>
+        <p>
+            其中 <br>
+            <code>"Label_name"</code> 应设置为标签的名称；<br>
+            <code>color</code> 为显示的颜色，以[R, G, B]表示，取值范围为 0～1；<br>
+            <code>draw</code> 表示鼠标绘制或者点选标记，0 表示点选标记，1 为绘制标记；<br>
+            <code>mode</code> 表示标记模式，0 表示闭合曲线，1 为开放曲线；<br>
+            <code>label_step</code> 为手动划定初始标记后，曲线拟合时的采样距离参数, 该参数仅在<code>draw</code>为1时有效。<br>
+        </p>
+        <p>本软件还支持对每张图片进行分类，可以在配置文件中指定可选分类，图片层面的分类位于
+            <code>Classifications</code>中，一个典型的图片层面分类选项如下：
+        </p>
+        <pre>
+        <code class="code">
+            "Class_name":{
+                "short_title": "Image quality",
+                "class": ["Good", "fair"],
+                "description": "This is a image classification"
+            },
+        </code>
+        </pre>
+        <p>其中
+            <code>"Class_name"</code>应设置为针对图像的分类名称，<br>
+            可选可选分类位于<code>class</code>中
+        </p>
+        <p>
+            除了<code>Labels</code>和<code>Classifications</code>项目，conf.json 文件还提供了以下设置可以修改：<br>
+            <code>Loading_mode:</code> 读取的文件格式——0：DICOM，1：图像，2：视频；<br>
+            <code>2D_preview_mag</code>2 维预览时的放大倍数，需为整数；<br>
+            <code>Default_series</code>默认图像序列，仅在 DICOM 图像包含“SeriesDescription”条目（[0x0020,
+            0x0011]）时有效; <br>
+            <code>Default_label</code>默认初始标签，当切换slice时将从默认标签开始标记，当将该值设定为""时不自动切换标签;<br>
+            <code>Max_im_height</code>最大图像高度，设置最大图像高度时，若读取图像高度大于此数值则自动缩放至此高度，
+            当该值设定为-1时不自动缩放。
+        </p>
+    </section>
+
+    <hr class="section">
+    <section>
+        <h1 id="c_interface">软件界面</h1>
+        <h2>主界面</h2>
+        <img src="Pics/mainUI.png" alt="" class="center" width="75%">
+        <p>
+            主界面可大体分为四区：
+            <ol>
+                <li>
+                <b>菜单栏</b><br>
+                菜单栏位于软件最上部分，包含本软件各种操作，并且提示了各个操作所绑定的快捷键，主要分为以下五大菜单：<br>
+                文件（File）：包含图像载入和读取已标注数据入口，退出程序；<br>
+                显示（View）：可以修改软件窗口大小，开启 2D、3D 预览窗口；<br>
+                操作（Operation）：各种标记所需图像操作；<br>
+                设置（Settings）：可以设置标记者姓名、输出路径和修改软件其他设定；<br>
+                帮助（Help）：在此菜单可以打开帮助手册<br>
+                </li>
+                <li>
+                <b>操作栏</b><br>
+                操作栏位于软件左侧，以按钮形式显示标记常用的功能，包括图片导航、标记、图片分类与注释等功能板块
+                </li>
+                <li>
+                <b>提示窗口: </b><br>
+                位于软件下部，窗口上半部分包含标记者姓名及输出路径信息，下方控制台输出软件提示信息
+                </li>
+                <li>
+                <b>主显示框 </b><br>
+                显示图像, 左上角显示目前选择的标签，左下角显示目前文件信息及图像分类与注释
+                </li>
+            </ol>
+        </p>
+        <h2>预览界面</h2>
+        <p>
+            预览界面可以在菜单栏 -> 显示中打开，包含 2D 及 3D 预览界面，方便对标注进行评估：
+        </p>
+        <img src="Pics/2DPreview.png" alt="" class="center" width="40%">
+        <p class="center">2D 预览界面：同时展示了所有标签，开启时主界面片层和 2D 预览同步移动</p>
+        <img src="Pics/3DPreview.png" alt="" class="center" width="40%">
+        <p class="center">3D 预览界面（当同一序列图像大小不同时3D预览不可用）</p>
+        <!--
+        <h2>比较页面</h2>
+        <p>比较界面可以在菜单栏 ->工具中打开，用以比较（并修改）不同标记者的标记。</p>
+        <img src="Pics/compareWin.png" alt="" class="center" width="50%">
+        <p>在比较页面中两窗口同步移动，保存时将会同时保存两个项目。</p>
+        -->
+    </section>
+
+    <hr class="section">
+    <section>
+        <h1 id="c_workflow">常规标注流程</h1>
+        <h2>开启软件</h2>
+        将配置文件（.json）拖入可执行文件即可使用特定配置文件启动程序
+        <h3>命令行启动</h3>
+        可执行文件也可以从命令行启动，软件安装为Python Module后可以使用命令<code>labelSys</code>运行<br>
+        命令行参数如下：
+        <pre><code class="code">
+            $ labelSys -h                                                       
+                usage: labelSys [-h] [-d] [-l] [-f FILE][--gen_conf]
+                                [config_file]
+
+                positional arguments:
+                config_file           Configuration file path
+
+                optional arguments:
+                -h, --help            show this help message and exit
+                -d, --dev             Development mode, in dev mode std streams will be shown on the terminal
+                -l, --load            Loading mode, should be used in conjugation with -f, i.e.: -lf [labeled file path]
+                -f FILE, --file FILE  File path to open for labeling (simply use -f) or revising (used -lf option)
+                --gen_conf            Generate a configuration file at current working directory, then exits
+
+        </code></pre>
+        <h2>读取文件</h2>
+        <p>
+            文件的读取位于：菜单栏 -> 文件（Flie） -> 打开（Open）<br>
+            载入已标注数据：菜单栏 -> 文件（Flie） -> 载入（Load）<br>
+            读取时请选择文件夹打开，文件的储存结构见<a href="#c_preparation">文件准备</a>章节，
+            请注意读取影像文件和标注数据使用的文件结构树不同，载入标记数据后不能使用主界面中“Prev/Next Patient”切换图像序列
+        </p>
+        <h2>初始设置</h2>
+        <p>
+            标注开始前通常需要设置标注者的姓名和输出路径，它们位于菜单栏 -> 设置（Settings）中，
+            这些信息每次打开软件后只需设置一次，之后读取文件不会改变。<br>
+            若不设置输出路径，则输出路径默认为原始图像目录。
+            载入标记的数据时输出路径会自动设置为载入的文件路径以便储存时覆盖原文件。
+        </p>
+        <h2>导航</h2>
+        <p>
+            常用的导航操作包括在病例或不同切片之间切换，切换不同图像序列等，他们都在菜单栏 ->
+            操作（Operation）中找到，常用的操作也以按钮形式展示在操作栏的上半部分，以下为鼠标
+            绑定的操作：<br>
+            移动 – 按住并移动鼠标右键；<br>
+            改变切片 – 滚动滚轮；<br>
+            改变亮度/对比度 – 按住鼠标中键并拖动；<br>
+            进行标记（绘制模式） – （点击/按住）并移动鼠标左键划出初始曲线，松开鼠标完成曲线绘制；<br>
+            进行标记（点选模式） – 点击鼠标左键设置关键点，双击鼠标左键完成曲线绘制
+        </p>
+        <h2>进行标记</h2>
+            可用的标记在 conf.json 文件中定义，并在操作栏中部下拉菜单栏中找到，
+            可以使用 Tab 在他 们之间快速切换，使用鼠标左键绘制初始曲线后，曲线会转换为以控制点定义的参数曲线，<br>
+            对于控制点的操作包括：
+            <ul>
+                <li>移动 – 鼠标左键拖动； </li>
+                <li>添加 – 在曲线上的非控制点处点击；</li>
+                <li>删除 – 鼠标悬浮在想要删除的控制点上并按退格键或删除键。</li>
+                <li>点击绘制曲线（Draw contour选框可以在绘制模式和点选模式之间切换</li>
+                <li>标记的曲线可以为闭合曲线或开放曲线，可以点击操作栏中的开放曲线（Open curve）选框以改变设置。</li>
+                <li>有时一个标签需要标记多余一条曲线，此时完成一条曲线绘制后可以点击操作栏中的添加曲线（Add another contour, Ctrl+a）来添加曲线。</li>
+            </ul>
+        <h2>保存和储存</h2>
+        <p>
+            点击操作栏中的保存（Save）按钮可以保存并导出对于当前病例的标记，保存的文件夹名为
+            “Label-[标记者姓名]-[原始文件名]”<br>
+            标记完成后的文件以 json 文件保存，包含头文件“HEAD_0.json”和随后的每一片层的文件
+            “Slice*.json”，与图像文件“Slice*.pkl”。
+        </p>
+        <h2>载入和修改标记数据</h2>
+        <p>
+            标记的病例载入后可以按照前述方法修改并重新保存以覆盖原文件。
+        </p>
+    </section>
+
+    <hr class="section">
+    <section>
+        <h1 id="c_api">API</h1>
+        <h2>基本用法</h2>
+        读取标记文件
+        <pre>
+        <code class="code">
+                import typing
+                from labelSys.utils import LabelSysReader
+
+                label_dirs: typing.List[str]    # Result folders (list of folder paths) to inspect
+                i: int                          # Data index
+
+                reader = LabelSysReader(label_dirs)
+                data_i = reader[i]
+        </code>
+        </pre>
+    </section>
+
+    <hr class="section">
+    <section>
+        <b>作者: </b>李梦寻<br>
+        <b>Email:</b>
+        <a href="mailto:mengxunli@whu.edu.cn">mengxunli@whu.edu.cn</a> | <a href="mailto:limengxun45@outlook.com">limengxun45@outlook.com</a> <br>
+    </section>
+  </body>
+</html>

@@ -1,0 +1,59 @@
+section {
+    margin-right: 20%;
+    margin-left: 20%;
+}
+
+hr.section {
+    border: 1px solid #D6D6D6;
+}
+
+code{
+    font-family: 'Courier';
+    font-family: 'Source Code Pro';
+    /*font-family: 'Courier';*/
+    background: #333333;
+    color: #dfdfdf;
+    word-break: keep-all;
+    overflow-wrap: break-word;
+    border-radius: 3px;
+    padding: 0px;
+    padding-left: 5px;
+    padding-right: 5px;
+    text-align: center;
+}
+
+a {
+    text-decoration: none;
+}
+a:link, a:visited {
+    color: blue;
+}
+a:hover {
+    color: rgb(155, 0, 46);
+}
+
+.code{
+    text-align:left ;
+    font-family: 'Source Code Pro';
+    display: block;
+    padding: 10px;
+    padding-left: 20px;
+    padding-right: 20px;
+    border-radius: 20px;
+}
+
+.file_tree{
+    display: block;
+    border-radius: 10px;
+    font-family: 'monospace';
+    background: #dddddd;
+    color: #353535;
+    text-align: left;
+    font-size: smaller;
+}
+
+.center{
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
