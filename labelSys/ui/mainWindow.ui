@@ -556,8 +556,9 @@
     <property name="title">
      <string>Help</string>
     </property>
-    <addaction name="act_manual"/>
-    <addaction name="act_manual_zh"/>
+    <addaction name="act_help_manual"/>
+    <addaction name="act_help_manual_zh"/>
+    <addaction name="act_help_info"/>
    </widget>
    <widget class="QMenu" name="menu_tools">
     <property name="title">
@@ -664,7 +665,7 @@
     <string>Add contour</string>
    </property>
   </action>
-  <action name="act_manual">
+  <action name="act_help_manual">
    <property name="text">
     <string>Manual (en)</string>
    </property>
@@ -709,9 +710,14 @@
     <string>To another label</string>
    </property>
   </action>
-  <action name="act_manual_zh">
+  <action name="act_help_manual_zh">
    <property name="text">
     <string>Manual (zh)</string>
+   </property>
+  </action>
+  <action name="act_help_info">
+   <property name="text">
+    <string>INFO</string>
    </property>
   </action>
  </widget>

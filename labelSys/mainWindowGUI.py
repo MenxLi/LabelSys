@@ -11,7 +11,7 @@ from pathlib import Path
 import os,sys, platform
 import copy
 
-from .version import __version__
+from .version import __version__, __license__, __license_full__
 from .fileReader import FolderLoader
 from .utils.labelReader import checkFolderEligibility
 from .configLoader import *
@@ -189,8 +189,17 @@ Welcome to LabelSys v{version},\n\
         self.act_set_settings.setShortcut("Ctrl+Alt+S")
 
         # Help
-        self.act_manual.triggered.connect(self.showHelpManual_en)
-        self.act_manual_zh.triggered.connect(self.showHelpManual_zh)
+        self.act_help_manual.triggered.connect(self.showHelpManual_en)
+        self.act_help_manual_zh.triggered.connect(self.showHelpManual_zh)
+        self.act_help_info.triggered.connect(lambda: self._msgDialog(
+            title="Info",
+            message="\n".join([
+                "LabelSys (Version: {})".format(__version__),
+                "Author: Li, Mengxun (mengxunli@whu.edu.cn)",
+                "License: {}".format(__license__)
+            ]),
+            info_msg=__license_full__
+        ))
 # }}}
     def initPanel(self):# {{{
         """Init the whole panel, will be called on loading the patients"""

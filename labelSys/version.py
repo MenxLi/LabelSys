@@ -12,6 +12,32 @@ __license__ = "All right reserved"
 __maintainer__ = "Mengxun Li"
 __email__ = "mengxunli@whu.edu.cn | mengxun1@ualberta.ca"
 
+__license_full__ = "\
+Copyright (c) 2020-2022, Mengxun Li\n\
+All rights reserved.\n\
+\n\
+Redistribution and use in source and binary forms, with or without\n\
+modification, are not permitted except that permission from the copyright holder\n\
+was obtained and the following conditions are met:\n\
+\n\
+1. Redistributions of source code must retain the above copyright notice, this\n\
+   list of conditions and the following disclaimer.\n\
+\n\
+2. Redistributions in binary form must reproduce the above copyright notice,\n\
+   this list of conditions and the following disclaimer in the documentation\n\
+   and/or other materials provided with the distribution.\n\
+\n\
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS \"AS IS\"\n\
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE\n\
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE\n\
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE\n\
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL\n\
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR\n\
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER\n\
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,\n\
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE\n\
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE."
+
 __VERSIONS__ =[ \
         ["0.X", "Implemented with Tkinter"],
         ["1.0-alpha", "Re-write the whole program using PyQt5 and vtk, under develpment"],
@@ -40,5 +66,6 @@ __VERSIONS__ =[ \
         ["1.6.2", "Able to generate default conf; double the default label step;"],
         ["1.6.3", "Add 'to another label' in 'operation', old label loading compatability; set default labeler name to platform.node()"],
         ["1.6.4", "LabelReader API update, doc-zh update"],
+        ["1.6.5", "Add License to help menu"],
         ]
 __version__, __description__ = __VERSIONS__[-1]
