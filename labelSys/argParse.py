@@ -17,10 +17,17 @@ description = "\
     ".format(version = __version__)
 
 parser = argparse.ArgumentParser(description = description)
-parser.add_argument("config_file", nargs="?", type = str, default = "")
-parser.add_argument("-d", "--dev", action = "store_true", default = False)
-parser.add_argument("-l", "--load", action = "store_true", default = False)
-parser.add_argument("-f", "--file", type = str, default = "")
-parser.add_argument("-m", "--loading_mode", type = int)
+parser.add_argument("config_file", nargs="?", type = str, default = "", \
+    help = "Configuration file path")
+parser.add_argument("-d", "--dev", action = "store_true", default = False, \
+    help = "Development mode, in dev mode std streams will be shown on the terminal")
+parser.add_argument("-l", "--load", action = "store_true", default = False, \
+    help = "Loading mode, should be used in conjugation with -f, i.e.: -lf <labeled file path>")
+parser.add_argument("-f", "--file", type = str, default = "", \
+    help = "File path to open for labeling or revising (used with -l option)")
+parser.add_argument("-m", "--loading_mode", type = int, \
+    help = "(**Deprecated**) Set the loading mode, please use configuration file instead")
+parser.add_argument("--gen_conf", action = "store_true", default = False, \
+    help = "Generate a configuration file at current working directory, then exits")
 
 args = parser.parse_args()

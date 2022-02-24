@@ -267,7 +267,7 @@ class VtkWidget(QVTKRenderWindowInteractor, WidgetCore):
 
     def setStyleSampleStep(self, step = 1):
         if isinstance(self.style, DrawContourInteractorStyle):
-            STEP_SHAPE_MODIFIER = 128
+            STEP_SHAPE_MODIFIER = 64
             step *= self.im.shape[0]/STEP_SHAPE_MODIFIER
             self.style._setSampleStep(step)
 

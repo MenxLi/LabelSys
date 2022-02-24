@@ -5,10 +5,9 @@
 # (see https://bitbucket.org/Mons00n/mrilabelsys/).
 #
 # Import {{{
-from ensurepip import version
 import webbrowser
 from pathlib import Path
-import os,sys
+import os,sys, platform
 import copy
 
 from .version import __version__
@@ -63,7 +62,7 @@ class MainWindow(QMainWindow, WidgetCore):
 
         # Attribute init
         self.output_path = Path(os.getcwd()).parent
-        self.labeler_name = "Anonymous"
+        self.labeler_name = platform.node()
         self.lbl_holder = LabelHolder()
 
         self.slice_id = 0
@@ -121,7 +120,6 @@ Welcome to LabelSys v{version},\n\
             "2D_magnification":PREVIEW2D_MAG,
             "max_im_height":MAX_IM_HEIGHT,
             "classifications": CLASSIFICATIONS,
-            # "draw_contour": DRAW_CONTOUR,
             "label_draw": LBL_DRAW,
         }
         if self.args.loading_mode != None:
@@ -375,6 +373,13 @@ Welcome to LabelSys v{version},\n\
             self.im_widget.setStyleAuto()      # May change label drawing mode
         except: pass
 # }}}
+    def querySwitchCurrentLabel(self):
+        """Change current label selection while retain the contours,
+        would be useful if someone did some labeling already, 
+        and found they are working in a wrong label.
+        """
+        pass
+
     def changeCheckCrv(self, i):# {{{
         if self.check_crv.isChecked():
             self.config["label_modes"][self.config["labels"].index(self.curr_lbl)] = 1

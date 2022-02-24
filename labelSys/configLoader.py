@@ -5,7 +5,7 @@
 # (see https://bitbucket.org/Mons00n/mrilabelsys/).
 #
 import json
-import os
+import os, shutil
 from .argParse import parser, args
 
 _CURR_DIR = os.path.dirname(__file__)
@@ -13,6 +13,13 @@ if args.config_file:
     CONF_PATH = args.config_file
 else:
     CONF_PATH = os.path.join(_CURR_DIR, "conf.json")
+
+if args.gen_conf:
+    dst =  "./{}.json".format("conf_labelsysDefault")
+    shutil.copyfile(CONF_PATH,dst)
+    print("Generated configuration file at: ", os.path.abspath(dst))
+    exit()
+
 with open(CONF_PATH, "r", encoding="utf-8") as f:
     CONF = json.load(f)
 _UI_DIR = os.path.join(_CURR_DIR, "ui")
