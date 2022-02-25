@@ -153,7 +153,7 @@ class VtkWidget(QVTKRenderWindowInteractor, WidgetCore):
         """Create a template widget for drawing contours"""
         contourRep = vtkOrientedGlyphContourRepresentation()
         contourRep.GetLinesProperty().SetColor(color)
-        contourRep.GetLinesProperty().SetLineWidth(4)
+        contourRep.GetLinesProperty().SetLineWidth(3)
         contourRep.GetLinesProperty().SetOpacity(0.8)
         contourRep.GetLinesProperty().SetVertexColor(0.3,0.8,1.0)
 

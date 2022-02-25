@@ -150,7 +150,8 @@ class GeneralImageLoader(LoaderBase):# {{{
             if os.path.isdir(path_) and os.path.basename(path_).startswith("Label-"):
                 continue
             try:
-                im = cv.imread(path_)
+                # im = cv.imread(path_)
+                im = F.cv_imread(path_)         # For chinese in path
                 # resize image if it is too big...
                 if self.MAX_IM_HEIGHT > 0 and im.shape[0] > self.MAX_IM_HEIGHT:
                     new_im_size = (int(im.shape[1] * self.MAX_IM_HEIGHT/im.shape[0]), self.MAX_IM_HEIGHT)

@@ -70,5 +70,6 @@ __VERSIONS__ =[ \
         ["1.6.6", "Logfile update"],
         ["1.7.0", "Move SOPInstanceUID out of Data when saving, use uid instead, move logfile to $HOME. Bug fix: not enable widgets when open files after loading"],
         ["1.7.1", "Better debugging when opend general image"],
+        ["1.7.2", "Bug fix: opencv read image path contain 中文"],
         ]
 __version__, __description__ = __VERSIONS__[-1]

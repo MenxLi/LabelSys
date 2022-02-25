@@ -10,7 +10,6 @@ Useful functions
 
 # import{{{
 import numpy as np
-from torch import short
 try:
     import scipy.ndimage
 except: pass
@@ -72,6 +71,12 @@ def ssUUID() -> str:
     """
     suid = sUUID()
     return suid[:8] + suid[-8:]
+
+def cv_imread(file_path):
+    """Read image even if path contain 中文
+    """
+    cv_img = cv.imdecode(np.fromfile(file_path, dtype=np.uint8), cv.IMREAD_COLOR)
+    return cv_img
 
 def openFile(filepath):
 	"""Use system application to open a file"""
