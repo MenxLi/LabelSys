@@ -4,7 +4,10 @@ from typing import List, Tuple, Union
 from .base64ImageConverter import imgDecodeB64
 import numpy as np
 import cv2 as cv
-import vtk
+from vtkmodules.vtkRenderingCore import vtkRenderWindow, vtkRenderer, vtkRenderWindowInteractor
+from vtkmodules.vtkInteractionWidgets import vtkOrientedGlyphContourRepresentation, vtkContourWidget
+from vtkmodules.vtkCommonDataModel import vtkPolyData, vtkCellArray
+from vtkmodules.vtkCommonCore import vtkPoints
 import re, os, json, sys, random
 try:
     import skimage.transform
@@ -79,7 +82,7 @@ class LabelSysReader(object):
     def __init__(self, folder_list: List[str]) -> None:
         self.fl = folder_list
     
-    def __getitem__(self, key):
+    def __getitem__(self, key)->LabelData:
         if isinstance(key, int):
             assert key<len(self) and key >=0, "invalid index."
             return self.read(self.fl[key], self.MAGNIFICATION, self.LINE_THICKNESS)
@@ -94,7 +97,8 @@ class LabelSysReader(object):
     def __len__(self):
         return len(self.fl)
 
-    def read(self, path: str, magnification: Union[float, int] = 1, line_thickness: int = 1):
+    def read(self, path: str, magnification: Union[float, int] = 1, line_thickness: int = 1)\
+        ->LabelData:
         images = []
         masks = []
         contours = []
@@ -226,9 +230,9 @@ def _readOneLabel(ori_im_size, data, magnification, line_thickness):# {{{
         #  contour_widget.AddObserver('EndInteractionEvent', contourWidgetEndInteraction)
         #  contour_widget.AddObserver('WidgetValueChangedEvent', contourWidgetEndInteraction)
 
-        pd = vtk.vtkPolyData()
-        points = vtk.vtkPoints()
-        lines = vtk.vtkCellArray()
+        pd = vtkPolyData()
+        points = vtkPoints()
+        lines = vtkCellArray()
         for i in range(len(pts)):
             points.InsertPoint(i, pts[i])
 
@@ -243,14 +247,14 @@ def _readOneLabel(ori_im_size, data, magnification, line_thickness):# {{{
         pd.SetLines(lines)
 
         # create a contour widget
-        renderer = vtk.vtkRenderer()
-        ren_win = vtk.vtkRenderWindow()
+        renderer = vtkRenderer()
+        ren_win = vtkRenderWindow()
         ren_win.AddRenderer(renderer)
 
-        contourRep = vtk.vtkOrientedGlyphContourRepresentation()
-        contour_widget = vtk.vtkContourWidget()
+        contourRep = vtkOrientedGlyphContourRepresentation()
+        contour_widget = vtkContourWidget()
 
-        iren = vtk.vtkRenderWindowInteractor()
+        iren = vtkRenderWindowInteractor()
         iren.SetRenderWindow(ren_win)
         contour_widget.SetInteractor(iren)
         contour_widget.SetRepresentation(contourRep)

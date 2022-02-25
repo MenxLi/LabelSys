@@ -4,9 +4,17 @@
 # This file is part of LabelSys
 # (see https://bitbucket.org/Mons00n/mrilabelsys/).
 #
-import vtk# {{{
-from vtk.util import vtkImageImportFromArray
-from vtk.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
+# import vtk# {{{
+from vtkmodules.vtkRenderingCore import vtkColorTransferFunction, vtkVolume, vtkActor, vtkVolumeProperty, vtkRenderer, vtkPolyDataMapper
+from vtkmodules.vtkInteractionStyle import vtkInteractorStyleTrackballCamera
+from vtkmodules.vtkCommonColor import vtkNamedColors
+from vtkmodules.vtkIOImage import vtkImageImport
+from vtkmodules.vtkFiltersCore import vtkStripper, vtkMarchingCubes, vtkPolyDataNormals, vtkWindowedSincPolyDataFilter
+from vtkmodules.vtkFiltersModeling import vtkOutlineFilter
+from vtkmodules.vtkCommonDataModel import vtkPiecewiseFunction
+from vtkmodules.vtkRenderingVolume import vtkFixedPointVolumeRayCastMapper
+
+from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 from PyQt5.QtWidgets import *
 from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtGui import QImage, QPixmap
@@ -14,7 +22,6 @@ import numpy as np
 from .configLoader import *
 from .utils import utils_ as F
 import cv2 as cv
-# }}}
 
 class PreviewWindow(QWidget):# {{{
     def __init__(self, parent, imgs, masks, spacing = [1,1,1]):# {{{
@@ -67,10 +74,10 @@ class Preview3DWindow(PreviewWindow):# {{{
     def initUI(self):# {{{
         self.vtk_widget = QVTKRenderWindowInteractor()
         self.ren_win = self.vtk_widget.GetRenderWindow()
-        self.ren = vtk.vtkRenderer()
+        self.ren = vtkRenderer()
         self.ren_win.AddRenderer(self.ren)
         self.iren = self.ren_win.GetInteractor()
-        self.iren.SetInteractorStyle(vtk.vtkInteractorStyleTrackballCamera())
+        self.iren.SetInteractorStyle(vtkInteractorStyleTrackballCamera())
 
         self.setWindowTitle("Preview-3D")
         layout = QGridLayout()
@@ -88,10 +95,10 @@ class Preview3DWindow(PreviewWindow):# {{{
         https://lorensen.github.io/VTKExamples/site/Python/Visualization/ViewFrog/
         """
         self.r_masks = F.resampleSpacing(self.masks, self.spacing, [0.5,0.5,0.5])[0].astype(np.uint8)*2
-        colors = vtk.vtkNamedColors()
+        colors = vtkNamedColors()
         colors.SetColor("BkgColor", [51, 77, 102, 255])
 
-        data_importer = vtk.vtkImageImport()
+        data_importer = vtkImageImport()
         data_string = self.r_masks.tostring()
         data_importer.CopyImportVoidPointer(data_string, len(data_string))
         data_importer.SetDataScalarTypeToUnsignedChar()
@@ -99,7 +106,7 @@ class Preview3DWindow(PreviewWindow):# {{{
         data_importer.SetDataExtent(0, self.r_masks.shape[1]-1, 0, self.r_masks.shape[2]-1, 0, self.r_masks.shape[0]-1)
         data_importer.SetWholeExtent(0, self.r_masks.shape[1]-1, 0, self.r_masks.shape[2]-1, 0, self.r_masks.shape[0]-1)
 
-        surface_extractor = vtk.vtkMarchingCubes()
+        surface_extractor = vtkMarchingCubes()
         surface_extractor.SetInputConnection(data_importer.GetOutputPort())
         surface_extractor.SetValue(0, 1)
 
@@ -107,7 +114,7 @@ class Preview3DWindow(PreviewWindow):# {{{
             smoothingIterations = 5
             passBand = 0.001
             featureAngle = 60.0
-            smoother = vtk.vtkWindowedSincPolyDataFilter()
+            smoother = vtkWindowedSincPolyDataFilter()
             smoother.SetInputConnection(surface_extractor.GetOutputPort())
             smoother.SetNumberOfIterations(smoothingIterations)
             smoother.BoundarySmoothingOff()
@@ -118,33 +125,33 @@ class Preview3DWindow(PreviewWindow):# {{{
             smoother.NormalizeCoordinatesOn()
             smoother.Update()
 
-            normals = vtk.vtkPolyDataNormals()
+            normals = vtkPolyDataNormals()
             normals.SetInputConnection(smoother.GetOutputPort())
             normals.SetFeatureAngle(featureAngle)
 
-            stripper = vtk.vtkStripper()
+            stripper = vtkStripper()
             stripper.SetInputConnection(normals.GetOutputPort())
         else:
-            stripper = vtk.vtkStripper()
+            stripper = vtkStripper()
             stripper.SetInputConnection(surface_extractor.GetOutputPort())
 
-        surface_mapper = vtk.vtkPolyDataMapper()
+        surface_mapper = vtkPolyDataMapper()
         surface_mapper.SetInputConnection(stripper.GetOutputPort())
         surface_mapper.ScalarVisibilityOff()
 
         colors.SetColor("SurfaceColor", [255, 125, 64, 255])
-        surface = vtk.vtkActor()
+        surface = vtkActor()
         surface.SetMapper(surface_mapper)
         surface.GetProperty().SetDiffuseColor(colors.GetColor3d("SurfaceColor"))
 
         # An outline provides context around the data.
-        ouline_data = vtk.vtkOutlineFilter()
+        ouline_data = vtkOutlineFilter()
         ouline_data.SetInputConnection(data_importer.GetOutputPort())
 
-        map_outline = vtk.vtkPolyDataMapper()
+        map_outline = vtkPolyDataMapper()
         map_outline.SetInputConnection(ouline_data.GetOutputPort())
 
-        outline = vtk.vtkActor()
+        outline = vtkActor()
         outline.SetMapper(map_outline)
         outline.GetProperty().SetColor(colors.GetColor3d("Black"))
 
@@ -156,8 +163,8 @@ class Preview3DWindow(PreviewWindow):# {{{
     def __show3D_(self):# {{{
         self.r_masks = F.resampleSpacing(self.masks, self.spacing)[0].astype(np.uint8)
 
-        colors = vtk.vtkNamedColors()
-        data_importer = vtk.vtkImageImport()
+        colors = vtkNamedColors()
+        data_importer = vtkImageImport()
         data_string = self.r_masks.tostring()
         data_importer.CopyImportVoidPointer(data_string, len(data_string))
         data_importer.SetDataScalarTypeToUnsignedChar()
@@ -165,24 +172,24 @@ class Preview3DWindow(PreviewWindow):# {{{
         data_importer.SetDataExtent(0, self.r_masks.shape[1]-1, 0, self.r_masks.shape[2]-1, 0, self.r_masks.shape[0]-1)
         data_importer.SetWholeExtent(0, self.r_masks.shape[1]-1, 0, self.r_masks.shape[2]-1, 0, self.r_masks.shape[0]-1)
 
-        alphaChannelFunc = vtk.vtkPiecewiseFunction()
+        alphaChannelFunc = vtkPiecewiseFunction()
         alphaChannelFunc.AddPoint(0, 0.0)
         for i in range(len(LABELS)):
             value = (i+1)*1
             alphaChannelFunc.AddPoint(value, 1.0)
 
-        gradientFunc = vtk.vtkPiecewiseFunction()
+        gradientFunc = vtkPiecewiseFunction()
         gradientFunc.AddPoint(0, 0.0)
         gradientFunc.AddPoint(1, 1.0)
         gradientFunc.AddPoint(5, 1.0)
 
-        colorFunc = vtk.vtkColorTransferFunction()
+        colorFunc = vtkColorTransferFunction()
         for i in range(len(LABELS)):
             value = (i+1)*1
             colorFunc.AddRGBPoint(value, *LBL_COLORS[i])
             #colorFunc.AddRGBPoint(value, 1.0, 0.0, 0.0)
 
-        volume_property = vtk.vtkVolumeProperty()
+        volume_property = vtkVolumeProperty()
         volume_property.SetColor(colorFunc)
         volume_property.SetScalarOpacity(alphaChannelFunc)
         volume_property.SetGradientOpacity(gradientFunc)
@@ -193,10 +200,10 @@ class Preview3DWindow(PreviewWindow):# {{{
         volume_property.SetSpecular(0.2)
 
 
-        volume_mapper = vtk.vtkFixedPointVolumeRayCastMapper()
+        volume_mapper = vtkFixedPointVolumeRayCastMapper()
         volume_mapper.SetInputConnection(data_importer.GetOutputPort())
 
-        volume = vtk.vtkVolume()
+        volume = vtkVolume()
         volume.SetMapper(volume_mapper)
         volume.SetProperty(volume_property)
 

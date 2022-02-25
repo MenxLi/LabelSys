@@ -39,10 +39,6 @@ def main():
     app = Application([parser.prog])
     font = QFont("Verdana", 9)
     app.setFont(font)
-    # set stylesheet
-    #import qdarkstyle
-    #app.setStyleSheet(qdarkstyle.load_stylesheet_pyqt5())
-    CURR_DIR = os.path.dirname(__file__)
     with open(os.path.join(_UI_DIR, "QTDark.stylesheet")) as f:
         app.setStyleSheet(f.read())
     w = MainWindow(args)

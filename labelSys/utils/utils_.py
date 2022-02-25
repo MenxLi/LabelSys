@@ -57,10 +57,6 @@ def plot_imgs(imgs, n_col = 3, gray = False, titles = None):# {{{
         else: ax.imshow(img)
     plt.show()
 # }}}
-def img_hist(img):# {{{
-    plt.hist(equ.ravel(), bins=256, range=(0, 256), fc='k', ec='k')
-    plt.show()
-# }}}
 def normalize_mat(mat, minimum = "mean"):# {{{
     if minimum == "zero":
         return (mat - mat.min())/(mat.max() - mat.min())
