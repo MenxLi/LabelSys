@@ -68,6 +68,13 @@ class MainWindow(QMainWindow, WidgetCore):
 
         self.slice_id = 0
 
+        # Widget to disable when load
+        self.loading_disable_list = (
+                self.btn_next_patient,
+                self.btn_prev_patient,
+                self.combo_series
+                )
+
         self.__configSetup()
 
         # store some status indicator and temporary variables
@@ -78,10 +85,10 @@ class MainWindow(QMainWindow, WidgetCore):
                 "load_path": None # save the path of loaded labeled data
                 }
         # data
-        # self.imgs = None # current image series of a patient
-        # self.SOPInstanceUIDs = None # SOPInstanceUIDs of self.imgs
-        # self.slice_id = None  # current slice id
-        # self.curr_lbl = None  # current label selected
+        self.imgs: List[np.ndarray]     # current image series of a patient
+        self.uids: List[str]            # UIDs of self.imgs
+        self.slice_id: int              # current slice id
+        self.curr_lbl: str              # current label selected
 
         self.central_widget.setEnabled(False)
 
@@ -254,6 +261,7 @@ Welcome to LabelSys v{version},\n\
 
 
         self.central_widget.setEnabled(True)
+        self.setWidgetsEnabled(True, *self.loading_disable_list)
 
         self.__cache["data_loaded"] = True
         return 0
@@ -268,11 +276,7 @@ Welcome to LabelSys v{version},\n\
             print("The selected folder is not eligiable: ", fname)
             return 1
         self.central_widget.setEnabled(True)
-        self.__disableWidgets(
-                self.btn_next_patient,
-                self.btn_prev_patient,
-                self.combo_series
-                )
+        self.setWidgetsEnabled(False, *self.loading_disable_list)
         self.fl = None  # prevent lbl_holder initialize when changing series and alter saving behaviour
         self.slice_id = 0
         header, self.imgs = self.lbl_holder.loadFile(Path(fname))
@@ -289,7 +293,8 @@ Welcome to LabelSys v{version},\n\
             self.config["labels"] = header["Labels"]
             print("Warning: The header file does not contain config attribute, maybe this data was labeled with older version of the tool. \n You can ignore this warning if no error occurs, please save this file to overwrite previous one to add config attribute.")
 
-        self.SOPInstanceUIDs = [s["SOPInstanceUID"] for s in self.lbl_holder.data]
+        # self.uids = [s["SOPInstanceUID"] for s in self.lbl_holder.data]
+        self.uids = self.lbl_holder.uids
         self.labeler_name = header["Labeler"]
         self.spacing = header["Spacing"]
 
@@ -591,7 +596,8 @@ Welcome to LabelSys v{version},\n\
         called by vtkClass
         """
         self.lbl_holder.data[self.slice_id][self.curr_lbl] = cnts_data
-        self.lbl_holder.data[self.slice_id]["SOPInstanceUID"] = self.SOPInstanceUIDs[self.slice_id]
+        # self.lbl_holder.data[self.slice_id]["SOPInstanceUID"] = self.uids[self.slice_id]
+        self.lbl_holder.uids[self.slice_id] = self.uids[self.slice_id]
         self.lbl_holder.SAVED = False
 
         # goes into segmentaion fault
@@ -708,7 +714,7 @@ Welcome to LabelSys v{version},\n\
             mask = self.__getSingleMask(idx, label)
             if mask is None:
                 continue
-            im = F.overlap_mask(im, mask, np.array(color)*255, alpha = 0.4)
+            im = F.overlap_mask(im, mask, np.array(color)*255, alpha = 0.3)
         return im.copy()
 # }}}
     def __updateComboSeries(self):# {{{
@@ -785,17 +791,13 @@ Welcome to LabelSys v{version},\n\
                 format(self.labeler_name, str(self.output_path)))
 # }}}
     def __readSeries(self):# {{{
-        """update self.imgs and self.SOPInstanceUIDs by current chosen image series"""
+        """update self.imgs and self.uids by current chosen image series"""
         entry = str(self.combo_series.currentText())
         image_data = self.fl.curr_patient.getSeriesImg(entry)
         self.imgs = image_data["Images"]
-        self.SOPInstanceUIDs = image_data["SOPInstanceUIDs"]
+        self.uids = image_data["UIDs"]
         self.spacing = image_data["Spacing"]
-        self.lbl_holder.initialize(self.config["labels"], self.SOPInstanceUIDs)
-# }}}
-    def __disableWidgets(self, *widgets):# {{{
-        for w in widgets:
-            w.setEnabled(False)
+        self.lbl_holder.initialize(self.config["labels"], self.uids)
 # }}}
     def __querySave(self):# {{{
         """Check if there are unsaved changes"""

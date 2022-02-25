@@ -38,12 +38,6 @@ class VtkWidget(QVTKRenderWindowInteractor, WidgetCore):
     def __init__(self, frame, parent):
         super().__init__(frame)
 
-        # Create temporary directory for color image storage,
-        # The color image will be stored in this directory then be read by VTK
-        # if not os.path.exists(self.TEMP_DIR):
-            # print("Temporary directory created: ", self.TEMP_DIR)
-            # os.mkdir(self.TEMP_DIR)
-
         self.master = frame
         self.parent = parent
         self.setMainWindow(parent)
@@ -101,33 +95,6 @@ class VtkWidget(QVTKRenderWindowInteractor, WidgetCore):
             self.__clearCanvas()
 
         self.im = arr
-        # if len(self.im.shape) == 3 and self.im.shape[2] == 3:
-            # # read from image
-            # #  im_path = os.path.join(self.TEMP_DIR, "im.jpg")
-            # im_path = os.path.join(self.TEMP_DIR, "im.png")
-            # cv.imwrite(im_path, cv.cvtColor(self.im, cv.COLOR_RGB2BGR))
-            # #  im_reader = vtk.vtkJPEGReader()
-            # im_reader = vtk.vtkPNGReader()
-            # im_reader.SetFileName(im_path)
-            # self.actor = vtk.vtkImageActor()
-            # self.actor.GetMapper().SetInputConnection(im_reader.GetOutputPort())
-            # 
-        # elif len(self.im.shape) == 2:
-            #===============Update Image======================
-            # # https://gitlab.kitware.com/vtk/vtk/blob/741fffbf6490c34228dfe437f330d854b2494adc/Wrapping/Python/vtkmodules/util/vtkImageImportFromArray.py
-            # # import from numpy array
-            # importer = vtkImageImportFromArray()
-            # importer.SetArray(arr)
-            # importer.Update()
-
-            # # flip image along y axis
-            # flipY_filter = vtk.vtkImageFlip()
-            # flipY_filter.SetFilteredAxis(1)
-            # flipY_filter.SetInputConnection(importer.GetOutputPort())
-            # flipY_filter.Update()
-
-            # self.actor = vtk.vtkImageActor()
-            # self.actor.GetMapper().SetInputConnection(flipY_filter.GetOutputPort())
         img_vtk = numpyArrayAsVtkImageData(self.im)
         self.actor = vtkImageActor()
         self.actor.GetMapper().SetInputData(img_vtk)
@@ -186,6 +153,9 @@ class VtkWidget(QVTKRenderWindowInteractor, WidgetCore):
         """Create a template widget for drawing contours"""
         contourRep = vtkOrientedGlyphContourRepresentation()
         contourRep.GetLinesProperty().SetColor(color)
+        contourRep.GetLinesProperty().SetLineWidth(4)
+        contourRep.GetLinesProperty().SetOpacity(0.8)
+        contourRep.GetLinesProperty().SetVertexColor(0.3,0.8,1.0)
 
         contour_widget = vtkContourWidget()
         contour_widget.SetInteractor(self.iren)
@@ -195,7 +165,7 @@ class VtkWidget(QVTKRenderWindowInteractor, WidgetCore):
 
         return contour_widget
 
-    def constructContour(self, pts, open_curve = None, save = True, tmp_contour = False):
+    def constructContour(self, pts, open_curve = None, save = True, tmp_contour = False) -> vtkContourWidget:
         """
         Default behaviour:
         - LeftButtonPressEvent - triggers a Select event

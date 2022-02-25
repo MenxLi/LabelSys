@@ -1,1 +1,1 @@
-载入文件后再打开新文件没有退出载入模式
+CompareWidget 不能preview

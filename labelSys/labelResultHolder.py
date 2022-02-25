@@ -24,25 +24,43 @@ class LabelHolder:
     HOlding the label result
     """
     def __init__(self):# {{{
+        """
+        self.data: List[dict]:
+            main data, list of dictionary:
+            {
+                "<Label1>": {
+                    "Open":: bool,                                  # indicate whether it is open contour
+                    "Points":: List[Tuple[float, float, float]],    # vtk nodes
+                    "Contour":: List[Tuple[int, int]]               # full contour (int) in vtk coordinate
+                },
+                "<Label2>": {...},
+                ...
+                "SOPInstanceUID": str                               # Will remove in the future Only appear on version < 1.6.7
+            }
+        """
         self.data: List[dict] = None
         self.SAVED: bool = True
+        self.uids: List[str]
         self.comments: List[Union[None, str]]
         self.class_comments: List[Union[None, str]]
 # }}}
     def initialize(self, entries, SOPInstanceUIDs):# {{{
         self.data = []
+        self.uids = []      # For future version
         self.SAVED = True
         for ids in SOPInstanceUIDs:
             self.data.append({})
             for entry in entries:
                 self.data[-1][entry] = []
-            self.data[-1]["SOPInstanceUID"] = ids
+            # self.data[-1]["SOPInstanceUID"] = ids
+            self.uids.append(ids)
         self.comments = [None]*len(self.data)
         self.class_comments = [None]*len(self.data)
 # }}}
     def loadFile(self, path):# {{{
         imgs = []
         data = []
+        uids = []
         comments = []
         class_comments = []
         file_list = [x for x in os.listdir(path) if x.endswith('.json')]
@@ -55,31 +73,35 @@ class LabelHolder:
             else:
                 with open(file_path, "r") as f_:
                     slice_data = json.load(f_)
-                if "Image" in slice_data:               # Older version compatbility (<1.5.4)
-                    img = imgDecodeB64(slice_data["Image"], accelerate=True)
-                else:
-                    img = np.load(file_path[:-4] + "npz")["img"]
-                imgs.append(img)
                 data_ = slice_data["Data"]
                 data.append(data_)
+                if "Image" in slice_data:               
+                    img = imgDecodeB64(slice_data["Image"], accelerate=True)
+                else:                           # Older version compatbility (<1.5.4)
+                    img = np.load(file_path[:-4] + "npz")["img"]
+                imgs.append(img)
                 if "Comment" in slice_data:
-                    comments_ = slice_data["Comment"]  # Older version compatablility (<1.5.1)
-                else:
+                    comments_ = slice_data["Comment"]  
+                else:                           # Older version compatablility (<1.5.1)
                     comments_ = None
                 comments.append(comments_)
                 if "Classification" in slice_data:
-                    c_comments_ = slice_data["Classification"]  # Older version compatablility (<1.5.3)
-                else:
+                    c_comments_ = slice_data["Classification"]  
+                else:                           # Older version compatablility (<1.5.3)
                     c_comments_ = None
                 class_comments.append(c_comments_)
+                if "Uid" in slice_data:
+                    uid = slice_data["Uid"]  
+                else:                           # Older version compatablility (<1.6.7)
+                    uid = slice_data["Data"]["SOPInstanceUID"]      
+                uids.append(uid)
         self.data = data
+        self.uids = uids
         self.comments = comments
         self.class_comments = class_comments
         self.SAVED = True
         return  header_data, imgs
 # }}}
-    def ssss(self):
-        pass
     def saveToFile(self, path, imgs, head_info):# {{{
         """
         - path: directory to store all the data for current patient
@@ -93,18 +115,9 @@ class LabelHolder:
             print("Saving to file ", path)
             os.mkdir(path)
 
-        #  head_info = {
-        #          "Labeler":labeler,
-        #          "Time":str(datetime.datetime.now()),
-        #          "Spacing":spacing,
-        #          #"Labels": labels,
-        #          "Series": series,
-        #          "Config": config
-        #          }
-
         print("Saving header file...")
         with open(os.path.join(path, "HEAD_0.json"), "w") as hf:
-            json.dump(head_info, hf)
+            json.dump(head_info, hf, indent=1)
 
         thread = Thread(target = self.__threadSaveToFile, args = (path, imgs.copy(),))
         thread.start()
@@ -114,12 +127,11 @@ class LabelHolder:
             print("Saving...{}/{}".format(i+1, len(imgs)))
             file_name = "Slice_"+str(i+1)+".json"
             img_name = "Slice_"+str(i+1)+".npz"
-            # im_string = imgEncodeB64(imgs[i], accelerate= True)
             js_data = {
                     "Data": self.data[i],
                     "Comment": self.comments[i],
                     "Classification": self.class_comments[i],
-                    # "Image": im_string,
+                    "Uid": self.uids[i]
                     }
             with open(os.path.join(path, file_name), "w") as f:
                 json.dump(js_data, f)

@@ -33,6 +33,7 @@ class LabelData(object):
         self.contours: List[dict] = []
         self.classifications: List[dict] = []
         self.comments: List[str] = []
+        self.uids: List[str] = []
         for k, v in param_dict.items():
             setattr(self, k, v)
     
@@ -104,6 +105,7 @@ class LabelSysReader(object):
         contours = []
         classifications = []
         comments = []
+        uids = []
 
         file_list = [x for x in os.listdir(path) if x.endswith(".json")]
         for file_name in sorted(file_list, key = lambda x : int(re.findall("\d+|$", x)[0])):
@@ -118,13 +120,15 @@ class LabelSysReader(object):
                 contours.append(d["cnts"])
                 comments.append(d["comment"])
                 classifications.append(d["classification"])
+                uids.append(d["uid"])
         return LabelData({
             "header": header,
             "images": images,
             "masks": masks,
             "contours": contours,
             "comments": comments,
-            "classifications": classifications
+            "classifications": classifications,
+            "uids": uids
         })
     
     def toCOCO(self):
@@ -191,9 +195,11 @@ def readDataSlice(file_path: str, magnification: Union[int, float] = 1, line_thi
 
     masks = dict()
     cnts = dict()
+    uid = None
     for label, data in slice_data["Data"].items():
         if not isinstance(data, list):
-            # SOPInstanceUID
+            # SOPInstanceUID, for version < 1.6.7
+            uid = data
             continue
         if data == []:
             masks[label], cnts[label] = (np.zeros(img.shape[:2]), None)
@@ -206,12 +212,15 @@ def readDataSlice(file_path: str, magnification: Union[int, float] = 1, line_thi
         for c in classification.split("&"):
             k, v = c.split(":")
             class_dict[k] = v
+    if uid is None:
+        uid = slice_data["Uid"]   # for version > 1.6.7
     return {
         "img": img,
         "msks": masks,
         "cnts": cnts,
         "comment": slice_data["Comment"],
-        "classification": class_dict
+        "classification": class_dict,
+        "uid": uid
     }
 # }}}
 def _readOneLabel(ori_im_size, data, magnification, line_thickness):# {{{

@@ -68,5 +68,6 @@ __VERSIONS__ =[ \
         ["1.6.4", "LabelReader API update, doc-zh update"],
         ["1.6.5", "Add License to help menu"],
         ["1.6.6", "Logfile update"],
+        ["1.7.0", "Move SOPInstanceUID out of Data when saving, use uid instead, move logfile to $HOME. Bug fix: not enable widgets when open files after loading"],
         ]
 __version__, __description__ = __VERSIONS__[-1]

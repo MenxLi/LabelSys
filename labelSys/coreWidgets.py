@@ -11,6 +11,10 @@ class WidgetCore():
     
     def getMainWindow(self):
         return self.__main_win
+
+    def setWidgetsEnabled(self, status: bool, *widgets):
+        for w in widgets:
+            w.setEnabled(status)
     
     def _msgDialog(self, title, message, info_msg = ""):
         msg_box = QMessageBox()

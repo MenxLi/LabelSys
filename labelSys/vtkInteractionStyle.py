@@ -87,7 +87,8 @@ class PtContourInteractorStyle(InteractionStyleBase):
                 self.tmp_cnt = self.widget.constructContour(self.pts*2, open_curve = True, tmp_contour = True)
             else:
                 self.tmp_cnt = self.widget.constructContour(self.pts, open_curve = True, tmp_contour = True)
-    # Unfinished.
+            # self.tmp_cnt.SetFollowCursor(True)
+            # self.tmp_cnt.Render()
 
     def doubleClickEvent(self, *args, **kwargs):
         self.__removeTmpCnt()

@@ -26,7 +26,7 @@ class LoaderBase:# {{{
     Methods should be overwritten in child classes
     """
     # default attribute if designated file type doesn't contain them
-    SOPInstanceUID_base = "-"
+    UID_base = "-"
     spacing_base = (1, 1, 1)
     entry_base = "Unknown_entry"
     def __init__(self, file_path):
@@ -37,7 +37,7 @@ class LoaderBase:# {{{
         - entry: image series name to load - str
         - series: dictionary to classify images based on entries - dict
         return data
-        => data = { "Images": 2D_array, "SOPInstanceUIDs": list[str], "Spacing": (f,f,f) }
+        => data = { "Images": 2D_array, "UIDs": list[str], "Spacing": (f,f,f) }
         """
         if series == None and self.series == dict():
             raise Exception("Series haven't been set")
@@ -104,12 +104,12 @@ class DicomLoader(LoaderBase):# {{{
             series = self.series
         scan = series[entry]
         images = np.stack([s.pixel_array for s in scan])
-        SOPInstanceUIDs = [s['SOPInstanceUID'].value for s in series[entry]]
+        UIDs = [s['SOPInstanceUID'].value for s in series[entry]]
         spacing = [scan[0].SliceThickness, *scan[0].PixelSpacing]
         spacing = [float(s) for s in spacing]
         data = {
                 "Images": images,
-                "SOPInstanceUIDs": SOPInstanceUIDs,
+                "UIDs": UIDs,
                 "Spacing": spacing
                 }
         return data
@@ -168,7 +168,8 @@ class GeneralImageLoader(LoaderBase):# {{{
         images = series[entry]
         data = {
             "Images": images,
-            "SOPInstanceUIDs": [self.SOPInstanceUID_base]*len(images),
+            # "UIDs": [self.SOPInstanceUID_base]*len(images),
+            "UIDs": [F.ssUUID() for _ in range(len(images))],
             "Spacing": self.spacing_base
         }
         return data# }}}
@@ -211,7 +212,8 @@ class GeneralVideoLoader(LoaderBase):# {{{
         images = series[entry]
         data = {
             "Images": images,
-            "SOPInstanceUIDs": [self.SOPInstanceUID_base]*len(images),
+            # "UIDs": [self.SOPInstanceUID_base]*len(images),
+            "UIDs": [F.ssUUID() for _ in range(len(images))],
             "Spacing": self.spacing_base
         }
         return data# }}}

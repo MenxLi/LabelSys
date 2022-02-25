@@ -6,7 +6,7 @@
 #
 # {{{
 from PyQt5 import uic
-from PyQt5 import QtWidgets, QtCore
+from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import Qt, pyqtSignal, QObject, QEvent
 from .labelResultHolder import LabelHolder
@@ -36,6 +36,8 @@ class CompareWidget(QWidget):
         self.combo_label.currentTextChanged.connect(self.changeComboLabels)
         self.btn_save.clicked.connect(self.save)
         self.btn_reset_camera.clicked.connect(self.resetCamera)
+        self.check_preview.stateChanged.connect(lambda: (self.L_part._updateImg(), self.R_part._updateImg()))
+        self.check_preview.setChecked(True)
 # }}}
     def nextSlice(self):# {{{
         self.L_part.nextSlice()
@@ -107,7 +109,7 @@ class CompareWidget(QWidget):
 class CompareWidgetVisualPart(QWidget):
     INIT_STEP = 15
     COLOR = (1,0,0)
-    def __init__(self, frame, parent):# {{{
+    def __init__(self, frame, parent: CompareWidget):# {{{
         super().__init__(frame)
         self.parent = parent    # compareWidget
         self.master = frame
@@ -129,7 +131,7 @@ class CompareWidgetVisualPart(QWidget):
         self.slice_id = 0
         self.curr_lbl = ""
         self.imgs = []
-        self.SOPInstanceUIDs = []
+        self.uids = []
         self.spacing = (1,1,1)
         self.labeler_name = "Anonymous"
         self.lbl_holder = LabelHolder()
@@ -140,9 +142,12 @@ class CompareWidgetVisualPart(QWidget):
         uic.loadUi(ui_path, self)
         layout = QGridLayout()
         layout.addWidget(self, 0,0)
+        self.check_preview = self.parent.check_preview
         self.master.setLayout(layout)
         self.check_crv = QCheckBox()        # decoy checkbox to record curve type used by VtkWidget
         self.check_crv.setVisible(False)
+        self.check_draw = QCheckBox()        # decoy checkbox to record draw type used by VtkWidget
+        self.check_draw.setVisible(False)
         self.im_widget = VtkWidget(self.im_frame, self)
         self.btn_load.clicked.connect(self.loadFile)
 # }}}
@@ -176,7 +181,8 @@ class CompareWidgetVisualPart(QWidget):
             self.lbl_holder.data = data
             self.lbl_holder.SAVED = True
         self.imgs = imgs
-        self.SOPInstanceUIDs = [s["SOPInstanceUID"] for s in self.lbl_holder.data]
+        # self.uids = [s["SOPInstanceUID"] for s in self.lbl_holder.data]
+        self.uids = self.lbl_holder.uids
         self.labeler_name = header["Labeler"]
         self.spacing = header["Spacing"]
         #  self.series = header["Series"]
@@ -251,7 +257,7 @@ class CompareWidgetVisualPart(QWidget):
     def saveCurrentSlice(self, cnts_data):# {{{
         # will be called by vtkClass
         self.lbl_holder.data[self.slice_id][self.curr_lbl] = cnts_data
-        self.lbl_holder.data[self.slice_id]["SOPInstanceUID"] = self.SOPInstanceUIDs[self.slice_id]
+        self.lbl_holder.uids[self.slice_id] = self.uids[self.slice_id]
         self.lbl_holder.SAVED = False
 # }}}
     def saveCurrentPatient(self):# {{{

@@ -16,12 +16,13 @@ else:
 
 with open(CONF_PATH, "r", encoding="utf-8") as f:
     CONF = json.load(f)
+_HOME_DIR = os.path.expanduser("~")
 _UI_DIR = os.path.join(_CURR_DIR, "ui")
 _DOC_DIR = os.path.join(_CURR_DIR, "docs")
 _ICON_DIR = os.path.join(_CURR_DIR, "icons")
 _TMP_DIR = os.path.join(_CURR_DIR, ".TempDir")
 
-LOG_FILE = os.path.join(_TMP_DIR, "labelSys.log")
+LOG_FILE = os.path.join(_HOME_DIR, ".labelSys.log")
 
 if args.gen_conf:
     dst =  "./{}.json".format("conf_labelsysDefault")
