@@ -29,5 +29,7 @@ parser.add_argument("-m", "--loading_mode", type = int, \
     help = "(**Deprecated**) Set the loading mode, please use configuration file instead")
 parser.add_argument("--gen_conf", action = "store_true", default = False, \
     help = "Generate a configuration file at current working directory, then exits")
+parser.add_argument("--show_log", action = "store_true", default = False, \
+    help = "Show log, then exit")
 
 args = parser.parse_args()

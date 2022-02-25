@@ -22,14 +22,14 @@ from .previewGUI import Preview3DWindow, Preview2DWindow
 from .settingsGUI import SettingsDialog
 from .compareWidget import CompareWidget
 from .vtkClass import VtkWidget
-from .coreWidgets import WidgetCore
+from .coreWidgets import WidgetCore, EmittingStream
 from .configLoader import _ICON_DIR, _DOC_DIR, _UI_DIR
 from .commentGUI import CommentGUI
 
 import numpy as np
 from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtWidgets import *
-from PyQt5.QtCore import Qt, pyqtSignal, QObject, QEvent
+from PyQt5.QtCore import Qt, QEvent
 from PyQt5.QtGui import QIcon
 from PyQt5 import uic
 import cv2 as cv
@@ -316,6 +316,13 @@ Welcome to LabelSys v{version},\n\
         if not self.lbl_holder.SAVED and not self.args.dev:
             if not self._alertMsg("Unsaved changes, quitting?"):
                 return 1
+        # Erase some log if it's too long
+        MAX_LOG_LINES = 1000
+        with open(LOG_FILE, "r", encoding="utf-8") as fp:
+            lines = fp.readlines()
+        if len(lines) > MAX_LOG_LINES:
+            with open(LOG_FILE, "w", encoding="utf-8") as fp:
+                fp.write("".join(lines[-MAX_LOG_LINES//2:]))
         self.close()
         return 0
 # }}}
@@ -858,10 +865,3 @@ Welcome to LabelSys v{version},\n\
     def resizeEvent(self, a0) -> None:
         self.resized.emit()
         return super().resizeEvent(a0)
-
-class EmittingStream(QObject):
-    """Reference: https://stackoverflow.com/questions/8356336/how-to-capture-output-of-pythons-interpreter-and-show-in-a-text-widget"""
-    textWritten = pyqtSignal(str)
-
-    def write(self, text):
-        self.textWritten.emit(str(text))

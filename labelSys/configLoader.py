@@ -14,20 +14,25 @@ if args.config_file:
 else:
     CONF_PATH = os.path.join(_CURR_DIR, "conf.json")
 
+with open(CONF_PATH, "r", encoding="utf-8") as f:
+    CONF = json.load(f)
+_UI_DIR = os.path.join(_CURR_DIR, "ui")
+_DOC_DIR = os.path.join(_CURR_DIR, "docs")
+_ICON_DIR = os.path.join(_CURR_DIR, "icons")
+_TMP_DIR = os.path.join(_CURR_DIR, ".TempDir")
+
+LOG_FILE = os.path.join(_TMP_DIR, "labelSys.log")
+
 if args.gen_conf:
     dst =  "./{}.json".format("conf_labelsysDefault")
     shutil.copyfile(CONF_PATH,dst)
     print("Generated configuration file at: ", os.path.abspath(dst))
     exit()
 
-with open(CONF_PATH, "r", encoding="utf-8") as f:
-    CONF = json.load(f)
-_UI_DIR = os.path.join(_CURR_DIR, "ui")
-_DOC_DIR = os.path.join(_CURR_DIR, "docs")
-_ICON_DIR = os.path.join(_CURR_DIR, "icons")
-
-# CNT_OPEN = CONF["Contour_mode"]["Open"]
-# CNT_CLOSE = CONF["Contour_mode"]["Close"]
+if args.show_log:
+    from .utils.utils_ import openFile
+    openFile(LOG_FILE)
+    exit()
 
 LOADING_MODE = CONF["Loading_mode"]
 SERIES = CONF["Default_series"]

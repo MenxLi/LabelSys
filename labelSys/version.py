@@ -67,5 +67,6 @@ __VERSIONS__ =[ \
         ["1.6.3", "Add 'to another label' in 'operation', old label loading compatability; set default labeler name to platform.node()"],
         ["1.6.4", "LabelReader API update, doc-zh update"],
         ["1.6.5", "Add License to help menu"],
+        ["1.6.6", "Logfile update"],
         ]
 __version__, __description__ = __VERSIONS__[-1]
