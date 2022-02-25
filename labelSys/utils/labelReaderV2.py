@@ -38,9 +38,13 @@ class LabelData(object):
             setattr(self, k, v)
     
     def __str__(self):
+        if not "Version" in self.header:    # compat <v1.6.0
+            version_labeled = "<1.6.0"
+        else:
+            version_labeled = self.header["Version"]
         length_string = f"LabelData({len(self)})"
         reader_string = f"Reader: {self.header['Labeler']}"
-        version_info = f"Application version: {self.header['Version']}"
+        version_info = f"Application version: {version_labeled}"
         label_info = f"Number of avaliable labels: {len(self.header['Config']['labels'])}"
         to_show = [length_string, version_info, reader_string, label_info]
         return "\n".join(to_show)

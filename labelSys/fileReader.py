@@ -147,6 +147,8 @@ class GeneralImageLoader(LoaderBase):# {{{
         p = sorted([path_ for path_ in os.listdir(self.path)])
         abs_paths = [ os.path.join(self.path, path_) for path_ in p]
         for path_ in  abs_paths:
+            if os.path.isdir(path_) and os.path.basename(path_).startswith("Label-"):
+                continue
             try:
                 im = cv.imread(path_)
                 # resize image if it is too big...
@@ -157,7 +159,9 @@ class GeneralImageLoader(LoaderBase):# {{{
                 if len(im.shape) == 3 and im.shape[-1] == 3:
                     im = cv.cvtColor(im, cv.COLOR_BGR2RGB)
                 arr.append(im)
-            except: pass
+            except Exception as e:
+                print("An error happened when reading: ",path_, ": ")
+                print(e)
         if arr != []:
             self.series[self.entry_base] = arr
         return
