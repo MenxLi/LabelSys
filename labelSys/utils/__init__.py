@@ -5,4 +5,4 @@
 # (see https://bitbucket.org/Mons00n/mrilabelsys/).
 #
 
-from .labelReaderV2 import LabelSysReader
+from .labelReaderV2 import LabelSysReader, recursivelyFindLabelDir
