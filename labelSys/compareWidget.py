@@ -4,7 +4,6 @@
 # This file is part of LabelSys
 # (see https://bitbucket.org/Mons00n/mrilabelsys/).
 #
-# {{{
 from PyQt5 import uic
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import *
@@ -16,15 +15,14 @@ from .configLoader import _UI_DIR
 
 import os, sys
 from pathlib import Path
-# }}}
 
 class CompareWidget(QWidget):
-    def __init__(self, parent):# {{{
+    def __init__(self, parent):
         super().__init__()
         self.parent = parent    # mainWindow
         self.initUI()
-# }}}
-    def initUI(self):# {{{
+
+    def initUI(self):
         ui_path = os.path.join(_UI_DIR, "compareWidget.ui")
         uic.loadUi(ui_path, self)
         self.setWindowTitle("Compare Widget")
@@ -38,16 +36,16 @@ class CompareWidget(QWidget):
         self.btn_reset_camera.clicked.connect(self.resetCamera)
         self.check_preview.stateChanged.connect(lambda: (self.L_part._updateImg(), self.R_part._updateImg()))
         self.check_preview.setChecked(True)
-# }}}
-    def nextSlice(self):# {{{
+
+    def nextSlice(self):
         self.L_part.nextSlice()
         self.R_part.nextSlice()
-# }}}
-    def prevSlice(self):# {{{
+
+    def prevSlice(self):
         self.L_part.prevSlice()
         self.R_part.prevSlice()
-# }}}
-    def changeComboLabels(self, entry):# {{{
+
+    def changeComboLabels(self, entry):
         self.R_part.curr_lbl = entry
         self.L_part.curr_lbl = entry
         if self.R_part._cache["data_loaded"]:
@@ -58,8 +56,8 @@ class CompareWidget(QWidget):
             try:    # prevent triggering with blank entry
                 self.L_part._updateImg()
             except: pass
-# }}}
-    def save(self):# {{{
+
+    def save(self):
         if self.R_part.file_path == self.L_part.file_path:
             if not self._alertMsg("The two images have the same output path and are labeled by same labeler. Output files will overwrite each other to corrupt the result. Continue?"):
                 return
@@ -67,19 +65,19 @@ class CompareWidget(QWidget):
             self.R_part.saveCurrentPatient()
         if self.L_part._cache["data_loaded"]:
             self.L_part.saveCurrentPatient()
-# }}}
-    def rebaseSliceId(self):# {{{
+
+    def rebaseSliceId(self):
         """Will be called by CompareWidgetVisualPart to sync slice idx"""
         self.R_part.slice_id = 0
         self.R_part._updateImg()
         self.L_part.slice_id = 0
         self.L_part._updateImg()
-# }}}
+
     def resetCamera(self):#{{{
         self.R_part.resetCamera()
         self.L_part.resetCamera()
 #}}}
-    def wheelEvent(self, event):# {{{
+    def wheelEvent(self, event):
         modifier = QtWidgets.QApplication.keyboardModifiers()
         if event.angleDelta().y() < 0:
             if modifier != Qt.ControlModifier:
@@ -94,7 +92,7 @@ class CompareWidget(QWidget):
                 if self.R_part._cache["data_loaded"]: self.R_part.im_widget.style.OnMouseWheelBackward()
                 if self.L_part._cache["data_loaded"]: self.L_part.im_widget.style.OnMouseWheelBackward()
 #}}}
-    def _alertMsg(self,msg, title = "Alert", func = lambda x : None):# {{{
+    def _alertMsg(self,msg, title = "Alert", func = lambda x : None):
         msg_box = QMessageBox()
         msg_box.setText(msg)
         msg_box.setWindowTitle(title)
@@ -104,12 +102,12 @@ class CompareWidget(QWidget):
         if return_value == QMessageBox.Ok:
             return True
         else: return False
-# }}}
+
 
 class CompareWidgetVisualPart(QWidget):
     INIT_STEP = 15
     COLOR = (1,0,0)
-    def __init__(self, frame, parent: CompareWidget):# {{{
+    def __init__(self, frame, parent: CompareWidget):
         super().__init__(frame)
         self.parent = parent    # compareWidget
         self.master = frame
@@ -136,8 +134,8 @@ class CompareWidgetVisualPart(QWidget):
         self.labeler_name = "Anonymous"
         self.lbl_holder = LabelHolder()
         self.file_path = ""
-# }}}
-    def initUI(self):# {{{
+
+    def initUI(self):
         ui_path = os.path.join(_UI_DIR, "compareVisualWidget.ui")
         uic.loadUi(ui_path, self)
         layout = QGridLayout()
@@ -150,8 +148,8 @@ class CompareWidgetVisualPart(QWidget):
         self.check_draw.setVisible(False)
         self.im_widget = VtkWidget(self.im_frame, self)
         self.btn_load.clicked.connect(self.loadFile)
-# }}}
-    def initConfig(self, header):# {{{
+
+    def initConfig(self, header):
         """
         This method is a placeholder method for now, will be deprecated in the future
         """
@@ -159,16 +157,16 @@ class CompareWidgetVisualPart(QWidget):
         for i in self.config["labels"]:
             self.config["label_colors"].append(self.COLOR)
             self.config["label_steps"].append(self.INIT_STEP)
-# }}}
-    def loadFile(self):# {{{
+
+    def loadFile(self):
         """Load a labeld file for one patient"""
         fname = QFileDialog.getExistingDirectory(self, "Select loading directory")
         if fname == "":
             return 1
         header, imgs = self.lbl_holder.loadFile(Path(fname))
         self.loadData(header, self.lbl_holder.data, imgs, fname)
-# }}}
-    def loadData(self, header, data, imgs, file_path):# {{{
+
+    def loadData(self, header, data, imgs, file_path):
         """
         load directly from data directly (from mainWindow) instead of loading from file
         - header: Label result header file
@@ -213,16 +211,16 @@ class CompareWidgetVisualPart(QWidget):
 
         self.parent.rebaseSliceId()     # Sync silce by forcing slice id to 0
         self._updateImg()
-# }}}
-    def nextSlice(self):# {{{
+
+    def nextSlice(self):
         if not self._cache["data_loaded"]:
             return
         if self.slice_id >= len(self.imgs)-1:
             return 1
         self.slice_id += 1
         self._updateImg()
-# }}}
-    def prevSlice(self):# {{{
+
+    def prevSlice(self):
         if not self._cache["data_loaded"]:
             return
         if self.slice_id < 1:
@@ -230,8 +228,8 @@ class CompareWidgetVisualPart(QWidget):
         self.slice_id -= 1
         self._updateImg()
         return 0
-# }}}
-    def _updateImg(self):# {{{
+
+    def _updateImg(self):
         if not self._cache["data_loaded"]:
             return
         im = F.map_mat_255(self.imgs[self.slice_id])
@@ -249,30 +247,30 @@ class CompareWidgetVisualPart(QWidget):
         if cnts_data != []:
             for cnt in cnts_data:
                 self.im_widget.loadContour(cnt["Points"], cnt["Open"])
-# }}}
+
     def resetCamera(self):#{{{
         if self._cache["data_loaded"]:
             self.im_widget.resetCamera()
 #}}}
-    def saveCurrentSlice(self, cnts_data):# {{{
+    def saveCurrentSlice(self, cnts_data):
         # will be called by vtkClass
         self.lbl_holder.data[self.slice_id][self.curr_lbl] = cnts_data
         self.lbl_holder.uids[self.slice_id] = self.uids[self.slice_id]
         self.lbl_holder.SAVED = False
-# }}}
-    def saveCurrentPatient(self):# {{{
+
+    def saveCurrentPatient(self):
         self.lbl_holder.saveToFile(self.file_path, self.imgs, self.header)
         self.lbl_holder.SAVED = True
-# }}}
-    def _getColor(self, label):# {{{
+
+    def _getColor(self, label):
         # will be called by vtkClass
         try:
             idx = self.config["labels"].index(label)
         except:
             return (1,0,0)
         return self.config["label_colors"][idx]
-# }}}
-    def wheelEvent_deprecated(self, event):# {{{
+
+    def wheelEvent_deprecated(self, event):
         if self._cache["data_loaded"] == False:
             return
         modifier = QtWidgets.QApplication.keyboardModifiers()
@@ -282,4 +280,4 @@ class CompareWidgetVisualPart(QWidget):
         else:
             if modifier == Qt.ControlModifier:
                 self.im_widget.style.OnMouseWheelBackward()
-# }}}
+

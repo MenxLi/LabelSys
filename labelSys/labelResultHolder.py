@@ -92,7 +92,7 @@ class LabelHolder:
                 class_comments.append(c_comments_)
                 if "Uid" in slice_data:
                     uid = slice_data["Uid"]  
-                else:                           # Older version compatablility (<1.6.7)
+                else:                           # Older version compatablility (<1.7.0)
                     uid = slice_data["Data"]["SOPInstanceUID"]      
                 uids.append(uid)
         self.data = data

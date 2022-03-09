@@ -36,7 +36,7 @@ class LabelData(object):
         self.uids: List[str] = []
         for k, v in param_dict.items():
             setattr(self, k, v)
-    
+
     def __str__(self):
         if not "Version" in self.header:    # compat <v1.6.0
             version_labeled = "<1.6.0"
@@ -52,7 +52,7 @@ class LabelData(object):
 
     def __len__(self):
         return len(self.images)
-    
+
     def avalLabels(self):
         return self.header["Config"]["labels"]
 
@@ -67,7 +67,7 @@ class LabelData(object):
             msk = np.concatenate((msk[..., np.newaxis], msk[..., np.newaxis], msk[..., np.newaxis]), axis = -1)
             c_mask = c_mask*(1-msk) + msk*c
         return c_mask
-    
+
     def singleMask(self, idx: int, num_dict: dict):
         assert idx<len(self) and idx >=0, "invalid index."
         masks = self.masks[idx]
@@ -86,7 +86,7 @@ class LabelSysReader(object):
     LINE_THICKNESS = 1
     def __init__(self, folder_list: List[str]) -> None:
         self.fl = folder_list
-    
+
     def __getitem__(self, key)->LabelData:
         if isinstance(key, int):
             assert key<len(self) and key >=0, "invalid index."
@@ -98,7 +98,7 @@ class LabelSysReader(object):
             return LabelSysReader(self.fl[start: stop: step])
         else:
             raise TypeError("Invalid argument type.")
-    
+
     def __len__(self):
         return len(self.fl)
 
@@ -134,7 +134,7 @@ class LabelSysReader(object):
             "classifications": classifications,
             "uids": uids
         })
-    
+
     def toCOCO(self):
         raise NotImplementedError
 
@@ -161,7 +161,7 @@ def recursivelyFindLabelDir(root_dir: str) -> List[str]:
                 valid_labeldir += recursivelyFindLabelDir(sub_file)
     return valid_labeldir
 
-# def readOneFolder(path: str, magnification: Union[float, int] = 1, line_thickness: int = 1) -> Tuple[List[np.ndarray],List[dict]]:# {{{
+# def readOneFolder(path: str, magnification: Union[float, int] = 1, line_thickness: int = 1) -> Tuple[List[np.ndarray],List[dict]]:
     # imgs = []
     # masks = []
     # masks_cnt = []
@@ -175,8 +175,8 @@ def recursivelyFindLabelDir(root_dir: str) -> List[str]:
                 # header_data = json.load(_f)
         # else:
     # return imgs, masks
-# }}}
-def readDataSlice(file_path: str, magnification: Union[int, float] = 1, line_thickness: int = 1):# {{{
+
+def readDataSlice(file_path: str, magnification: Union[int, float] = 1, line_thickness: int = 1):
     """
     - line_thickness: the line thickness of the interpreted mask, if the label is open contour
     read one data slice (i.e. not header file), the image and masks are magified with masks obtained\
@@ -225,7 +225,7 @@ def readDataSlice(file_path: str, magnification: Union[int, float] = 1, line_thi
             masks[label], cnts[label] = (np.zeros(img.shape[:2]), None)
         else:
             masks[label], cnts[label] = _readOneLabel(img_ori.shape[:2], data, magnification, line_thickness)
-    
+
     classification: str = slice_data["Classification"]
     class_dict = {}
     if not classification is None:
@@ -242,8 +242,8 @@ def readDataSlice(file_path: str, magnification: Union[int, float] = 1, line_thi
         "classification": class_dict,
         "uid": uid
     }
-# }}}
-def _readOneLabel(ori_im_size, data, magnification, line_thickness):# {{{
+
+def _readOneLabel(ori_im_size, data, magnification, line_thickness):
     """
     will be called by readDataSlice(...)
     - ori_im_size: original image size (H, W)
@@ -296,8 +296,8 @@ def _readOneLabel(ori_im_size, data, magnification, line_thickness):# {{{
         mask = drawMask(mask, cnt, open_curve, line_thickness)
         cnts.append(cnt)
     return mask, cnts
-# }}}
-def _getFullCnt(contour_widget, img_shape):# {{{{{{
+
+def _getFullCnt(contour_widget, img_shape):
     """
     Get all point position in a contour widget
     return point in (col, row)
@@ -317,13 +317,13 @@ def _getFullCnt(contour_widget, img_shape):# {{{{{{
             all_pts.append(_getBackCvCoord(*point[:2], img_shape))
     all_pts = np.array(all_pts)
     return all_pts.tolist()
-# }}}
-def _getBackCvCoord(x, y, img_shape):# {{{{{{
+
+def _getBackCvCoord(x, y, img_shape):
     """Get coordinate in (col, row)
     - img_shape: (W, H)"""
     return np.array([x, img_shape[0]-1-y])
-# }}}
-def drawMask(mask, cnt, open_curve, line_thickness):# {{{
+
+def drawMask(mask, cnt, open_curve, line_thickness):
     """
     draw the mask from contour points
     will be called by _readOneLabel()
@@ -342,14 +342,14 @@ def drawMask(mask, cnt, open_curve, line_thickness):# {{{
         cnt = np.array([[arr] for arr in cnt])
         cv.fillPoly(mask, pts = [cnt], color = 1)
     return mask
-# }}}
-def gray2rgb(im):# {{{
+
+def gray2rgb(im):
     return np.concatenate((im[:, :, np.newaxis], im[:, :, np.newaxis], im[:, :, np.newaxis]), axis = 2)
-# }}}
-def format2Uint8(im):# {{{
+
+def format2Uint8(im):
     return ((im - im.min())/(im.max() - im.min())*255).astype(np.uint8)
-# }}}
-def inspectOneSlice(slice_path):# {{{
+
+def inspectOneSlice(slice_path):
     img, masks = readDataSlice(slice_path, magnification = 1)
     img = format2Uint8(img)
 
@@ -372,9 +372,9 @@ def inspectOneSlice(slice_path):# {{{
     cv.imshow(slice_path, cv.cvtColor(show_im, cv.COLOR_RGB2BGR))
     cv.waitKey(0)
     return masks
-# }}}
 
-def _removeDuplicate2d(duplicate):# {{{
+
+def _removeDuplicate2d(duplicate):
     final_list = []
     flag = True
     for num in duplicate:
@@ -384,7 +384,7 @@ def _removeDuplicate2d(duplicate):# {{{
         if flag: final_list.append(num)
         flag = True
     return final_list
-# }}}
+
 
 def randomColorUINT8() -> Tuple[int, int, int]:
     choice = random.randint(0, 16777216)    # 256**3

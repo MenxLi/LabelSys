@@ -33,13 +33,13 @@ from PyQt5.QtCore import Qt, QEvent
 from PyQt5.QtGui import QIcon
 from PyQt5 import uic
 import cv2 as cv
-# }}}
+
 LOCAL_DIR = os.path.dirname(os.path.realpath(__file__))
 
 class MainWindow(QMainWindow, WidgetCore):
     resized = QtCore.pyqtSignal()
     # Init{{{
-    def __init__(self,args):# {{{
+    def __init__(self,args):
         super().__init__()
         self.setWindowIcon(QIcon(os.path.join(_ICON_DIR, "main.ico")))
         if not args.dev:
@@ -100,7 +100,7 @@ class MainWindow(QMainWindow, WidgetCore):
                 self.loadLabeledFile(args.file)
             else:
                 self.loadPatients(args.file)
-        
+
         welcome_msg = "\
 ---------------------------------------------\n\
 Welcome to LabelSys v{version},\n\
@@ -114,8 +114,7 @@ Welcome to LabelSys v{version},\n\
             print("Developing mode...")
         print(welcome_msg)
 
-# }}}
-    def __configSetup(self):# {{{
+    def __configSetup(self):
         """Unfinished function, will move all CONF attributes into self.config in the future"""
         self.config = {
             "labels": LABELS,
@@ -134,8 +133,8 @@ Welcome to LabelSys v{version},\n\
             # if not loading mode in the command line
             self.config["loading_mode"] = self.args.loading_mode
         else: self.config["loading_mode"] = CONF["Loading_mode"]
-# }}}
-    def initMenu(self):# {{{
+
+    def initMenu(self):
         # File
         self.act_open.triggered.connect(lambda: self.loadPatients())
         self.act_open.setShortcut("Ctrl+O")
@@ -207,8 +206,8 @@ Welcome to LabelSys v{version},\n\
             ]),
             info_msg=__license_full__
         ))
-# }}}
-    def initPanel(self):# {{{
+
+    def initPanel(self):
         """Init the whole panel, will be called on loading the patients"""
         self.slider_im.setPageStep(1)
         self.combo_label.addItems(self.config["labels"])
@@ -233,13 +232,13 @@ Welcome to LabelSys v{version},\n\
         self.btn_add_bbox.clicked.connect(self.addBBox)
         self.btn_comment.clicked.connect(self.editComment)
         self.slider_im.valueChanged.connect(self.changeSliderValue)
-# }}}
-    def initImageUI(self):# {{{
+
+    def initImageUI(self):
         """Put image on to main window, will be called on loading the patients"""
-        self.im_widget = VtkWidget(self.im_frame, self)# }}}
-# }}}
+        self.im_widget = VtkWidget(self.im_frame, self)
+
     # Load images{{{
-    def loadPatients(self, fname: str = None):# {{{
+    def loadPatients(self, fname: str = None):
         """Load patients folder, and call initPanelAct() to initialize the panel"""
         if fname is None:
             fname = QFileDialog.getExistingDirectory(self, "Select data directory to open")
@@ -265,8 +264,8 @@ Welcome to LabelSys v{version},\n\
 
         self.__cache["data_loaded"] = True
         return 0
-# }}}
-    def loadLabeledFile(self, fname: str = None):# {{{
+
+    def loadLabeledFile(self, fname: str = None):
         """Load a labeld file for one patient"""
         if fname is None:
             fname = QFileDialog.getExistingDirectory(self, "Select labeled directory to load")
@@ -315,9 +314,9 @@ Welcome to LabelSys v{version},\n\
         self.__cache["load_path"] = fname
         self.__updateQLabelText()
         print("Data loaded")
-        # }}}
-# }}}
-    def quitApp(self):# {{{
+
+
+    def quitApp(self):
         if not self.lbl_holder.SAVED and not self.args.dev:
             if not self._alertMsg("Unsaved changes, quitting?"):
                 return 1
@@ -330,8 +329,8 @@ Welcome to LabelSys v{version},\n\
                 fp.write("".join(lines[-MAX_LOG_LINES//2:]))
         self.close()
         return 0
-# }}}
-    def changeScreenMode(self):# {{{
+
+    def changeScreenMode(self):
         """Change screen mode between Normal Maximized and full screen"""
         self.__screen_mode = (self.__screen_mode+1)%3
         if self.__screen_mode == 0:
@@ -340,8 +339,8 @@ Welcome to LabelSys v{version},\n\
             self.showMaximized()
         elif self.__screen_mode == 2:
             self.showFullScreen()
-# }}}
-    def setOutputPath(self):# {{{
+
+    def setOutputPath(self):
         fname = QFileDialog.getExistingDirectory(self, "Select output directory")
         if fname == "":
             return 1
@@ -349,20 +348,20 @@ Welcome to LabelSys v{version},\n\
         self.__cache["output_set"] = True
         self.__updateQLabelText()
         return 0
-# }}}
-    def setLabeler(self):# {{{
+
+    def setLabeler(self):
         """Set labeler name"""
         text, ok = QInputDialog.getText(self, "Set labeler", "Enter your name: ")
         if ok:
             self.labeler_name = str(text)
             self.__updateQLabelText()
-# }}}
-    def setSettings(self):# {{{
+
+    def setSettings(self):
         self.settings_dialog = SettingsDialog(self)
         self.settings_dialog.exec_()
         #self.settings_dialog.show()
-# }}}
-    def changeComboSeries(self, entry):# {{{
+
+    def changeComboSeries(self, entry):
         """Triggered when self.combo_series change the entry"""
         if self.__querySave() == 1:
             # decline action with unsaved changes
@@ -380,8 +379,8 @@ Welcome to LabelSys v{version},\n\
             self.slider_im.setSliderPosition(self.slice_id)
             self.slider_im.setMaximum(len(self.imgs)-1)
             self.im_widget.resetCamera()
-# }}}
-    def changeComboLabels(self, entry):# {{{
+
+    def changeComboLabels(self, entry):
         """
         Change label, be linked to self.combo_label.currentTextChange;
         should not be called directly if aiming at change combo text,
@@ -402,10 +401,10 @@ Welcome to LabelSys v{version},\n\
                 self.check_draw.setChecked(False)
             self.im_widget.setStyleAuto()      # May change label drawing mode
         except: pass
-# }}}
+
     def queryToAnotherLabel(self):
         """Change current label selection while retain the contours,
-        would be useful if someone did some labeling already, 
+        would be useful if someone did some labeling already,
         and found they are working in a wrong label.
         """
         aval_labels:List[str] = self.config["labels"]
@@ -419,39 +418,39 @@ Welcome to LabelSys v{version},\n\
         else:
             self._warnDialog("Failed.")
 
-    def changeCheckCrv(self, i):# {{{
+    def changeCheckCrv(self, i):
         if self.check_crv.isChecked():
             self.config["label_modes"][self.config["labels"].index(self.curr_lbl)] = 1
         else:
             self.config["label_modes"][self.config["labels"].index(self.curr_lbl)] = 0
-# }}}
-    def changeCheckDraw(self, i):# {{{
+
+    def changeCheckDraw(self, i):
         if self.check_draw.isChecked():
             self.config["label_draw"][self.config["labels"].index(self.curr_lbl)] = 1
         else:
             self.config["label_draw"][self.config["labels"].index(self.curr_lbl)] = 0
         self.im_widget.setStyleAuto()          # May change label drawing mode
-# }}}
-    def changeCheckPreview(self):# {{{
+
+    def changeCheckPreview(self):
         self.__updateImg()
-# }}}
-    def changeSliderValue(self):# {{{
+
+    def changeSliderValue(self):
         """Triggered when slider_im changes value"""
         self.slice_id = self.slider_im.value()
         # self.__updateImg()
         self.changeComboLabels(self.combo_label.currentText())  # A hack to update checkboxes and image
-# }}}
-    def switchLabel(self):# {{{
+
+    def switchLabel(self):
         """switch between labels, for shortcut use"""
         new_label_id = (self.config["labels"].index(self.curr_lbl) + 1)%len(self.config["labels"])
         self.combo_label.setCurrentText(self.config["labels"][new_label_id]) # will trigger changeComboLabels()
-# }}}
-    def switchLabelReverse(self):# {{{
+
+    def switchLabelReverse(self):
         """switch between labels, for shortcut use"""
         new_label_id = (self.config["labels"].index(self.curr_lbl) - 1)%len(self.config["labels"])
         self.combo_label.setCurrentText(self.config["labels"][new_label_id]) # will trigger changeComboLabels()
-# }}}
-    def nextSlice(self):# {{{
+
+    def nextSlice(self):
         if self.slice_id >= len(self.imgs)-1:
             return 1
         self.slice_id += 1
@@ -469,8 +468,8 @@ Welcome to LabelSys v{version},\n\
                 self.preview_win_2d._updatePanel()
         except: pass
         return 0
-# }}}
-    def prevSlice(self):# {{{
+
+    def prevSlice(self):
         if self.slice_id < 1:
             return 1
         self.slice_id -= 1
@@ -485,31 +484,31 @@ Welcome to LabelSys v{version},\n\
                 self.preview_win_2d.prevSlice()
         except: pass
         return 0
-# }}}
-    def nextPatient(self):# {{{
+
+    def nextPatient(self):
         if self.__querySave() == 1:
             return
         if self.fl.next():
             self.__updatePatient()
             return 0
-# }}}
-    def prevPatient(self):# {{{
+
+    def prevPatient(self):
         if self.__querySave() == 1:
             return
         if self.fl.previous():
             self.__updatePatient()
             return 0
-# }}}
-    def stdoutStream(self, text):# {{{
+
+    def stdoutStream(self, text):
         #self.tb_console.append(text)
         self.tb_console.insertPlainText(text)
         self.tb_console.verticalScrollBar().setValue(self.tb_console.verticalScrollBar().maximum())
-# }}}
+
     def clearCurrentSlice(self):
         self.lbl_holder.data[self.slice_id][self.curr_lbl] = []
         self.__updateImg()
-        
-    def interpCurrentSlice(self):# {{{
+
+    def interpCurrentSlice(self):
         prev_mask = self.__getSingleMask(self.slice_id-1, self.combo_label.currentText())
         next_mask = self.__getSingleMask(self.slice_id+1, self.combo_label.currentText())
         if type(prev_mask) == type(None) and type(next_mask) == type(None):
@@ -531,21 +530,21 @@ Welcome to LabelSys v{version},\n\
             self.lbl_holder.data[self.slice_id] = copy.deepcopy(self.lbl_holder.data[self.slice_id-1])
             self.lbl_holder.SAVED = False
             self.__updateImg()
-# }}}
-    def previewLabels3D(self):# {{{
+
+    def previewLabels3D(self):
         if not self.__cache["data_loaded"]:
             pass
         self.preview_win_3d = Preview3DWindow(self, self.imgs, self.__getMasks(), spacing = self.spacing)
         self.preview_win_3d.show()
-# }}}
-    def previewLabels2D(self):# {{{
+
+    def previewLabels2D(self):
         if not self.__cache["data_loaded"]:
             pass
         self.preview_win_2d = Preview2DWindow(self, self.imgs, self.__getMasks(), self.slice_id,\
                                               self.spacing, magnification = self.config["2D_magnification"])
         self.preview_win_2d.show()
-# }}}
-    def openCompareWindow(self):# {{{
+
+    def openCompareWindow(self):
         self.compare_win = CompareWidget(self)
         self.compare_win.show()
 
@@ -568,13 +567,13 @@ Welcome to LabelSys v{version},\n\
             self.compare_win.L_part.loadData(header, \
             self.lbl_holder.data, self.imgs, file_path)
         except:pass     # When no file is loaded
-# }}}
-    def addContour(self):# {{{
+
+    def addContour(self):
         self.im_widget.style.forceDrawing()
-# }}}
+
     def addBBox(self):
         self._warnDialog("This function has not been implemented yet")
-    
+
     def editComment(self):
         def saveComments(classification_txt: str, comment_txt: str):
             if comment_txt == "":
@@ -590,7 +589,7 @@ Welcome to LabelSys v{version},\n\
             current_comment=self.lbl_holder.comments[self.slice_id])
         self.comment_gui.show()
 
-    def saveCurrentSlice(self, cnts_data: List[dict]):# {{{
+    def saveCurrentSlice(self, cnts_data: List[dict]):
         """
         Will be triggered automatically when modifying the contour, will be
         called by vtkClass
@@ -609,8 +608,8 @@ Welcome to LabelSys v{version},\n\
             if self.preview_win_2d.isVisible():
                 self.preview_win_2d.updateInfo(self.__getMasks(), self.slice_id)
         except: pass
-# }}}
-    def saveCurrentPatient(self):# {{{
+
+    def saveCurrentPatient(self):
         try:
             # Opening dicom file
             folder_name = "Label-"+Path(self.fl.getPath()).stem + "-" + self.labeler_name.replace(" ", "_")
@@ -635,8 +634,8 @@ Welcome to LabelSys v{version},\n\
         #          )
         self.lbl_holder.saveToFile(file_path, self.imgs, header)
         self.lbl_holder.SAVED = True
-# }}}
-    def rotateImage(self):# {{{
+
+    def rotateImage(self):
         _has_label = False
         for entry in self.config["labels"]:
             if self.lbl_holder.data[self.slice_id][entry] != []:
@@ -657,15 +656,15 @@ Welcome to LabelSys v{version},\n\
             self.imgs[self.slice_id] = self.imgs[self.slice_id].transpose()
         self.__updateImg()
         return True
-# }}}
-    def _getColor(self, label):# {{{
+
+    def _getColor(self, label):
         try:
             idx = self.config["labels"].index(label)
         except:
             return (1,0,0)
         return self.config["label_colors"][idx]
-# }}}
-    def __getMasks(self):# {{{
+
+    def __getMasks(self):
         masks = []
         for slice_idx in range(len(self.imgs)):
             mask_data = {}
@@ -685,8 +684,8 @@ Welcome to LabelSys v{version},\n\
                 mask_data[label] = mask_data[label].astype(np.bool)
             masks.append(mask_data)
         return masks
-# }}}
-    def __getSingleMask(self, idx, label):# {{{
+
+    def __getSingleMask(self, idx, label):
         """get mask for a single label in single image, used for interpolation"""
         if idx <0 or idx > len(self.imgs)-1:
             return None
@@ -705,8 +704,8 @@ Welcome to LabelSys v{version},\n\
                 cv.fillPoly(mask, pts = [cv_cnt], color = 1)
         mask = mask.astype(np.bool)
         return mask
-# }}}
-    def _getMarkedImg(self, idx):# {{{
+
+    def _getMarkedImg(self, idx):
         im = F.map_mat_255(self.imgs[idx])
         if F.img_channel(im) == 1:
             im = F.gray2rgb_(F.map_mat_255(im))
@@ -716,8 +715,8 @@ Welcome to LabelSys v{version},\n\
                 continue
             im = F.overlap_mask(im, mask, np.array(color)*255, alpha = 0.3)
         return im.copy()
-# }}}
-    def __updateComboSeries(self):# {{{
+
+    def __updateComboSeries(self):
         """Update the series combobox when changing patient"""
         self.combo_series.clear()
         series = self.fl.curr_patient.getEntries()
@@ -727,8 +726,8 @@ Welcome to LabelSys v{version},\n\
             self.combo_series.setCurrentText(self.config["default_series"])
         else:
             self.combo_series.setCurrentText(list(series)[0])
-# }}}
-    def __updatePatient(self):# {{{
+
+    def __updatePatient(self):
         """Update current showing patient, will be triggeted when changing patient"""
         self.slice_id = 0
         self.__updateComboSeries()
@@ -745,8 +744,8 @@ Welcome to LabelSys v{version},\n\
             self.output_path = os.path.abspath( self.fl.getPath() )
             self.__updateQLabelText()
         self.CheckShapeCompatibility()
-# }}}
-    def __updateImg(self):# {{{
+
+    def __updateImg(self):
         """update image showing on im_frame"""
         if not self.check_preview.isChecked():
             im = F.map_mat_255(self.imgs[self.slice_id])
@@ -764,12 +763,12 @@ Welcome to LabelSys v{version},\n\
         if cnts_data != []:
             for cnt in cnts_data:
                 self.im_widget.loadContour(cnt["Points"], cnt["Open"])
-    
+
     def __updateVTKText(self):
-        if not hasattr(self, "imgs") or not self.imgs:
+        if not hasattr(self, "imgs") or self.imgs is None:
             return
         slice_info = "Slice: "+ str(self.slice_id+1)+"/"+str(len(self.imgs))
-        img_info = "Image size: {} x {} ({dtype})".format(*self.imgs[self.slice_id].shape, 
+        img_info = "Image size: {} x {} ({dtype})".format(*self.imgs[self.slice_id].shape,
             dtype = self.imgs[self.slice_id].dtype)
         thickness_info = "Thickness: {}".format(self.spacing)
         comment = self.lbl_holder.comments[self.slice_id]
@@ -786,11 +785,11 @@ Welcome to LabelSys v{version},\n\
         txt = "\n".join(show_txt)
         self.im_widget.updateText(txt)
 
-    def __updateQLabelText(self):# {{{
+    def __updateQLabelText(self):
         self.lbl_wd.setText("Console -- LABELER: {} || OUTPUT_PATH: {}".\
                 format(self.labeler_name, str(self.output_path)))
-# }}}
-    def __readSeries(self):# {{{
+
+    def __readSeries(self):
         """update self.imgs and self.uids by current chosen image series"""
         entry = str(self.combo_series.currentText())
         image_data = self.fl.curr_patient.getSeriesImg(entry)
@@ -798,8 +797,8 @@ Welcome to LabelSys v{version},\n\
         self.uids = image_data["UIDs"]
         self.spacing = image_data["Spacing"]
         self.lbl_holder.initialize(self.config["labels"], self.uids)
-# }}}
-    def __querySave(self):# {{{
+
+    def __querySave(self):
         """Check if there are unsaved changes"""
         if not self.lbl_holder.SAVED:
             if self._alertMsg("Unsaved changes, continue?"):
@@ -809,17 +808,17 @@ Welcome to LabelSys v{version},\n\
                 return 1
         else:
             return 0
-# }}}
-    def showHelpManual_en(self):# {{{
+
+    def showHelpManual_en(self):
         file_path = os.path.join(_DOC_DIR, "help.html")
         file_path = os.path.realpath(file_path)
         webbrowser.open("file://"+file_path)
-# }}}
-    def showHelpManual_zh(self):# {{{
+
+    def showHelpManual_zh(self):
         file_path = os.path.join(_DOC_DIR, "help-zh.html")
         file_path = os.path.realpath(file_path)
         webbrowser.open("file://"+file_path)
-# }}}
+
     def CheckShapeCompatibility(self):
         im_shape0 = self.imgs[0].shape
         for im in self.imgs:
@@ -829,7 +828,7 @@ Welcome to LabelSys v{version},\n\
         return True
 
     #==============Event Handler================
-    def eventFilter(self, receiver, event):# {{{
+    def eventFilter(self, receiver, event):
         """Globally defined event"""
         modifier = QtWidgets.QApplication.keyboardModifiers()
         if(event.type() == QEvent.KeyPress):
@@ -848,7 +847,7 @@ Welcome to LabelSys v{version},\n\
                 return False
             self.im_widget.style.mouseMoveEvent(None, None)
         return super().eventFilter(receiver, event)
-# }}}
+
     def wheelEvent(self, event):
         if not self.__cache["data_loaded"]:
             return

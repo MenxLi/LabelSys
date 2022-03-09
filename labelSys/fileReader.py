@@ -37,7 +37,7 @@ class LoaderBase:# {{{
         - entry: image series name to load - str
         - series: dictionary to classify images based on entries - dict
         return data
-        => data = { "Images": 2D_array, "UIDs": list[str], "Spacing": (f,f,f) }
+        => data = { "Images": 2D_arrays, "UIDs": list[str], "Spacing": (f,f,f) }
         """
         if series == None and self.series == dict():
             raise Exception("Series haven't been set")
@@ -232,6 +232,14 @@ class FolderLoader:# {{{
         Jpeg, png, tif, bmp, ...
         Mpeg4, ...
     """
+    _LOADER_ID_DICOM = 0
+    _LOADER_ID_IMAGE = 1
+    _LOADER_ID_VIDEO = 2
+    LOADER_CASES = {
+        _LOADER_ID_DICOM: DicomLoader,
+        _LOADER_ID_IMAGE: GeneralImageLoader,
+        _LOADER_ID_VIDEO: GeneralVideoLoader
+    }
     def __init__(self, parent_dir, mode = 0):
         """
         - parent_dir: directory to store data
@@ -257,12 +265,7 @@ class FolderLoader:# {{{
                     self.paths.append(curr_path)
         self.loadData(self.ptr)
     def loadData(self, id):
-        loaderCases = {
-            0: DicomLoader,
-            1: GeneralImageLoader,
-            2: GeneralVideoLoader
-        }
-        self.curr_patient = loaderCases[self.__mode](self.paths[id])
+        self.curr_patient = self.LOADER_CASES[self.__mode](self.paths[id])
 
     def next(self):
         if self.ptr < len(self.paths)-1:

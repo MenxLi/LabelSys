@@ -11,8 +11,8 @@ from PyQt5.QtGui import QIntValidator
 import copy
 
 
-class SettingsDialog(QDialog):# {{{
-    def __init__(self, mainw):# {{{
+class SettingsDialog(QDialog):
+    def __init__(self, mainw):
         """- mainw: mainwindow object"""
         super().__init__(mainw)
         self.mainw = mainw
@@ -32,36 +32,35 @@ class SettingsDialog(QDialog):# {{{
         self.setLayout(self.layout)
 
         self.setWindowTitle("Settings")
-# }}}
-    def quitWindow(self):# {{{
+
+    def quitWindow(self):
         print("Change declined")
         self.close()
-# }}}
-    def applyChanges(self):# {{{
+
+    def applyChanges(self):
         self.mainw.config = self.config
         print("Change applied")
         #  print("This part isn't finished")
         self.close()
-# }}}
-    def __handleButtonClick(self, button):# {{{
+
+    def __handleButtonClick(self, button):
         sb = self.button_box.standardButton(button)
         if sb == QDialogButtonBox.Apply:
             self.applyChanges()
         elif sb == QDialogButtonBox.Cancel:
             self.quitWindow()
-# }}}
-# }}}
 
-class SettingsTab(QWidget):# {{{
+
+class SettingsTab(QWidget):
     def __init__(self, parent):
         super().__init__(parent)
         self.parent = parent
 
     def applyTabChanges(self):
         pass
-# }}}
 
-class GeneralTab(SettingsTab):# {{{
+
+class GeneralTab(SettingsTab):
     def __init__(self, parent):
         super().__init__(parent)
         self.initUI()
@@ -74,14 +73,13 @@ class GeneralTab(SettingsTab):# {{{
         layout.addWidget(self.preview_settings)
         self.setLayout(layout)
 
-# }}}
 
-class LabelTab(SettingsTab):# {{{
+class LabelTab(SettingsTab):
     def __init__(self, parent):
         super().__init__(parent)
-# }}}
 
-class SetLoadingMode(QWidget):# {{{
+
+class SetLoadingMode(QWidget):
     loading_mode_names = ["Dicom", "Image", "Video"]
     loading_modes = [0,1,2]
     def __init__(self, parent, config):
@@ -112,9 +110,9 @@ class SetLoadingMode(QWidget):# {{{
         if radioBtn.isChecked():
             value = radioBtn.idx
             self.config["loading_mode"] = value
-# }}}
 
-class Set2DMagification(QWidget):# {{{
+
+class Set2DMagification(QWidget):
     def __init__(self, parent, config):
         super().__init__(parent)
         self.config = config
@@ -141,6 +139,6 @@ class Set2DMagification(QWidget):# {{{
 
     def tEditFinish(self):
         pass
-# }}}
+
 
 

@@ -4,7 +4,7 @@
 # This file is part of LabelSys
 # (see https://bitbucket.org/Mons00n/mrilabelsys/).
 #
-# import vtk# {{{
+# import vtk
 from vtkmodules.vtkRenderingCore import vtkColorTransferFunction, vtkVolume, vtkActor, vtkVolumeProperty, vtkRenderer, vtkPolyDataMapper
 from vtkmodules.vtkInteractionStyle import vtkInteractorStyleTrackballCamera
 from vtkmodules.vtkCommonColor import vtkNamedColors
@@ -23,8 +23,8 @@ from .configLoader import *
 from .utils import utils_ as F
 import cv2 as cv
 
-class PreviewWindow(QWidget):# {{{
-    def __init__(self, parent, imgs, masks, spacing = [1,1,1]):# {{{
+class PreviewWindow(QWidget):
+    def __init__(self, parent, imgs, masks, spacing = [1,1,1]):
         super().__init__(None, QtCore.Qt.WindowStaysOnTopHint)
         self.parent = parent
         if masks== None:
@@ -36,17 +36,17 @@ class PreviewWindow(QWidget):# {{{
         #self._center()
 
         self.initUI()
-# }}}
-    def initUI(self):# {{{
+
+    def initUI(self):
         pass
-# }}}
-    def _center(self):# {{{
+
+    def _center(self):
         qr = self.frameGeometry()
         cp = QDesktopWidget().availableGeometry().center()
         qr.moveCenter(cp)
         self.move(qr.topLeft())
-# }}}
-    def generateMasks(self, masks_raw):# {{{
+
+    def generateMasks(self, masks_raw):
         masks = []
         for mask_ in masks_raw:
             color = 1
@@ -63,15 +63,14 @@ class PreviewWindow(QWidget):# {{{
             # incompatible shape among images
             # 3D preview will be unavaliable
             return masks
-# }}}
-# }}}
 
-class Preview3DWindow(PreviewWindow):# {{{
-    def __init__(self, parent, imgs, masks, spacing = [1,1,1]):# {{{
+
+class Preview3DWindow(PreviewWindow):
+    def __init__(self, parent, imgs, masks, spacing = [1,1,1]):
         super().__init__(parent, imgs, masks, spacing)
         self.show3D()
-# }}}
-    def initUI(self):# {{{
+
+    def initUI(self):
         self.vtk_widget = QVTKRenderWindowInteractor()
         self.ren_win = self.vtk_widget.GetRenderWindow()
         self.ren = vtkRenderer()
@@ -87,8 +86,8 @@ class Preview3DWindow(PreviewWindow):# {{{
         self.ren_win.Render()
         self.iren.Initialize()
         self.iren.Start()
-# }}}
-    def show3D(self, smoothing = False):# {{{
+
+    def show3D(self, smoothing = False):
         """
         https://github.com/lorensen/VTKExamples/blob/master/src/Python/Utilities/VTKWithNumpy.py
         https://lorensen.github.io/VTKExamples/site/Python/Medical/MedicalDemo1/
@@ -159,8 +158,8 @@ class Preview3DWindow(PreviewWindow):# {{{
         self.ren.AddActor(surface)
         self.ren.ResetCamera()
         self.ren.SetBackground(colors.GetColor3d("BkgColor"))
-# }}}
-    def __show3D_(self):# {{{
+
+    def __show3D_(self):
         self.r_masks = F.resampleSpacing(self.masks, self.spacing)[0].astype(np.uint8)
 
         colors = vtkNamedColors()
@@ -212,11 +211,10 @@ class Preview3DWindow(PreviewWindow):# {{{
 
         self.ren.ResetCamera()
         self.ren_win.Render()
-# }}}
-# }}}
 
-class Preview2DWindow(PreviewWindow):# {{{
-    def __init__(self, parent, imgs, masks, curr_slice_id = 0, spacing = [1,1,1], magnification = 1):# {{{
+
+class Preview2DWindow(PreviewWindow):
+    def __init__(self, parent, imgs, masks, curr_slice_id = 0, spacing = [1,1,1], magnification = 1):
         """
         - parent: mainwindow object
         """
@@ -229,8 +227,8 @@ class Preview2DWindow(PreviewWindow):# {{{
             self.lbl_color[lbl_id_+1] = [int(i*255) for i in LBL_COLORS[lbl_id_]]
 
         self._updatePanel()
-# }}}
-    def initUI(self):# {{{
+
+    def initUI(self):
         self.setWindowTitle("Preview-2D")
         self.lbl_im = QLabel(self)
         self.lbl_txt = QLabel()
@@ -239,35 +237,35 @@ class Preview2DWindow(PreviewWindow):# {{{
         layout.addWidget(self.lbl_txt)
         layout.addWidget(self.lbl_im)
         self.setLayout(layout)
-# }}}
-    def nextSlice(self):# {{{
+
+    def nextSlice(self):
         self.slice_id = min(self.slice_id +1, len(self.imgs)-1)
         self._updatePanel()
-# }}}
-    def prevSlice(self):# {{{
+
+    def prevSlice(self):
         self.slice_id = max(self.slice_id -1, 0)
         self._updatePanel()
-# }}}
-    def updateInfo(self, masks, curr_slice_id):# {{{
+
+    def updateInfo(self, masks, curr_slice_id):
         self.slice_id = curr_slice_id
         self.masks = self.generateMasks(masks)
         self._updatePanel()
-# }}}
-    def _updatePanel(self):# {{{
+
+    def _updatePanel(self):
         self.__updateImg()
         self.__updateText()
-# }}}
-    def __updateText(self):# {{{
+
+    def __updateText(self):
         self.lbl_txt.setText("Slice: {}/{}".format(self.slice_id+1, len(self.imgs)))
-# }}}
-    def __updateImg(self):# {{{
+
+    def __updateImg(self):
         im = self.__generateImg()
         height, width, channel = im.shape
         byte_per_line = 3*width
         qimg = QImage(im.data, width, height, byte_per_line, QImage.Format_RGB888)
         self.lbl_im.setPixmap(QPixmap(qimg))
-# }}}
-    def __generateImg(self):# {{{
+
+    def __generateImg(self):
         mask = self.masks[self.slice_id]
         im = self.imgs[self.slice_id].copy()
         im = F.map_mat_255(im)
@@ -275,9 +273,9 @@ class Preview2DWindow(PreviewWindow):# {{{
             mask_ = mask == key
             im = F.overlap_mask(im, mask_, color, alpha = 0.4)
         return cv.resize(im, None, fx = self.mag, fy = self.mag, interpolation = cv.INTER_NEAREST)
-# }}}
+
     #==============Event Handler================
-    def wheelEvent(self, event):# {{{
+    def wheelEvent(self, event):
         modifier = QtWidgets.QApplication.keyboardModifiers()
         if event.angleDelta().y() < 0:
             if modifier == QtCore.Qt.ControlModifier:
@@ -289,5 +287,5 @@ class Preview2DWindow(PreviewWindow):# {{{
                 pass
             else:
                 self.nextSlice()
-# }}}
-# }}}
+
+
