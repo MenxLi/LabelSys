@@ -71,8 +71,12 @@ class DicomLoader(LoaderBase):# {{{
                     slices.append(s)
                 except: pass
         #slices = [pydicom.read_file(s, force=True) for s in dicom_path]
-        slices.sort(key = lambda x: int(x.InstanceNumber))
+        try:
+            slices.sort(key = lambda x: int(x.InstanceNumber))
+        except:
+            print("Slice has no instance Number attribute")
         return slices
+
     def __creatSeries(self, slices):
         """
         @ slices: a list of FileDataset
@@ -80,17 +84,27 @@ class DicomLoader(LoaderBase):# {{{
         Return a dictionary of classified FileDataset with SeriesDiscription being the entry
         """
         series = {}
+        __no_series = False  # For warning propose
         for slice in slices:
-            try:
+            if "SeriesDescription" in slice:
                 seriesDescript = slice["SeriesDescription"].value
-            except:
-                seriesDescript = str(slice[0x0020, 0x0011].value)    # Series Number
+            else:
+                try:
+                    seriesDescript = str(slice[0x0020, 0x0011].value)    # Series Number
+                except KeyError:
+                    __no_series = True
+                    seriesDescript = "Unknown"
 
             try:
                 series[seriesDescript].append(slice)
             except KeyError:
                 series[seriesDescript] = [slice]
+        if __no_series:
+            print("There is no \"SeriesDescription\" or [0x0020, 0x0011] in this Dicom. ", end="")
+            print("Set series name to {}".format(seriesDescript))
+
         return series
+
     def getEntries(self):
         """Return series entries"""
         return self.series.keys()
