@@ -1,5 +1,13 @@
 from setuptools import setup, find_packages
+import importlib
 from labelSys.version import __version__
+
+# Do not install opencv if any of cv variation exists
+# e.g. opencv-headless, opencv-contrib
+install_requires = ["PyQt5", "numpy", "pydicom", "vtk", "scipy"]
+cv_spec = importlib.util.find_spec("cv2")
+if cv_spec is None:
+    install_requires.append("opencv-python")
 
 setup(
     name="LabelSys",
@@ -26,7 +34,7 @@ setup(
 
     include_package_data = True,
 
-    install_requires = ["PyQt5", "numpy", "opencv-python", "pydicom", "vtk", "scipy"],
+    install_requires = install_requires,
 
     entry_points = {
         "console_scripts":[
