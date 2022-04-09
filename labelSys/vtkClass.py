@@ -290,7 +290,7 @@ class VtkWidget(QVTKRenderWindowInteractor, WidgetCore):
             for ipt_id in range(rep.GetNumberOfIntermediatePoints(pt_id)):
                 rep.GetIntermediatePointWorldPosition(pt_id, ipt_id, point)
                 all_pts.append(self.__getBackCvCoord(*point[:2], img_shape))
-        all_pts = np.array(all_pts).astype(np.int)
+        all_pts = np.rint(all_pts).astype(int)
         return all_pts.tolist()
 
     def __getMask(self, contour_widget, img_shape, mode):
@@ -322,10 +322,10 @@ class VtkWidget(QVTKRenderWindowInteractor, WidgetCore):
         # - img_shape: (W, H)"""
         # return np.array([img_shape[1]-1-y, x])
 # 
-    def __getBackCvCoord(self, x, y, img_shape):
+    def __getBackCvCoord(self, x_vtk, y_vtk, img_shape):
         """Get coordinate in (col, row)
         - img_shape: (W, H)"""
-        return np.array([x, img_shape[0]-1-y])
+        return np.array([x_vtk+1, img_shape[0]-2-y_vtk])
 
     def __clearCanvas(self):
         self.contours = []

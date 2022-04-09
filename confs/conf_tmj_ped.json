@@ -1,26 +1,26 @@
 {
     "Labels":{
         "Disc" :{
-            "value": 1, 
             "color": [1.0, 0.0, 0.0], 
             "mode": 0,
-            "label_step":1.2
+            "draw": 1,
+            "label_step":1
         },
         "Condyle" :{
-            "value": 2, 
             "color": [1.0, 1.0, 0.0], 
-            "mode": 1,
-            "label_step":1.8
+            "mode": 0,
+            "draw": 1,
+            "label_step": 1.5
         },
         "Eminence" :{
-            "value": 3, 
-            "color": [0.0, 1.0, 1.0], 
+            "color": [0.0, 1.0, 1.0],
             "mode": 1,
-            "label_step":1.8
+            "draw": 1,
+            "label_step": 1.5
         }
     },
     "Classifications":{
-        "Bone marrow oedema":{
+         "Bone marrow oedema":{
             "short_title":"BMO",
             "class":["0-Absent", "1-Present"],
             "description":"Compared to the mandibular ramus, hyperintense marrow signalling within the condyle on T2w FS or STIR images, and/or hypointense signaling on pre-contrast T1w images without FS."
@@ -79,3 +79,4 @@
         "2": "Classifications are image wide"
     }
 }
+

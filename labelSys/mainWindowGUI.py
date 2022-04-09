@@ -610,13 +610,7 @@ Welcome to LabelSys v{version},\n\
         except: pass
 
     def saveCurrentPatient(self):
-        try:
-            # Opening dicom file
-            folder_name = "Label-"+Path(self.fl.getPath()).stem + "-" + self.labeler_name.replace(" ", "_")
-        except:
-            # Loading labeled data
-            folder_name = Path(self.__cache["load_path"]).stem
-        file_path = os.path.join(self.output_path, folder_name)
+        file_path = self._getOutputPath()
         if os.path.exists(file_path):
             if not self._alertMsg("Data exists, overwrite?"):
                 return
@@ -633,6 +627,7 @@ Welcome to LabelSys v{version},\n\
         #          config = self.config
         #          )
         self.lbl_holder.saveToFile(file_path, self.imgs, header)
+        self.__updateQLabelText()           # To get labeled marker
         self.lbl_holder.SAVED = True
 
     def rotateImage(self):
@@ -656,6 +651,18 @@ Welcome to LabelSys v{version},\n\
             self.imgs[self.slice_id] = self.imgs[self.slice_id].transpose()
         self.__updateImg()
         return True
+    
+    def _getOutputPath(self) -> str:
+        if not self.__cache["data_loaded"]:
+            return ""
+        try:
+            # Opening dicom file
+            folder_name = "Label-"+Path(self.fl.getPath()).stem + "-" + self.labeler_name.replace(" ", "_")
+        except:
+            # Loading labeled data
+            folder_name = Path(self.__cache["load_path"]).stem
+        file_path = os.path.join(self.output_path, folder_name)
+        return file_path
 
     def _getColor(self, label):
         try:
@@ -786,7 +793,10 @@ Welcome to LabelSys v{version},\n\
         self.im_widget.updateText(txt)
 
     def __updateQLabelText(self):
-        self.lbl_wd.setText("Console -- LABELER: {} || OUTPUT_PATH: {}".\
+        qlabel_txt = "Console -- LABELER: {} || OUTPUT_PATH: {}"
+        if os.path.exists(self._getOutputPath()):
+            qlabel_txt += " [LABELED]"
+        self.lbl_wd.setText(qlabel_txt.\
                 format(self.labeler_name, str(self.output_path)))
 
     def __readSeries(self):

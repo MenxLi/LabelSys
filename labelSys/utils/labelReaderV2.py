@@ -330,10 +330,10 @@ def _getFullCnt(contour_widget, img_shape):
     all_pts = np.array(all_pts)
     return all_pts.tolist()
 
-def _getBackCvCoord(x, y, img_shape):
+def _getBackCvCoord(x_vtk, y_vtk, img_shape):
     """Get coordinate in (col, row)
     - img_shape: (W, H)"""
-    return np.array([x, img_shape[0]-1-y])
+    return np.array([x_vtk+1, img_shape[0]-2-y_vtk])
 
 def drawMask(mask, cnt, open_curve, line_thickness):
     """
@@ -346,7 +346,9 @@ def drawMask(mask, cnt, open_curve, line_thickness):
     """
     if not isinstance(cnt, np.ndarray):
         cnt = np.array(cnt)
-    cnt = _removeDuplicate2d(cnt.astype(int))
+    # cnt = _removeDuplicate2d(cnt.astype(int))
+    cnt = np.rint(cnt).astype(int)
+    cnt = _removeDuplicate2d(cnt)
     if open_curve:
         cnt = np.array(cnt)
         cv.polylines(mask, [cnt], False, 1, thickness = line_thickness)
