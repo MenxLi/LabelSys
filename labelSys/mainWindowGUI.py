@@ -5,7 +5,7 @@
 # (see https://bitbucket.org/Mons00n/mrilabelsys/).
 #
 # Import {{{
-from typing import List
+from typing import List, Sequence
 import webbrowser
 from pathlib import Path
 import os,sys, platform
@@ -184,7 +184,9 @@ Welcome to LabelSys v{version},\n\
 
         # Tools
         self.act_tool_compare.triggered.connect(self.openCompareWindow)
-        self.act_tool_compare.setShortcut("Ctrl+C")
+        self.act_tool_compare.setShortcut("Ctrl+Shift+Alt+C")
+        self.act_tool_crop.triggered.connect(self.openCropAndRotateWindow)
+        self.act_tool_crop.setShortcut("Shift+C")
 
         # Settings
         self.act_set_path.triggered.connect(self.setOutputPath)
@@ -567,6 +569,13 @@ Welcome to LabelSys v{version},\n\
             self.compare_win.L_part.loadData(header, \
             self.lbl_holder.data, self.imgs, file_path)
         except:pass     # When no file is loaded
+
+    def openCropAndRotateWindow(self):
+        from .sideWidgets.cropRotate import startCropGUI
+        img = self.imgs[self.slice_id]
+        def callback_save(crop_im: np.ndarray, ori_im: np.ndarray, crop_coords: Sequence[np.ndarray]):
+            slice_uid = self.lbl_holder.uids[self.slice_id]
+        startCropGUI(img, callback_save)
 
     def addContour(self):
         self.im_widget.style.forceDrawing()

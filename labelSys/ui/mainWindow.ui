@@ -502,7 +502,7 @@
      <x>0</x>
      <y>0</y>
      <width>1024</width>
-     <height>22</height>
+     <height>23</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_file">
@@ -565,6 +565,7 @@
      <string>Tools</string>
     </property>
     <addaction name="act_tool_compare"/>
+    <addaction name="act_tool_crop"/>
    </widget>
    <addaction name="menu_file"/>
    <addaction name="menu_view"/>
@@ -718,6 +719,11 @@
   <action name="act_help_info">
    <property name="text">
     <string>INFO</string>
+   </property>
+  </action>
+  <action name="act_tool_crop">
+   <property name="text">
+    <string>Crop and rotate</string>
    </property>
   </action>
  </widget>
