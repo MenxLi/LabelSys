@@ -191,6 +191,7 @@ class CropItem(ToolItemCheckable, ExtensionRefs):
         super().onClick()
         if "crop_marker" in self.GLOBAL_VAR.objs:
             self.GLOBAL_VAR.logger.info("Already in cropping")
+            self.app.setInteractionStyle(StyleCrop(), G.app.im_wid)
             return
         curr_img_np = self.app.data[self.idx]["image"].arr
         im_size = curr_img_np.shape
