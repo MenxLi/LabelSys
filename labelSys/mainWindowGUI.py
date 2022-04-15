@@ -4,7 +4,6 @@
 # This file is part of LabelSys
 # (see https://bitbucket.org/Mons00n/mrilabelsys/).
 #
-# Import {{{
 from typing import List, Sequence
 import webbrowser
 from pathlib import Path
@@ -571,10 +570,22 @@ Welcome to LabelSys v{version},\n\
         except:pass     # When no file is loaded
 
     def openCropAndRotateWindow(self):
-        from .sideWidgets.cropRotate import startCropGUI
+        try:
+            from .sideWidgets.cropRotate.extIO import startCropGUI
+        except ModuleNotFoundError:
+            self._warnDialog("Immarker module is needed.")
+            return 
         img = self.imgs[self.slice_id]
         def callback_save(crop_im: np.ndarray, ori_im: np.ndarray, crop_coords: Sequence[np.ndarray]):
+            """
+            - crop_im: cropped image
+            - ori_im: original image
+            - crop_coords: 4 crop box vertices points' coordinate, in (x, y) - opencv coordinate
+            """
             slice_uid = self.lbl_holder.uids[self.slice_id]
+            self.imgs[self.slice_id] = crop_im
+            self.__updateImg()
+            self.im_widget.resetCamera()
         startCropGUI(img, callback_save)
 
     def addContour(self):
@@ -592,6 +603,7 @@ Welcome to LabelSys v{version},\n\
                 classification_txt = None
             self.lbl_holder.class_comments[self.slice_id] = classification_txt
             self.__updateVTKText()
+
         self.comment_gui = CommentGUI(self, saveComments,
             classes= self.config["classifications"],
             current_classes_str=self.lbl_holder.class_comments[self.slice_id],

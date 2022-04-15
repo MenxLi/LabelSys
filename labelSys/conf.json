@@ -15,12 +15,12 @@
     },
     "Classifications":{
         "Class0":{
-            "short_title": "Image quality",
+            "full_name": "Image quality",
             "class": ["Good", "fair"],
             "description": "This is a image classification"
         },
         "Class1":{
-            "short_title": "Image size",
+            "full_name": "Image size",
             "class": ["Large", "small"],
             "description": "This is a image classification"
         }

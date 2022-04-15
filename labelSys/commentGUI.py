@@ -1,23 +1,24 @@
 from typing import Callable, Union, List
 from PyQt5.QtWidgets import QDialog, QHBoxLayout, QMainWindow, QPushButton, QLabel, QCheckBox, QTextEdit, QVBoxLayout, QWidget, QRadioButton
 import numpy as np
+from numpy.core.numeric import full
 
 from .coreWidgets import WidgetCore
 
 class ClassLine(QWidget, WidgetCore):
-    def __init__(self, parent, name: str, classes: List[str], help: str, short_name = None) -> None:
+    def __init__(self, parent, name: str, classes: List[str], help: str, full_name = None) -> None:
         super().__init__()
         self.setToolTip(help)
         self.name = name
         self.classes = classes
-        self.short_name = short_name
+        self.full_name = full_name
         self.initUI()
     
     def initUI(self):
         h_layout = QHBoxLayout()
         v_layout = QVBoxLayout()
 
-        v_layout.addWidget(QLabel(f"{self.name} ({self.short_name})"))
+        v_layout.addWidget(QLabel(f"{self.name} ({self.full_name})"))
         self.rbs = [QRadioButton("<none>")]
         self.rbs += [QRadioButton(c) for c in self.classes]
         self.rbs[0].setChecked(True)
@@ -39,8 +40,6 @@ class ClassLine(QWidget, WidgetCore):
                 return True
         return False
 
-
-
 class CommentGUI(QDialog, WidgetCore):
     def __init__(self, parent:QMainWindow, save_callback: Callable, 
         classes: dict = {},
@@ -56,7 +55,7 @@ class CommentGUI(QDialog, WidgetCore):
         self.classification_lines: List[ClassLine]
         self.initUI()
         if not current_classes_str is None:
-            pass
+            self.setClassificationFromStr(current_classes_str)
 
     def initUI(self):
         self.setWindowTitle("Comment")
@@ -68,10 +67,15 @@ class CommentGUI(QDialog, WidgetCore):
         h_layout.addWidget(self.btn_ok)
         h_layout.addWidget(self.btn_cancel)
         for k in self.classes.keys():
+            if "short_title" in self.classes[k]:
+                # old version compatablility
+                full_name_key = "short_title"
+            else:
+                full_name_key = "full_name"
             class_line = ClassLine(self, k,
                 self.classes[k]["class"],
                 self.classes[k]["description"],
-                self.classes[k]["short_title"],
+                self.classes[k][full_name_key],
                 )
             self.classification_lines.append(class_line)
             v_layout.addWidget(class_line)

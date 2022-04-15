@@ -36,6 +36,7 @@ class MarkerCrop(MarkerRectangleHPT):
         return im_crop
 
 class StyleCrop(StyleBase, ExtensionRefs):
+    DESCRIPTION = "Crop the showing image"
     def __init__(self):
         super().__init__()
         self.initExtRefs()
@@ -214,7 +215,8 @@ class CropItem(ToolItemCheckable, ExtensionRefs):
         self.im_win.closeEvent = lambda a0: on_close()
 
 class ExtCrop(ExtensionAbstract):
-    NAME = "EXT_CROP"
+    NAME = "CropButton"
+    DEPENDENCE_EXTS = ["InteractionStylePanelItems"]
     def rc(self):
         crop_item = CropItem()
         self.im_win.toolbars["InteractionStyleTools"].addItem(crop_item)

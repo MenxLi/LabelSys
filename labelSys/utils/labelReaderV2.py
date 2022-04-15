@@ -14,7 +14,6 @@ try:
     import skimage.transform
     USE_SKIMAGE = True
 except ModuleNotFoundError:
-    print("Skimage not found, trying to use opencv instead...")
     USE_SKIMAGE = False
 
 
