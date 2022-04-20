@@ -8,6 +8,7 @@ from immarker.extensions.extStyle import ExtStyle
 from immarker.extensions.extStyleInfo import ExtStyleInfo
 from immarker.extensions import ExtensionAbstract, ExtensionRefs
 from immarker.gui.tools import ToolItem, ToolBar
+from immarker.gui.widgetCore import WidgetCore
 
 from .extCrop import ExtCrop
 
@@ -19,7 +20,16 @@ class ExportItem(ToolItem, ExtensionRefs):
         self.initExtRefs()
     
     def onClick(self):
+        if "crop_marker" in self.GLOBAL_VAR.objs.keys():
+            # Not confirmed yet
+            if WidgetCore._queryDialog("Press <Enter> before apply cropping, apply and exit?",
+                                       "Not yet confirmed"):
+                self.im_win.toolbars["InteractionStyleTools"]["crop_tool"].click()
+                self.app.im_wid.istyle.applyChanges()
+            else:
+                return super().onClick()
         if not "crop_coords" in self.app.data[self.idx]["meta"]:
+            # Haven't cropped yet
             return super().onClick()
         img_now = self.app.data[self.idx]["image"].arr
         img_ori = self.app.data[self.idx]["meta"]["ori_arr"]
