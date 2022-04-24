@@ -905,3 +905,8 @@ Welcome to LabelSys v{version},\n\
     def resizeEvent(self, a0) -> None:
         self.resized.emit()
         return super().resizeEvent(a0)
+
+    def closeEvent(self, a0) -> None:
+        self.im_widget.close()
+        del self.im_widget
+        return super().closeEvent(a0)
