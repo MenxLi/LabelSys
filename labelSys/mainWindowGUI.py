@@ -572,9 +572,12 @@ Welcome to LabelSys v{version},\n\
     def openCropAndRotateWindow(self):
         try:
             from .sideWidgets.cropRotate.extIO import startCropGUI
+            from immarker.extensions import registerCallback
         except ModuleNotFoundError:
             self._warnDialog("Immarker module is needed.")
             return 
+        #  import logging
+        #  logging.basicConfig(level = logging.DEBUG)
         img = self.imgs[self.slice_id]
         def callback_save(crop_im: np.ndarray, ori_im: np.ndarray, crop_coords: Sequence[np.ndarray]):
             """
@@ -586,6 +589,11 @@ Welcome to LabelSys v{version},\n\
             self.imgs[self.slice_id] = crop_im
             self.__updateImg()
             self.im_widget.resetCamera()
+
+        @registerCallback("onPopupMsg")
+        def on_popupMsg(app, msg: str, flag: str ):
+            if flag == "warning":
+                self._warnDialog(msg)
         startCropGUI(img, callback_save)
 
     def addContour(self):

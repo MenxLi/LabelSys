@@ -12,20 +12,17 @@ Number = Union[int, float]
 Coord = Tuple[Number, Number]
 
 
-#  class MarkerRectangleHPT(MarkerRectangle):
-#      def __init__(self, head_pt, diag_pt, theta):
-#          super().__init__(head_pt, diag_pt, theta)
-#          self.config["head_pt_color"] = [255, 255, 0]
-#
-#      def toNewVisualLayer(self, size_hw: Tuple[int, int]) -> ImLayer:
-#          base_layer = super().toNewVisualLayer(size_hw)
-#          head_pt = np.rint(self.head_pt).astype(int)
-#          cv.circle(base_layer.arr, head_pt, self.config["pt_radius"], self.config["head_pt_color"], thickness = -1)
-#          return base_layer
+class MarkerCrop(MarkerRectangle, ExtensionRefs):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.initExtRefs()
 
-class MarkerCrop(MarkerRectangle):
     def crop(self, img: np.ndarray) -> np.ndarray:
         im_crop = cropByBox(img, self.pts)
+        self.GLOBAL_VAR.logger.debug(f"Crop points: {self.pts}")
+        if im_crop is None:
+            self.app.popupMsg("Crop range out of the image.", flag = "warning")
+            return img
         return im_crop
 
 class StyleCrop(StyleBoxReshape):

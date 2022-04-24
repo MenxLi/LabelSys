@@ -6,6 +6,7 @@ from immarker.core.io import ReaderRGBImage
 from immarker.core.utils import isRGB
 from immarker.extensions.extStyle import ExtStyle
 from immarker.extensions.extStyleInfo import ExtStyleInfo
+from immarker.extensions.extImWinInfoText import ExtImWinInfoText
 from immarker.extensions import ExtensionAbstract, ExtensionRefs
 from immarker.gui.tools import ToolItem, ToolBar
 from immarker.gui.widgetCore import WidgetCore
@@ -80,15 +81,18 @@ def startCropGUI(im: np.ndarray, save_callback: Callable[[np.ndarray, np.ndarray
     assert isRGB(im), "im must be RGB"
     logging.basicConfig(level=logging.INFO)
     imm = Immarker()
+    imm.im_win.setMinimumWidth(600)
 
     ext_style_info = ExtStyleInfo()
     ext_style = ExtStyle()
+    ext_im_info = ExtImWinInfoText()
     ext_crop = ExtCrop()
     ext_io = ExtExport(save_callback)
     ext_click_crop_btn = ExtClickCropBtn()
 
     imm.registerExtension(ext_style_info)
     imm.registerExtension(ext_style)
+    imm.registerExtension(ext_im_info)
     imm.registerExtension(ext_crop)
     imm.registerExtension(ext_io)
     imm.registerExtension(ext_click_crop_btn)
