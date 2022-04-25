@@ -15,8 +15,8 @@ class InteractionStyleBase(vtkInteractorStyleImage):
         self.picker = vtkPropPicker()
 
         # Right button for move
-        self.AddObserver("RightButtonPressEvent", lambda obj, event: self.OnMiddleButtonDown())
-        self.AddObserver("RightButtonReleaseEvent", lambda obj, event: self.OnMiddleButtonUp())
+        #  self.AddObserver("RightButtonPressEvent", lambda obj, event: self.dragImgStart())
+        #  self.AddObserver("RightButtonReleaseEvent", lambda obj, event: self.dragImgEnd())
         # Suspend wheel and implement in Qt framwork
         self.AddObserver("MouseWheelForwardEvent", lambda x, y : None)
         self.AddObserver("MouseWheelBackwardEvent", lambda x, y : None)
@@ -57,6 +57,12 @@ class InteractionStyleBase(vtkInteractorStyleImage):
     def doubleClickEvent(self, *args, **kwargs):
         # Will be called by Qt
         pass
+
+    def dragImgStart(self):
+        self.OnMiddleButtonDown()
+
+    def dragImgEnd(self):
+        self.OnMiddleButtonUp()
 
     def keyPressEvent(self, obj, event):
         key = self.widget.iren.GetKeySym()
