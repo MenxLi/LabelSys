@@ -3,77 +3,77 @@
         "#18" :{
             "color": [1.00, 1.00, 1.00],
             "mode": 0,
-            "label_step":2
+            "label_step": 2
         },
         "#17" :{
             "color": [1.00, 0.00, 0.00], 
             "mode": 0,
-            "label_step":2
+            "label_step": 2
         },
         "#16" :{
             "color": [0.00, 1.00, 1.00], 
             "mode": 0,
-            "label_step":2
+            "label_step": 2
         },
         "#15" :{
             "color": [1.00, 0.20, 0.00], 
             "mode": 0,
-            "label_step":2.5
+            "label_step": 2
         },
         "#14" :{
             "color": [0.00, 0.80, 1.00], 
             "mode": 0,
-            "label_step":2.5
+            "label_step": 2
         },
         "#13" :{
             "color": [1.00, 0.40, 0.00], 
             "mode": 0,
-            "label_step":2.8
+            "label_step": 2
         },
         "#12" :{
             "color": [0.00, 0.60, 1.00], 
             "mode": 0,
-            "label_step":3
+            "label_step": 2
         },
         "#11" :{
             "color": [1.00, 0.63, 0.00], 
             "mode": 0,
-            "label_step":3.2
+            "label_step": 2
         },
         "#21" :{
             "color": [0.00, 0.36, 1.00], 
             "mode": 0,
-            "label_step":3.2
+            "label_step": 2
         },
         "#22" :{
             "color": [1.00, 0.83, 0.00], 
             "mode": 0,
-            "label_step":3
+            "label_step": 2
         },
         "#23" :{
             "color": [0.00, 0.16, 1.00], 
             "mode": 0,
-            "label_step":2.8
+            "label_step": 2
         },
         "#24" :{
             "color": [0.93, 1.00, 0.00], 
             "mode": 0,
-            "label_step":2.5
+            "label_step": 2
         },
         "#25" :{
             "color": [0.07, 0.00, 1.00], 
             "mode": 0,
-            "label_step":2.5
+            "label_step": 2
         },
         "#26" :{
             "color": [0.73, 1.00, 0.00], 
             "mode": 0,
-            "label_step":2
+            "label_step": 2
         },
         "#27" :{
             "color": [0.27, 0.00, 1.00], 
             "mode": 0,
-            "label_step":2
+            "label_step": 2
         },
         "#28" :{
             "color": [1.00, 1.00, 1.00],
@@ -88,67 +88,67 @@
         "#37" :{
             "color": [0.50, 1.00, 0.00], 
             "mode": 0,
-            "label_step":2
+            "label_step": 2
         },
         "#36" :{
             "color": [0.50, 0.00, 1.00], 
             "mode": 0,
-            "label_step":2
+            "label_step": 2
         },
         "#35" :{
             "color": [0.30, 1.00, 0.00], 
             "mode": 0,
-            "label_step":2.5
+            "label_step": 2
         },
         "#34" :{
             "color": [0.70, 0.00, 1.00], 
             "mode": 0,
-            "label_step":2.5
+            "label_step": 2
         },
         "#33" :{
             "color": [0.10, 1.00, 0.00], 
             "mode": 0,
-            "label_step":2.8
+            "label_step": 2
         },
         "#32" :{
             "color": [0.90, 0.00, 1.00], 
             "mode": 0,
-            "label_step":3
+            "label_step": 2
         },
         "#31" :{
             "color": [0.00, 1.00, 0.13], 
             "mode": 0,
-            "label_step":3.2
+            "label_step": 2
         },
         "#41" :{
             "color": [1.00, 0.00, 0.87], 
             "mode": 0,
-            "label_step":3.2
+            "label_step": 2
         },
         "#42" :{
             "color": [0.00, 1.00, 0.33], 
             "mode": 0,
-            "label_step":3
+            "label_step": 2
         },
         "#43" :{
             "color": [1.00, 0.00, 0.67], 
             "mode": 0,
-            "label_step":2.8
+            "label_step": 2
         },
         "#44" :{
             "color": [0.00, 1.00, 0.57], 
             "mode": 0,
-            "label_step":2.5
+            "label_step": 2
         },
         "#45" :{
             "color": [1.00, 0.00, 0.43], 
             "mode": 0,
-            "label_step":2.5
+            "label_step": 2
         },
         "#46" :{
             "color": [0.00, 1.00, 0.77], 
             "mode": 0,
-            "label_step":2
+            "label_step": 2
         },
         "#47" :{
             "color": [1.00, 0.00, 0.23], 
@@ -164,20 +164,20 @@
     "Classifications":{
         "C":{
             "full_name": "Image class",
-            "class": ["Bite", "Bite-side", "Occlusal", "Occlusal-angle", "AnteriorTeeth"],
-            "description": "拍摄对象的水平位置，例如拍摄左侧上颌，则选择Left, 拍摄合面的选Occlusal."
+            "class": ["Bite", "Bite-side", "Occlusal", "Occlusal-angle", "AnteriorTeeth", "Other"],
+            "description": "拍摄的图像类型，例如拍摄上颌前牙(张口)，则选择AnteriorTeeth; 拍摄合面的选Occlusal. (通常不选Other)"
         },
         "HP":{
             "full_name": "Horizontal position",
-            "class": ["Left", "Middle", "Right"],
-            "description": "拍摄对象的水平位置，例如拍摄左侧上颌，则选择Left."
+            "class": ["Left", "Middle", "Right", "Other"],
+            "description": "拍摄对象的水平位置，例如拍摄左侧，则选择Left. (通常不选Other)"
         }
     },
     "Loading_mode": 1,
     "2D_preview_mag":1,
     "Default_series":"",
     "Default_label":"",
-    "Max_im_height":1024,
+    "Max_im_height":1500,
     "-----------Below are comments for your understanding--------":
     "---------------------don't change them----------------------",
 
