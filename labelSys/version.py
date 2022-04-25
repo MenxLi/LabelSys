@@ -74,5 +74,6 @@ __VERSIONS__ =[ \
         ["1.7.3", "Delete vim markers, bug fix: crash when opening DICOM from CLI. support for DICOM without series and InstanceNumber"],
         ["1.7.4", "More accurate labeling by vtk-cv coordinate transform; Mark labeled folder in qlabeltext"],
         ["1.8.0", "Add crop and rotate window (achieved with immarker project); Bug fix: classification not update when reopen classification GUI; Change classification config file naming: short_title -> full_name "],
+        ["1.8.1", "Interaction style change, use space to move image"],
         ]
 __version__, __description__ = __VERSIONS__[-1]

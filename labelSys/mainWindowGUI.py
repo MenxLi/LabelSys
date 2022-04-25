@@ -24,6 +24,7 @@ from .vtkClass import VtkWidget
 from .coreWidgets import WidgetCore, EmittingStream
 from .configLoader import _ICON_DIR, _DOC_DIR, _UI_DIR
 from .commentGUI import CommentGUI
+from .interactionStyle import StyleImWidgetBase
 
 import numpy as np
 from PyQt5 import QtWidgets, QtCore
@@ -94,6 +95,9 @@ class MainWindow(QMainWindow, WidgetCore):
         self.initImageUI()
         self.initPanel()
 
+        im_wid_style_base = StyleImWidgetBase(self)
+        im_wid_style_base.apply(self.im_widget)
+
         if args.file:
             if args.load:
                 self.loadLabeledFile(args.file)
@@ -149,7 +153,7 @@ Welcome to LabelSys v{version},\n\
         self.act_2D_preview.setShortcut("Ctrl+P")
         self.act_3D_preview.triggered.connect(self.previewLabels3D)
         self.act_check_preview.triggered.connect(lambda : self.check_preview.setChecked(not self.check_preview.isChecked()))
-        self.act_check_preview.setShortcut("Space")
+        self.act_check_preview.setShortcut("Ctrl+Space")
 
         # Operation
         self.act_op_next_slice.triggered.connect(self.nextSlice)
