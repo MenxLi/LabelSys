@@ -35,6 +35,7 @@ from PyQt5 import uic
 import cv2 as cv
 
 LOCAL_DIR = os.path.dirname(os.path.realpath(__file__))
+from .toothSeg_utils.io import ResizeImageRecord
 
 class MainWindow(QMainWindow, WidgetCore):
     resized = QtCore.pyqtSignal()
@@ -65,6 +66,7 @@ class MainWindow(QMainWindow, WidgetCore):
         self.output_path = Path(os.getcwd()).parent
         self.labeler_name = platform.node()
         self.lbl_holder = LabelHolder()
+        self.resize_record = ResizeImageRecord()
 
         self.slice_id = 0
 
@@ -318,6 +320,7 @@ Welcome to LabelSys v{version},\n\
         self.output_path = Path(fname).parent
         self.__cache["load_path"] = fname
         self.__updateQLabelText()
+        self.resize_record.loadFromFile(os.path.join(fname, "resize_data.pkl"))
         print("Data loaded")
 
 
@@ -590,6 +593,12 @@ Welcome to LabelSys v{version},\n\
             - crop_coords: 4 crop box vertices points' coordinate, in (x, y) - opencv coordinate
             """
             slice_uid = self.lbl_holder.uids[self.slice_id]
+            self.resize_record.setCoords(self.slice_id, crop_coords)
+            if self.imgs[self.slice_id].shape != ori_im.shape:
+                if not self._queryDialog("Original crop will lost, continue?"):
+                    return
+                self.resize_record.setOriIm(self.slice_id, ori_im)
+
             self.imgs[self.slice_id] = crop_im
             self.__updateImg()
             self.im_widget.resetCamera()
@@ -662,6 +671,10 @@ Welcome to LabelSys v{version},\n\
         self.lbl_holder.saveToFile(file_path, self.imgs, header)
         self.__updateQLabelText()           # To get labeled marker
         self.lbl_holder.SAVED = True
+
+        print("Exporting resize data.")
+        self.resize_record.export(os.path.join(file_path, "resize_data.pkl"))
+        print("done.")
 
     def rotateImage(self):
         _has_label = False
@@ -840,6 +853,9 @@ Welcome to LabelSys v{version},\n\
         self.uids = image_data["UIDs"]
         self.spacing = image_data["Spacing"]
         self.lbl_holder.initialize(self.config["labels"], self.uids)
+        
+        # for tooth segment project
+        self.resize_record.init(self.imgs)
 
     def __querySave(self):
         """Check if there are unsaved changes"""

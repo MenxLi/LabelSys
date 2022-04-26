@@ -7,6 +7,7 @@ $TempDir$
 __pycache__
 *.swp
 .vscode
+.ipynb_checkpoints
 # build file
 build/
 dist/
