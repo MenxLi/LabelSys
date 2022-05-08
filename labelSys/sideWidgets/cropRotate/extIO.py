@@ -81,7 +81,7 @@ def startCropGUI(im: np.ndarray, save_callback: Callable[[np.ndarray, np.ndarray
     assert isRGB(im), "im must be RGB"
     logging.basicConfig(level=logging.INFO)
     imm = Immarker()
-    imm.im_win.setMinimumWidth(600)
+    imm.im_win.setMinimumWidth(800)
 
     ext_style_info = ExtStyleInfo()
     ext_style = ExtStyle()

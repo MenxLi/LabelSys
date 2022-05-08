@@ -583,22 +583,26 @@ Welcome to LabelSys v{version},\n\
         #  import logging
         #  logging.basicConfig(level = logging.DEBUG)
         img = self.imgs[self.slice_id]
+        curr_slice_id = self.slice_id
         def callback_save(crop_im: np.ndarray, ori_im: np.ndarray, crop_coords: Sequence[np.ndarray]):
             """
             - crop_im: cropped image
             - ori_im: original image
             - crop_coords: 4 crop box vertices points' coordinate, in (x, y) - opencv coordinate
             """
-            slice_uid = self.lbl_holder.uids[self.slice_id]
-            self.imgs[self.slice_id] = crop_im
+            slice_uid = self.lbl_holder.uids[curr_slice_id]
+            self.imgs[curr_slice_id] = crop_im
             self.__updateImg()
+            if curr_slice_id != self.slice_id:
+                self._warnDialog("You are at wrong slice. The correct slice has been changed.")
+                return
             self.im_widget.resetCamera()
 
         @registerCallback("onPopupMsg")
         def on_popupMsg(app, msg: str, flag: str ):
             if flag == "warning":
                 self._warnDialog(msg)
-        startCropGUI(img, callback_save)
+        startCropGUI(img.copy(), callback_save)
 
     def addContour(self):
         self.im_widget.style.forceDrawing()
