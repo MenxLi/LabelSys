@@ -9,7 +9,10 @@ data_path = [
 ( "labelSys/utils/*.dll", "./labelSys/utils" ),
 ( "labelSys/utils/*.so", "./labelSys/utils" ),
 ( "labelSys/docs", "./labelSys/docs" ),
-( "labelSys/conf.json", "./labelSys" )
+( "labelSys/conf.json", "./labelSys" ),
+
+( "../immarker/immarker/icons/*", "./immarker/icons" ),
+( "../immarker/immarker/docs/*", "./immarker/docs" ),
 ]
 ```
 ```
