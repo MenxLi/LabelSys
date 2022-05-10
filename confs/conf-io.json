@@ -164,20 +164,25 @@
     "Classifications":{
         "C":{
             "full_name": "Image class",
-            "class": ["Bite", "Bite-side", "Occlusal", "Occlusal-angle", "AnteriorTeeth", "Other"],
-            "description": "拍摄的图像类型，例如拍摄上颌前牙(张口)，则选择AnteriorTeeth; 拍摄合面的选Occlusal. (通常不选Other)"
-        },
-        "HP":{
-            "full_name": "Horizontal position",
-            "class": ["Left", "Middle", "Right", "Other"],
-            "description": "拍摄对象的水平位置，例如拍摄左侧，则选择Left. (通常不选Other)"
+            "class": [
+                "Bite-Middle",
+                "Bite-Left",
+                "Bite-Right",
+                "Anterior-Maxilla",
+                "Anterior-Mandible",
+                "Occlusal-Maxilla",
+                "Occlusal-Mandible",
+                "Occlusal (Angle) -Maxilla",
+                "Occlusal (Angle) -Mandible"
+            ],
+            "description": "拍摄的图像类型"
         }
     },
     "Loading_mode": 1,
     "2D_preview_mag":1,
     "Default_series":"",
     "Default_label":"",
-    "Max_im_height":1200,
+    "Max_im_height":1024,
     "-----------Below are comments for your understanding--------":
     "---------------------don't change them----------------------",
 
