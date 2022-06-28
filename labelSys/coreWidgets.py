@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import QWidget, QMessageBox, QDesktopWidget
 from .configLoader import LOG_FILE
 from .version import __version__
 from PyQt5.QtCore import pyqtSignal, QObject
-import datetime
+import datetime, logging
 
 class WidgetCore():
 
@@ -74,17 +74,19 @@ class WidgetCore():
 class EmittingStream(QObject):
     """Reference: https://stackoverflow.com/questions/8356336/how-to-capture-output-of-pythons-interpreter-and-show-in-a-text-widget"""
     textWritten = pyqtSignal(str)
+    logger = logging.getLogger("labelSys")
 
     def write(self, text):
         self.textWritten.emit(str(text))
-        EmittingStream.logText(text)
+        self.logText(text)
 
-    @staticmethod
-    def logText(text: str):
+    @classmethod
+    def logText(cls, text: str):
         log_txt = EmittingStream.setHeader(text)
         if log_txt:
-            with open(LOG_FILE, "a", encoding="utf-8") as fp:
-                fp.write(log_txt)
+            #  with open(LOG_FILE, "a", encoding="utf-8") as fp:
+            #      fp.write(log_txt)
+            cls.logger.info(text)
 
     @staticmethod
     def setHeader(text: str):

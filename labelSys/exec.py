@@ -5,7 +5,7 @@
 # (see https://bitbucket.org/Mons00n/mrilabelsys/).
 #
 
-import sys, os
+import sys, os, logging
 # Import MainWindow will somehow change this enviroment variable to improprate path
 # Export it manually before starting the program will not work as it will change after import
 # So, save it here for later useage
@@ -18,7 +18,7 @@ from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtCore import QTextCodec
 from .mainWindowGUI import MainWindow
-from .configLoader import _UI_DIR
+from .configLoader import _UI_DIR, LOG_FILE
 from .argParse import parser, args
 
 if not QT_QPA_PLATFORM_PLUGIN_PATH is None:
@@ -34,6 +34,26 @@ class Application(QApplication):
             print("An exception occured: ", exp)
             return 1
 def main():
+    logger = logging.getLogger("labelSys")
+    logger.setLevel(logging.DEBUG)
+
+    # FileHandler show DEBUG log level
+    f_handler = logging.FileHandler(LOG_FILE)
+    f_handler.setLevel(logging.DEBUG)
+    fomatter = logging.Formatter('%(asctime)s (%(levelname)s) - %(message)s')
+    f_handler.setFormatter(fomatter)
+    logger.addHandler(f_handler)
+
+    # re-direct unhandled exceptions
+    def handle_exception(exc_type, exc_value, exc_traceback):
+        if issubclass(exc_type, KeyboardInterrupt):
+            sys.__excepthook__(exc_type, exc_value, exc_traceback)
+        else:
+            logger.critical("Uncaught exception", exc_info=(exc_type, exc_value, exc_traceback))
+        logger.info("Exit.")
+        sys.exit()
+    sys.excepthook = handle_exception
+
     codec = QTextCodec.codecForName("UTF-8")
     QTextCodec.setCodecForLocale(codec)
     app = Application([parser.prog])

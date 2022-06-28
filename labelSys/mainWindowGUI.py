@@ -329,12 +329,12 @@ Welcome to LabelSys v{version},\n\
             if not self._alertMsg("Unsaved changes, quitting?"):
                 return 1
         # Erase some log if it's too long
-        MAX_LOG_LINES = 1000
-        with open(LOG_FILE, "r", encoding="utf-8") as fp:
-            lines = fp.readlines()
-        if len(lines) > MAX_LOG_LINES:
-            with open(LOG_FILE, "w", encoding="utf-8") as fp:
-                fp.write("".join(lines[-MAX_LOG_LINES//2:]))
+        #  MAX_LOG_LINES = 1000
+        #  with open(LOG_FILE, "r", encoding="utf-8") as fp:
+        #      lines = fp.readlines()
+        #  if len(lines) > MAX_LOG_LINES:
+        #      with open(LOG_FILE, "w", encoding="utf-8") as fp:
+        #          fp.write("".join(lines[-MAX_LOG_LINES//2:]))
         self.close()
         return 0
 
