@@ -21,8 +21,8 @@ from .previewGUI import Preview3DWindow, Preview2DWindow
 from .settingsGUI import SettingsDialog
 from .compareWidget import CompareWidget
 from .vtkClass import VtkWidget
-from .coreWidgets import WidgetCore, EmittingStream
-from .configLoader import _ICON_DIR, _DOC_DIR, _UI_DIR
+from .coreWidgets import WidgetCore, EmittingStream, loggedFunction
+from .configLoader import _ICON_DIR, _DOC_DIR, _UI_DIR, LOG_FILE
 from .commentGUI import CommentGUI
 from .interactionStyle import StyleImWidgetBase
 
@@ -111,9 +111,11 @@ class MainWindow(QMainWindow, WidgetCore):
 Welcome to LabelSys v{version},\n\
  - Using Configuration file at: \n\
     {conf_path},\n\
+ - Log file: \n\
+    {log_file_path},\n\
  - For help see: Help -> manual\n\
 ---------------------------------------------\n\
-".format(version = __version__,conf_path = CONF_PATH)
+".format(version = __version__,conf_path = CONF_PATH, log_file_path = LOG_FILE)
 
         if self.args.dev:
             print("Developing mode...")
@@ -143,48 +145,48 @@ Welcome to LabelSys v{version},\n\
         # File
         self.act_open.triggered.connect(lambda: self.loadPatients())
         self.act_open.setShortcut("Ctrl+O")
-        self.act_quit.triggered.connect(self.quitApp)
+        self.act_quit.triggered.connect(lambda: self.quitApp())
         self.act_quit.setShortcut("Ctrl+Q")
         self.act_load.triggered.connect(lambda: self.loadLabeledFile())
         self.act_load.setShortcut("Ctrl+L")
 
         # View
-        self.act_fullscreen.triggered.connect(self.changeScreenMode)
+        self.act_fullscreen.triggered.connect(lambda: self.changeScreenMode())
         self.act_fullscreen.setShortcut("Ctrl+F")
-        self.act_2D_preview.triggered.connect(self.previewLabels2D)
+        self.act_2D_preview.triggered.connect(lambda: self.previewLabels2D())
         self.act_2D_preview.setShortcut("Ctrl+P")
-        self.act_3D_preview.triggered.connect(self.previewLabels3D)
+        self.act_3D_preview.triggered.connect(lambda: self.previewLabels3D())
         self.act_check_preview.triggered.connect(lambda : self.check_preview.setChecked(not self.check_preview.isChecked()))
         self.act_check_preview.setShortcut("Ctrl+Space")
 
         # Operation
-        self.act_op_next_slice.triggered.connect(self.nextSlice)
+        self.act_op_next_slice.triggered.connect(lambda: self.nextSlice())
         self.act_op_next_slice.setShortcut("Up")
-        self.act_op_prev_slice.triggered.connect(self.prevSlice)
+        self.act_op_prev_slice.triggered.connect(lambda: self.prevSlice())
         self.act_op_prev_slice.setShortcut("Down")
-        self.act_op_next_patient.triggered.connect(self.nextPatient)
+        self.act_op_next_patient.triggered.connect(lambda: self.nextPatient())
         self.act_op_next_patient.setShortcut("Right")
-        self.act_op_prev_patient.triggered.connect(self.prevPatient)
+        self.act_op_prev_patient.triggered.connect(lambda: self.prevPatient())
         self.act_op_prev_patient.setShortcut("Left")
-        self.act_op_change_lbl.triggered.connect(self.switchLabel)
+        self.act_op_change_lbl.triggered.connect(lambda: self.switchLabel())
         self.act_op_change_lbl.setShortcut("Tab")
-        self.act_op_change_lbl_reverse.triggered.connect(self.switchLabelReverse)
+        self.act_op_change_lbl_reverse.triggered.connect(lambda: self.switchLabelReverse())
         self.act_op_change_lbl_reverse.setShortcut("Shift+Tab")
-        self.act_op_toAnotherLbl.triggered.connect(self.queryToAnotherLabel)
+        self.act_op_toAnotherLbl.triggered.connect(lambda: self.queryToAnotherLabel())
         self.act_op_change_lbl_reverse.setShortcut("Shift+Tab")
-        self.act_op_save.triggered.connect(self.saveCurrentPatient)
+        self.act_op_save.triggered.connect(lambda: self.saveCurrentPatient())
         self.act_op_save.setShortcut("Ctrl+S")
-        self.act_op_clear.triggered.connect(self.clearCurrentSlice)
+        self.act_op_clear.triggered.connect(lambda: self.clearCurrentSlice())
         self.act_op_clear.setShortcut("Esc")
         self.act_op_interp.triggered.connect(self.interpCurrentSlice)
         self.act_op_interp.setShortcut("Ctrl+I")
-        self.act_op_add_cnt.triggered.connect(self.addContour)
+        self.act_op_add_cnt.triggered.connect(lambda: self.addContour())
         self.act_op_add_cnt.setShortcut("Ctrl+A")
         self.act_op_rotate.triggered.connect(self.rotateImage)
         self.act_op_rotate.setShortcut("Ctrl+R")
         self.act_op_add_bbox.triggered.connect(self.addBBox)
         self.act_op_add_bbox.setShortcut("Ctrl+B")
-        self.act_op_edit_comment.triggered.connect(self.editComment)
+        self.act_op_edit_comment.triggered.connect(lambda: self.editComment())
         self.act_op_edit_comment.setShortcut("Ctrl+C")
 
         # Tools
@@ -194,11 +196,11 @@ Welcome to LabelSys v{version},\n\
         self.act_tool_crop.setShortcut("Shift+C")
 
         # Settings
-        self.act_set_path.triggered.connect(self.setOutputPath)
+        self.act_set_path.triggered.connect(lambda: self.setOutputPath())
         self.act_set_path.setShortcut("Ctrl+Alt+P")
-        self.act_set_lbler.triggered.connect(self.setLabeler)
+        self.act_set_lbler.triggered.connect(lambda: self.setLabeler())
         self.act_set_lbler.setShortcut("Ctrl+Alt+L")
-        self.act_set_settings.triggered.connect(self.setSettings)
+        self.act_set_settings.triggered.connect(lambda: self.setSettings())
         self.act_set_settings.setShortcut("Ctrl+Alt+S")
 
         # Help
@@ -226,13 +228,13 @@ Welcome to LabelSys v{version},\n\
         self.combo_label.currentTextChanged.connect(self.changeComboLabels)
         self.check_crv.stateChanged.connect(self.changeCheckCrv)
         self.check_draw.stateChanged.connect(self.changeCheckDraw)
-        self.check_preview.stateChanged.connect(self.changeCheckPreview)
-        self.btn_next_slice.clicked.connect(self.nextSlice)
-        self.btn_prev_slice.clicked.connect(self.prevSlice)
-        self.btn_next_patient.clicked.connect(self.nextPatient)
-        self.btn_prev_patient.clicked.connect(self.prevPatient)
-        self.btn_save.clicked.connect(self.saveCurrentPatient)
-        self.btn_clear.clicked.connect(self.clearCurrentSlice)
+        self.check_preview.stateChanged.connect(lambda: self.changeCheckPreview())
+        self.btn_next_slice.clicked.connect(lambda: self.nextSlice())
+        self.btn_prev_slice.clicked.connect(lambda: self.prevSlice())
+        self.btn_next_patient.clicked.connect(lambda: self.nextPatient())
+        self.btn_prev_patient.clicked.connect(lambda: self.prevPatient())
+        self.btn_save.clicked.connect(lambda: self.saveCurrentPatient())
+        self.btn_clear.clicked.connect(lambda: self.clearCurrentSlice())
         self.btn_interp.clicked.connect(self.interpCurrentSlice)
         # self.btn_preview.clicked.connect(self.previewLabels2D)
         self.btn_add_cnt.clicked.connect(self.addContour)
@@ -245,6 +247,7 @@ Welcome to LabelSys v{version},\n\
         self.im_widget = VtkWidget(self.im_frame, self)
 
     # Load images{{{
+    @loggedFunction
     def loadPatients(self, fname: str = None):
         """Load patients folder, and call initPanelAct() to initialize the panel"""
         if fname is None:
@@ -272,6 +275,7 @@ Welcome to LabelSys v{version},\n\
         self.__cache["data_loaded"] = True
         return 0
 
+    @loggedFunction
     def loadLabeledFile(self, fname: str = None):
         """Load a labeld file for one patient"""
         if fname is None:
@@ -323,7 +327,6 @@ Welcome to LabelSys v{version},\n\
         self.resize_record.loadFromFile(os.path.join(fname, "resize_data.pkl"))
         print("Data loaded")
 
-
     def quitApp(self):
         if not self.lbl_holder.SAVED and not self.args.dev:
             if not self._alertMsg("Unsaved changes, quitting?"):
@@ -338,6 +341,7 @@ Welcome to LabelSys v{version},\n\
         self.close()
         return 0
 
+    @loggedFunction
     def changeScreenMode(self):
         """Change screen mode between Normal Maximized and full screen"""
         self.__screen_mode = (self.__screen_mode+1)%3
@@ -348,6 +352,7 @@ Welcome to LabelSys v{version},\n\
         elif self.__screen_mode == 2:
             self.showFullScreen()
 
+    @loggedFunction
     def setOutputPath(self):
         fname = QFileDialog.getExistingDirectory(self, "Select output directory")
         if fname == "":
@@ -357,6 +362,7 @@ Welcome to LabelSys v{version},\n\
         self.__updateQLabelText()
         return 0
 
+    @loggedFunction
     def setLabeler(self):
         """Set labeler name"""
         text, ok = QInputDialog.getText(self, "Set labeler", "Enter your name: ")
@@ -364,6 +370,7 @@ Welcome to LabelSys v{version},\n\
             self.labeler_name = str(text)
             self.__updateQLabelText()
 
+    @loggedFunction
     def setSettings(self):
         self.settings_dialog = SettingsDialog(self)
         self.settings_dialog.exec_()
@@ -410,6 +417,7 @@ Welcome to LabelSys v{version},\n\
             self.im_widget.setStyleAuto()      # May change label drawing mode
         except: pass
 
+    @loggedFunction
     def queryToAnotherLabel(self):
         """Change current label selection while retain the contours,
         would be useful if someone did some labeling already,
@@ -426,12 +434,14 @@ Welcome to LabelSys v{version},\n\
         else:
             self._warnDialog("Failed.")
 
+    @loggedFunction
     def changeCheckCrv(self, i):
         if self.check_crv.isChecked():
             self.config["label_modes"][self.config["labels"].index(self.curr_lbl)] = 1
         else:
             self.config["label_modes"][self.config["labels"].index(self.curr_lbl)] = 0
 
+    @loggedFunction
     def changeCheckDraw(self, i):
         if self.check_draw.isChecked():
             self.config["label_draw"][self.config["labels"].index(self.curr_lbl)] = 1
@@ -439,6 +449,7 @@ Welcome to LabelSys v{version},\n\
             self.config["label_draw"][self.config["labels"].index(self.curr_lbl)] = 0
         self.im_widget.setStyleAuto()          # May change label drawing mode
 
+    @loggedFunction
     def changeCheckPreview(self):
         self.__updateImg()
 
@@ -458,6 +469,7 @@ Welcome to LabelSys v{version},\n\
         new_label_id = (self.config["labels"].index(self.curr_lbl) - 1)%len(self.config["labels"])
         self.combo_label.setCurrentText(self.config["labels"][new_label_id]) # will trigger changeComboLabels()
 
+    @loggedFunction
     def nextSlice(self):
         if self.slice_id >= len(self.imgs)-1:
             return 1
@@ -477,6 +489,7 @@ Welcome to LabelSys v{version},\n\
         except: pass
         return 0
 
+    @loggedFunction
     def prevSlice(self):
         if self.slice_id < 1:
             return 1
@@ -493,6 +506,7 @@ Welcome to LabelSys v{version},\n\
         except: pass
         return 0
 
+    @loggedFunction
     def nextPatient(self):
         if self.__querySave() == 1:
             return
@@ -500,6 +514,7 @@ Welcome to LabelSys v{version},\n\
             self.__updatePatient()
             return 0
 
+    @loggedFunction
     def prevPatient(self):
         if self.__querySave() == 1:
             return
@@ -619,6 +634,7 @@ Welcome to LabelSys v{version},\n\
     def addBBox(self):
         self._warnDialog("This function has not been implemented yet")
 
+    @loggedFunction
     def editComment(self):
         def saveComments(classification_txt: str, comment_txt: str):
             if comment_txt == "":
@@ -635,6 +651,7 @@ Welcome to LabelSys v{version},\n\
             current_comment=self.lbl_holder.comments[self.slice_id])
         self.comment_gui.show()
 
+    @loggedFunction
     def saveCurrentSlice(self, cnts_data: List[dict]):
         """
         Will be triggered automatically when modifying the contour, will be
@@ -655,6 +672,7 @@ Welcome to LabelSys v{version},\n\
                 self.preview_win_2d.updateInfo(self.__getMasks(), self.slice_id)
         except: pass
 
+    @loggedFunction
     def saveCurrentPatient(self):
         file_path = self._getOutputPath()
         if os.path.exists(file_path):
@@ -680,6 +698,7 @@ Welcome to LabelSys v{version},\n\
         self.resize_record.export(os.path.join(file_path, "resize_data.pkl"))
         print("done.")
 
+    @loggedFunction
     def rotateImage(self):
         _has_label = False
         for entry in self.config["labels"]:

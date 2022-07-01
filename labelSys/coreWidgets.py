@@ -3,6 +3,18 @@ from .configLoader import LOG_FILE
 from .version import __version__
 from PyQt5.QtCore import pyqtSignal, QObject
 import datetime, logging
+from typing import Callable, TypeVar
+from functools import wraps
+
+CallVar = TypeVar("CallVar", bound = Callable)
+
+def loggedFunction(func: CallVar) -> CallVar:
+    logger = logging.getLogger("labelSys")
+    @wraps(func)
+    def func_(*args, **kwargs):
+        logger.debug(f" [{func.__name__}] ")
+        return func(*args, **kwargs)
+    return func_
 
 class WidgetCore():
 
