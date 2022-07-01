@@ -38,12 +38,16 @@ def main():
     logger = logging.getLogger("labelSys")
     logger.setLevel(logging.DEBUG)
 
+    logger_ext = logging.getLogger("global_logger")
+    logger.setLevel(logging.DEBUG)
+
     # FileHandler show DEBUG log level
     f_handler = RotatingFileHandler(LOG_FILE, "a", maxBytes=5*1024*1024, backupCount=1, encoding="utf-8")
     f_handler.setLevel(logging.DEBUG)
     fomatter = logging.Formatter('%(asctime)s (%(levelname)s) - %(message)s')
     f_handler.setFormatter(fomatter)
     logger.addHandler(f_handler)
+    logger_ext.addHandler(f_handler)
 
     # re-direct unhandled exceptions
     def handle_exception(exc_type, exc_value, exc_traceback):
