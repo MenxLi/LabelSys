@@ -76,5 +76,6 @@ __VERSIONS__ =[ \
         ["1.8.0", "Add crop and rotate window (achieved with immarker project); Bug fix: classification not update when reopen classification GUI; Change classification config file naming: short_title -> full_name "],
         ["1.8.1", "Interaction style change, use space to move image"],
         ["1.8.2", "Bug fix: deal with image change while crop panel being opened"],
+        ["1.8.3", "Logging update"],
         ]
 __version__, __description__ = __VERSIONS__[-1]

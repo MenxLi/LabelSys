@@ -1,7 +1,7 @@
 # import vtk
 import numpy as np
 from typing import List, Tuple, Union
-import time
+import time, logging
 from vtkmodules.vtkRenderingCore import vtkPropPicker
 from vtkmodules.vtkInteractionWidgets import vtkContourWidget
 from vtkmodules.vtkInteractionStyle import vtkInteractorStyleImage
@@ -9,6 +9,7 @@ from vtkmodules.vtkInteractionStyle import vtkInteractorStyleImage
 
 class InteractionStyleBase(vtkInteractorStyleImage):
     HEIGHT = 0 # Z/W position of the curve
+    logger = logging.getLogger("labelSys")
     def __init__(self, widget):
         super().__init__()
         self.widget = widget
@@ -173,7 +174,11 @@ class DrawContourInteractorStyle(InteractionStyleBase):
             full_curve = self.__removeDuplicate2d(full_curve)
             # Sampling inside full_curve
             # self.pts = full_curve[::self.sample_step]
-            self.pts = self._sampleCurve(full_curve, self.sample_step)
+            try:
+                self.pts = self._sampleCurve(full_curve, self.sample_step)
+            except ValueError as e:
+                self.logger.warn("An error occured while resampling the curve", str(e))
+                return
             if np.linalg.norm(np.array(self.pts[-1]) - np.array(full_curve[-1])) > self.sample_step * 0.4:
                 # when last point is too far from initialization, add last point
                 self.pts.append(full_curve[-1])
