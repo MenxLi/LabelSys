@@ -5,6 +5,7 @@ import time, logging
 from vtkmodules.vtkRenderingCore import vtkPropPicker
 from vtkmodules.vtkInteractionWidgets import vtkContourWidget
 from vtkmodules.vtkInteractionStyle import vtkInteractorStyleImage
+from .coreWidgets import loggedFunction
 
 
 class InteractionStyleBase(vtkInteractorStyleImage):
@@ -81,6 +82,7 @@ class PtContourInteractorStyle(InteractionStyleBase):
         self.tmp_cnt: Union[None, vtkContourWidget] = None
         self._reinitState()
     
+    @loggedFunction
     def leftButtonPressEvent(self, obj, event):
         if self.__mode == "Drawing":
             if self.tmp_cnt:
@@ -97,6 +99,7 @@ class PtContourInteractorStyle(InteractionStyleBase):
             # self.tmp_cnt.SetFollowCursor(True)
             # self.tmp_cnt.Render()
 
+    @loggedFunction
     def doubleClickEvent(self, *args, **kwargs):
         self.__removeTmpCnt()
         if len(self.pts) > 1:
@@ -140,6 +143,7 @@ class DrawContourInteractorStyle(InteractionStyleBase):
         self.__drawing = False
         self.__prev_pt = None
 
+    @loggedFunction
     def leftButtonPressEvent(self, obj, event):
         ctrl = self.widget.iren.GetControlKey()
         alt = self.widget.iren.GetAltKey()
@@ -164,6 +168,7 @@ class DrawContourInteractorStyle(InteractionStyleBase):
             self.__prev_pt = now_pt
             return 0
 
+    @loggedFunction
     def leftButtonReleaseEvent(self, obj, event):
         if self.__mode == "Drawing":
             # Interpolate between raw points
