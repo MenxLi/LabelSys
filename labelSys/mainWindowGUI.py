@@ -239,7 +239,7 @@ Welcome to LabelSys v{version},\n\
         # self.btn_preview.clicked.connect(self.previewLabels2D)
         self.btn_add_cnt.clicked.connect(self.addContour)
         self.btn_add_bbox.clicked.connect(self.addBBox)
-        self.btn_comment.clicked.connect(self.editComment)
+        self.btn_comment.clicked.connect(lambda: self.editComment())
         self.slider_im.valueChanged.connect(self.changeSliderValue)
 
     def initImageUI(self):
