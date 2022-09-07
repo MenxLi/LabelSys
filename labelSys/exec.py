@@ -14,9 +14,9 @@ try:
 except KeyError:
     # if not export enviroment variable before the program start
     QT_QPA_PLATFORM_PLUGIN_PATH = None
-from PyQt5.QtGui import QFont
-from PyQt5.QtWidgets import QApplication
-from PyQt5.QtCore import QTextCodec
+from PyQt6.QtGui import QFont
+from PyQt6.QtWidgets import QApplication
+from PyQt6.QtCore import QStringConverter
 from .mainWindowGUI import MainWindow
 from .configLoader import _UI_DIR, LOG_FILE
 from .argParse import parser, args
@@ -59,8 +59,9 @@ def main():
         sys.exit()
     sys.excepthook = handle_exception
 
-    codec = QTextCodec.codecForName("UTF-8")
-    QTextCodec.setCodecForLocale(codec)
+    #  codec = QStringConverter.codecForName("UTF-8")
+    #  codec = QStringConverter.Encoding.Utf8
+    #  QStringConverter.setCodecForLocale(codec)
     app = Application([parser.prog])
     font = QFont("Verdana", 9)
     app.setFont(font)
@@ -68,7 +69,7 @@ def main():
         app.setStyleSheet(f.read())
     w = MainWindow(args)
     app.installEventFilter(w)
-    sys.exit(app.exec_())
+    sys.exit(app.exec())
 
 def main_():
     """

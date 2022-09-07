@@ -1,11 +1,11 @@
-#
+
 # Copyright (c) 2020 Mengxun Li.
 #
 # This file is part of LabelSys
 # (see https://bitbucket.org/Mons00n/mrilabelsys/).
 #
 # import{{{
-from typing import List, Union
+from typing import List, Union, Optional
 from .utils.base64ImageConverter import imgEncodeB64, imgDecodeB64
 from .configLoader import *
 import os
@@ -38,7 +38,7 @@ class LabelHolder:
                 "SOPInstanceUID": str                               # Will remove in the future Only appear on version < 1.6.7
             }
         """
-        self.data: List[dict] = None
+        self.data: Optional[List[dict]] = None
         self.SAVED: bool = True
         self.uids: List[str]
         self.comments: List[Union[None, str]]

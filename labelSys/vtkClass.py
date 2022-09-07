@@ -5,7 +5,7 @@
 # (see https://bitbucket.org/Mons00n/mrilabelsys/).
 #
 # import{{{
-from typing import List, Tuple
+from typing import List, Tuple, Type
 from vtkmodules.vtkCommonCore import \
     VTK_INT, VTK_UNSIGNED_CHAR, VTK_UNSIGNED_INT, VTK_UNSIGNED_SHORT, \
     VTK_UNSIGNED_LONG, VTK_CHAR, VTK_SHORT, VTK_FLOAT, VTK_DOUBLE, VTK_UNSIGNED_LONG_LONG, VTK_LONG_LONG, \
@@ -18,7 +18,7 @@ from vtkmodules.vtkInteractionWidgets import vtkContourWidget, vtkOrientedGlyphC
 from vtkmodules.vtkFiltersSources import vtkLineSource
 from vtkmodules.util import numpy_support
 from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
-from PyQt5.QtWidgets import *
+from PyQt6.QtWidgets import *
 import numpy as np
 import cv2 as cv
 from .utils import utils_ as F
@@ -76,7 +76,7 @@ class VtkWidget(QVTKRenderWindowInteractor, WidgetCore):
                 lbl_idx = self.getMainWindow().config["labels"].index(self.getMainWindow().curr_lbl)
                 self.setStyleSampleStep(self.getMainWindow().config["label_steps"][lbl_idx])
     
-    def setStyle(self, style_: InteractionStyleBase):
+    def setStyle(self, style_: Type[InteractionStyleBase]):
         if hasattr(self, "style"):
             try:
                 del self.style

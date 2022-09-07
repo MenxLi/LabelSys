@@ -4,10 +4,10 @@
 # This file is part of LabelSys
 # (see https://bitbucket.org/Mons00n/mrilabelsys/).
 #
-from PyQt5.QtWidgets import \
+from PyQt6.QtWidgets import \
     (QRadioButton, QButtonGroup, QLabel, QWidget, QDialog, QFormLayout, QVBoxLayout, QHBoxLayout, \
      QGridLayout, QPushButton, QTabWidget, QDialogButtonBox, QLineEdit)
-from PyQt5.QtGui import QIntValidator
+from PyQt6.QtGui import QIntValidator
 import copy
 
 
@@ -18,7 +18,7 @@ class SettingsDialog(QDialog):
         self.mainw = mainw
         self.config = copy.deepcopy(mainw.config)
 
-        btns = QDialogButtonBox.Apply | QDialogButtonBox.Cancel
+        btns = QDialogButtonBox.StandardButton.Apply | QDialogButtonBox.StandardButton.Cancel
         self.button_box = QDialogButtonBox(btns)
         self.button_box.clicked.connect(self.__handleButtonClick)
 
@@ -45,9 +45,9 @@ class SettingsDialog(QDialog):
 
     def __handleButtonClick(self, button):
         sb = self.button_box.standardButton(button)
-        if sb == QDialogButtonBox.Apply:
+        if sb == QDialogButtonBox.StandardButton.Apply:
             self.applyChanges()
-        elif sb == QDialogButtonBox.Cancel:
+        elif sb == QDialogButtonBox.StandardButton.Cancel:
             self.quitWindow()
 
 
@@ -106,7 +106,7 @@ class SetLoadingMode(QWidget):
             grid.addWidget(r, 0, i+1)
 
     def onClicked(self):
-        radioBtn = self.sender()
+        radioBtn: QRadioButton = self.sender()
         if radioBtn.isChecked():
             value = radioBtn.idx
             self.config["loading_mode"] = value

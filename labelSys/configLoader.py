@@ -6,7 +6,7 @@
 #
 import json
 import os, shutil
-from .argParse import parser, args
+from .argParse import args
 
 _CURR_DIR = os.path.dirname(__file__)
 if args.config_file:

@@ -15,9 +15,9 @@ from vtkmodules.vtkCommonDataModel import vtkPiecewiseFunction
 from vtkmodules.vtkRenderingVolume import vtkFixedPointVolumeRayCastMapper
 
 from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
-from PyQt5.QtWidgets import *
-from PyQt5 import QtWidgets, QtCore
-from PyQt5.QtGui import QImage, QPixmap
+from PyQt6.QtWidgets import *
+from PyQt6 import QtWidgets, QtCore
+from PyQt6.QtGui import QImage, QPixmap
 import numpy as np
 from .configLoader import *
 from .utils import utils_ as F
@@ -25,7 +25,9 @@ import cv2 as cv
 
 class PreviewWindow(QWidget):
     def __init__(self, parent, imgs, masks, spacing = [1,1,1]):
-        super().__init__(None, QtCore.Qt.WindowStaysOnTopHint)
+        #  super().__init__(None, QtCore.Qt.WindowType.WindowStaysOnTopHint)
+        super().__init__(None)
+        self.setWindowFlag(QtCore.Qt.WindowType.WindowStaysOnTopHint)
         self.parent = parent
         if masks== None:
             self.close()
@@ -42,7 +44,7 @@ class PreviewWindow(QWidget):
 
     def _center(self):
         qr = self.frameGeometry()
-        cp = QDesktopWidget().availableGeometry().center()
+        cp = self.screen().availableGeometry().center()
         qr.moveCenter(cp)
         self.move(qr.topLeft())
 
@@ -262,7 +264,7 @@ class Preview2DWindow(PreviewWindow):
         im = self.__generateImg()
         height, width, channel = im.shape
         byte_per_line = 3*width
-        qimg = QImage(im.data, width, height, byte_per_line, QImage.Format_RGB888)
+        qimg = QImage(im.data, width, height, byte_per_line, QImage.Format.Format_RGB888)
         self.lbl_im.setPixmap(QPixmap(qimg))
 
     def __generateImg(self):
@@ -278,12 +280,12 @@ class Preview2DWindow(PreviewWindow):
     def wheelEvent(self, event):
         modifier = QtWidgets.QApplication.keyboardModifiers()
         if event.angleDelta().y() < 0:
-            if modifier == QtCore.Qt.ControlModifier:
+            if modifier == QtCore.Qt.KeyboardModifier.ControlModifier:
                 pass
             else:
                 self.prevSlice()
         else:
-            if modifier == QtCore.Qt.ControlModifier:
+            if modifier == QtCore.Qt.KeyboardModifier.ControlModifier:
                 pass
             else:
                 self.nextSlice()

@@ -1,9 +1,8 @@
 from __future__ import annotations
 from typing import Callable, Dict, Literal, NewType, Tuple, List, TypedDict, TYPE_CHECKING
-from PyQt5 import QtCore
-from PyQt5.QtWidgets import QWidget, QApplication
-from PyQt5.QtCore import Qt, QObject, QEvent
-from PyQt5.QtGui import QCursor, QPixmap
+from PyQt6.QtWidgets import QWidget, QApplication
+from PyQt6.QtCore import Qt, QObject, QEvent
+from PyQt6.QtGui import QCursor, QPixmap
 import logging
 
 if TYPE_CHECKING:
@@ -28,19 +27,19 @@ class Cursor():
         self._cursor = QCursor()
 
     def setShapeArrow(self):
-        self._cursor.setShape(Qt.ArrowCursor)
+        self._cursor.setShape(Qt.CursorShape.ArrowCursor)
         self.wid.setCursor(self._cursor)
 
     def setShapeOpenHand(self):
-        self._cursor.setShape(Qt.OpenHandCursor)
+        self._cursor.setShape(Qt.CursorShape.OpenHandCursor)
         self.wid.setCursor(self._cursor)
 
     def setShapeClosedHand(self):
-        self._cursor.setShape(Qt.ClosedHandCursor)
+        self._cursor.setShape(Qt.CursorShape.ClosedHandCursor)
         self.wid.setCursor(self._cursor)
 
     def setShapeCross(self):
-        self._cursor.setShape(Qt.CrossCursor)
+        self._cursor.setShape(Qt.CursorShape.CrossCursor)
         self.wid.setCursor(self._cursor)
 
     def setShapeFromFile(self, f: str):
@@ -89,14 +88,14 @@ class StyleBase(QObject):
 
     def watchKeyStatus(self, k: str):
         try:
-            key = getattr(Qt, "Key_{}".format(k))
+            key = getattr(Qt.Key, "Key_{}".format(k))
             self._watching_keys[key] = False
         except AttributeError:
             labelsys_logger.error("Can't find key {} to watch on {}".format(k, self.__class__))
 
     def queryKeyStatus(self, k: str) -> bool:
         try:
-            key = getattr(Qt, "Key_{}".format(k))
+            key = getattr(Qt.Key, "Key_{}".format(k))
             return self._watching_keys[key]
         except AttributeError:
             labelsys_logger.error("Can't find key {} to query on {}".format(k, self.__class__))
@@ -115,7 +114,7 @@ class StyleBase(QObject):
         modifiers = []
         for k in args:
             try:
-                attr = getattr(Qt, k + "Modifier")
+                attr = getattr(Qt.KeyboardModifier, k + "Modifier")
                 modifiers.append(attr)
             except AttributeError:
                 labelsys_logger.error("Unable to get modifier from QtCore.Qt: {}".format(k))
@@ -137,7 +136,7 @@ class StyleBase(QObject):
             auto_doc (bool): automatically add an entry in self.info["key_function"]
         """
         try:
-            key = getattr(Qt, "Key_{}".format(k))
+            key = getattr(Qt.Key, "Key_{}".format(k))
             event_record = getattr(self, "_key{}_events".format(mode))
             event_record[key] = {
                 "callback": callback,
@@ -176,24 +175,24 @@ class StyleBase(QObject):
         pass
 
     def eventFilter(self, receiver, event: QEvent):
-        if event.type() == QEvent.MouseMove:
+        if event.type() == QEvent.Type.MouseMove:
             self.mouseMoveEvent()
 
-        if event.type() == QEvent.MouseButtonPress:
+        if event.type() == QEvent.Type.MouseButtonPress:
             qlogger.debug(event)
-            if event.button() == Qt.LeftButton:
+            if event.button() == Qt.MouseButton.LeftButton:
                 self.leftButtonPressEvent()
-            if event.button() == Qt.RightButton:
+            if event.button() == Qt.MouseButton.RightButton:
                 self.rightButtonPressEvent()
 
-        if event.type() == QEvent.MouseButtonRelease:
+        if event.type() == QEvent.Type.MouseButtonRelease:
             qlogger.debug(event)
-            if event.button() == Qt.LeftButton:
+            if event.button() == Qt.MouseButton.LeftButton:
                 self.leftButtonReleaseEvent()
-            if event.button() == Qt.RightButton:
+            if event.button() == Qt.MouseButton.RightButton:
                 self.rightButtonReleaseEvent()
 
-        if event.type() == QEvent.KeyPress:
+        if event.type() == QEvent.Type.KeyPress:
             if not event.isAutoRepeat():
                 qlogger.debug("{} : key - {}".format(event, event.key()))
             for k in self._watching_keys.keys():
@@ -204,7 +203,7 @@ class StyleBase(QObject):
                 (event.isAutoRepeat() and not self._keypress_events[k]["auto_repeat"]):
                     self._keypress_events[k]["callback"]()
 
-        if event.type() == QEvent.KeyRelease:
+        if event.type() == QEvent.Type.KeyRelease:
             if not event.isAutoRepeat():
                 qlogger.debug("{} : key - {}".format(event, event.key()))
             for k in self._watching_keys.keys():
@@ -215,7 +214,7 @@ class StyleBase(QObject):
                 (event.isAutoRepeat() and not self._keypress_events[k]["auto_repeat"]):
                     self._keyrelease_events[k]["callback"]()
 
-        if event.type() == QEvent.Wheel:
+        if event.type() == QEvent.Type.Wheel:
             qlogger.debug("{} : delta - {}".format(event, event.angleDelta()))
             y = event.angleDelta().y()
             if y>0:

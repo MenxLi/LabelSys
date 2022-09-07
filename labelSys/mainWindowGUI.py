@@ -4,7 +4,7 @@
 # This file is part of LabelSys
 # (see https://bitbucket.org/Mons00n/mrilabelsys/).
 #
-from typing import List, Sequence
+from typing import List, Optional, Sequence
 import webbrowser
 from pathlib import Path
 import os,sys, platform
@@ -26,18 +26,20 @@ from .configLoader import _ICON_DIR, _DOC_DIR, _UI_DIR, LOG_FILE
 from .commentGUI import CommentGUI
 from .interactionStyle import StyleImWidgetBase
 
+from .ui._mainWindowGUI import MainWindowGUI
+
 import numpy as np
-from PyQt5 import QtWidgets, QtCore
-from PyQt5.QtWidgets import *
-from PyQt5.QtCore import Qt, QEvent
-from PyQt5.QtGui import QIcon
-from PyQt5 import uic
+from PyQt6 import QtWidgets, QtCore
+from PyQt6.QtWidgets import *
+from PyQt6.QtCore import Qt, QEvent
+from PyQt6.QtGui import QIcon
+from PyQt6 import uic
 import cv2 as cv
 
 LOCAL_DIR = os.path.dirname(os.path.realpath(__file__))
 from .toothSeg_utils.io import ResizeImageRecord
 
-class MainWindow(QMainWindow, WidgetCore):
+class MainWindow(MainWindowGUI, WidgetCore):
     resized = QtCore.pyqtSignal()
     # Init{{{
     def __init__(self,args):
@@ -48,7 +50,7 @@ class MainWindow(QMainWindow, WidgetCore):
             sys.stderr = EmittingStream(textWritten = self.stdoutStream)
         # load UI
         ui_path = os.path.join(_UI_DIR,  "mainWindow.ui")
-        uic.loadUi(ui_path, self)
+        uic.load_ui.loadUi(ui_path, self)
         self.args = args
 
         # set style sheet
@@ -58,7 +60,7 @@ class MainWindow(QMainWindow, WidgetCore):
         self.showFullScreen(); self.__screen_mode = 2
         self.setWindowTitle("LabelSys "+__version__)
         self.setFocus()
-        self.setFocusPolicy(Qt.StrongFocus)
+        self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
 
         self.initMenu()
 
@@ -248,7 +250,7 @@ Welcome to LabelSys v{version},\n\
 
     # Load images{{{
     @loggedFunction
-    def loadPatients(self, fname: str = None):
+    def loadPatients(self, fname: Optional[str] = None):
         """Load patients folder, and call initPanelAct() to initialize the panel"""
         if fname is None:
             fname = QFileDialog.getExistingDirectory(self, "Select data directory to open")
@@ -276,7 +278,7 @@ Welcome to LabelSys v{version},\n\
         return 0
 
     @loggedFunction
-    def loadLabeledFile(self, fname: str = None):
+    def loadLabeledFile(self, fname: Optional[str] = None):
         """Load a labeld file for one patient"""
         if fname is None:
             fname = QFileDialog.getExistingDirectory(self, "Select labeled directory to load")
@@ -427,6 +429,7 @@ Welcome to LabelSys v{version},\n\
         item, ok = QInputDialog.getItem(self, "Select label name.", "Avaliable labels", \
             aval_labels, aval_labels.index(self.curr_lbl), False)
         if ok and item!=self.curr_lbl:
+            assert self.lbl_holder.data is not None     # Type checking
             data = self.lbl_holder.data[self.slice_id]
             data[item] += data[self.curr_lbl]
             data[self.curr_lbl] = []
@@ -913,16 +916,16 @@ Welcome to LabelSys v{version},\n\
     def eventFilter(self, receiver, event):
         """Globally defined event"""
         modifier = QtWidgets.QApplication.keyboardModifiers()
-        if(event.type() == QEvent.KeyPress):
+        if(event.type() == QEvent.Type.KeyPress):
             """KeyBoard shortcut"""
             key = event.key()
-            if key == Qt.Key_Up:
+            if key == Qt.Key.Key_Up:
                 # Up : next slice
                 self.nextSlice()
-            if key == Qt.Key_Down:
+            if key == Qt.Key.Key_Down:
                 # Down : previous slice
                 self.prevSlice()
-        if(event.type() == QEvent.MouseMove):
+        if(event.type() == QEvent.Type.MouseMove):
             """vtk seems difficult in recognizing mouse dragging, so
             implimented With Qt"""
             if not self.__cache["data_loaded"]:
@@ -935,12 +938,12 @@ Welcome to LabelSys v{version},\n\
             return
         modifier = QtWidgets.QApplication.keyboardModifiers()
         if event.angleDelta().y() < 0:
-            if modifier == Qt.ControlModifier:
+            if modifier == Qt.KeyboardModifier.ControlModifier:
                 self.im_widget.style.OnMouseWheelForward()
             else:
                 self.prevSlice()
         else:
-            if modifier == Qt.ControlModifier:
+            if modifier == Qt.KeyboardModifier.ControlModifier:
                 self.im_widget.style.OnMouseWheelBackward()
             else:
                 self.nextSlice()

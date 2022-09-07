@@ -12,7 +12,6 @@ import os
 import scipy.ndimage
 from pathlib import Path
 import cv2 as cv
-from scipy.ndimage import interpolation
 from .utils import utils_ as F
 from .configLoader import MAX_IM_HEIGHT
 # }}}

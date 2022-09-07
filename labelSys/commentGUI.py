@@ -1,7 +1,5 @@
 from typing import Callable, Union, List
-from PyQt5.QtWidgets import QDialog, QHBoxLayout, QMainWindow, QPushButton, QLabel, QCheckBox, QTextEdit, QVBoxLayout, QWidget, QRadioButton
-import numpy as np
-from numpy.core.numeric import full
+from PyQt6.QtWidgets import QDialog, QHBoxLayout, QMainWindow, QPushButton, QLabel, QTextEdit, QVBoxLayout, QWidget, QRadioButton
 
 from .coreWidgets import WidgetCore
 

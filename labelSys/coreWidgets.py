@@ -1,7 +1,7 @@
-from PyQt5.QtWidgets import QWidget, QMessageBox, QDesktopWidget
+from PyQt6.QtWidgets import QWidget, QMessageBox
 from .configLoader import LOG_FILE
 from .version import __version__
-from PyQt5.QtCore import pyqtSignal, QObject
+from PyQt6.QtCore import pyqtSignal, QObject
 import datetime, logging
 from typing import Callable, TypeVar
 from functools import wraps
@@ -33,35 +33,35 @@ class WidgetCore():
         msg_box.setText(message)
         msg_box.setWindowTitle(title)
         msg_box.setInformativeText(info_msg)
-        msg_box.setStandardButtons(QMessageBox.Ok)
+        msg_box.setStandardButtons(QMessageBox.StandardButton.Ok)
         return msg_box.exec()
 
     def _warnDialog(self, message, info_msg = ""):
         msg_box = QMessageBox()
-        msg_box.setIcon(QMessageBox.Warning)
+        msg_box.setIcon(QMessageBox.icon.Warning)
         msg_box.setText(message)
         msg_box.setInformativeText(info_msg)
         msg_box.setWindowTitle("Warning")
-        msg_box.setStandardButtons(QMessageBox.Ok)
+        msg_box.setStandardButtons(QMessageBox.StandardButton.Ok)
         return msg_box.exec()
 
     def _warnDialogCritical(self, message, info_msg = "Please restart the program"):
         msg_box = QMessageBox()
-        msg_box.setIcon(QMessageBox.Critical)
+        msg_box.setIcon(QMessageBox.icon.Critical)
         msg_box.setText(message)
         msg_box.setInformativeText(info_msg)
         msg_box.setWindowTitle("Critical warning")
-        msg_box.setStandardButtons(QMessageBox.Ok)
+        msg_box.setStandardButtons(QMessageBox.StandardButton.Ok)
         return msg_box.exec()
 
     def _queryDialog(self, msg, title = "Query", func = lambda x: None):
         msg_box = QMessageBox()
         msg_box.setText(msg)
         msg_box.setWindowTitle(title)
-        msg_box.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
+        msg_box.setStandardButtons(QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Cancel)
         msg_box.buttonClicked.connect(func)
         return_value = msg_box.exec()
-        if return_value == QMessageBox.Ok:
+        if return_value == QMessageBox.StandardButton.Ok:
             return True
         else: return False
 
@@ -69,16 +69,16 @@ class WidgetCore():
         msg_box = QMessageBox()
         msg_box.setText(msg)
         msg_box.setWindowTitle(title)
-        msg_box.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
+        msg_box.setStandardButtons(QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Cancel)
         msg_box.buttonClicked.connect(func)
         return_value = msg_box.exec()
-        if return_value == QMessageBox.Ok:
+        if return_value == QMessageBox.StandardButton.Ok:
             return True
         else: return False
 
     def _center(self):
         qr = self.frameGeometry()
-        cp = QDesktopWidget().availableGeometry().center()
+        cp = self.screen().availableGeometry().center()
         qr.moveCenter(cp)
         self.move(qr.topLeft())
 

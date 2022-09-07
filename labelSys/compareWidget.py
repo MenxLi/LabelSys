@@ -4,10 +4,11 @@
 # This file is part of LabelSys
 # (see https://bitbucket.org/Mons00n/mrilabelsys/).
 #
-from PyQt5 import uic
-from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import *
-from PyQt5.QtCore import Qt, pyqtSignal, QObject, QEvent
+from PyQt6 import uic
+from PyQt6 import QtWidgets
+from PyQt6.QtWidgets import QWidget
+from PyQt6.QtWidgets import *
+from PyQt6.QtCore import Qt
 from .labelResultHolder import LabelHolder
 from .vtkClass import VtkWidget
 from .utils import utils_ as F
@@ -24,7 +25,7 @@ class CompareWidget(QWidget):
 
     def initUI(self):
         ui_path = os.path.join(_UI_DIR, "compareWidget.ui")
-        uic.loadUi(ui_path, self)
+        uic.load_ui.loadUi(ui_path, self)
         self.setWindowTitle("Compare Widget")
         self.L_part = CompareWidgetVisualPart(self.frame_L, self)
         self.R_part = CompareWidgetVisualPart(self.frame_R, self)
@@ -80,13 +81,13 @@ class CompareWidget(QWidget):
     def wheelEvent(self, event):
         modifier = QtWidgets.QApplication.keyboardModifiers()
         if event.angleDelta().y() < 0:
-            if modifier != Qt.ControlModifier:
+            if modifier != Qt.KeyboardModifier.ControlModifier:
                 self.prevSlice()
             else:
                 if self.R_part._cache["data_loaded"]: self.R_part.im_widget.style.OnMouseWheelForward()
                 if self.L_part._cache["data_loaded"]: self.L_part.im_widget.style.OnMouseWheelForward()
         else:
-            if modifier != Qt.ControlModifier:
+            if modifier != Qt.KeyboardModifier.ControlModifier:
                 self.nextSlice()
             else:
                 if self.R_part._cache["data_loaded"]: self.R_part.im_widget.style.OnMouseWheelBackward()
@@ -96,10 +97,10 @@ class CompareWidget(QWidget):
         msg_box = QMessageBox()
         msg_box.setText(msg)
         msg_box.setWindowTitle(title)
-        msg_box.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
+        msg_box.setStandardButtons(QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Cancel)
         msg_box.buttonClicked.connect(func)
         return_value = msg_box.exec()
-        if return_value == QMessageBox.Ok:
+        if return_value == QMessageBox.StandardButton.Ok:
             return True
         else: return False
 
@@ -137,7 +138,7 @@ class CompareWidgetVisualPart(QWidget):
 
     def initUI(self):
         ui_path = os.path.join(_UI_DIR, "compareVisualWidget.ui")
-        uic.loadUi(ui_path, self)
+        uic.load_ui.loadUi(ui_path, self)
         layout = QGridLayout()
         layout.addWidget(self, 0,0)
         self.check_preview = self.parent.check_preview
@@ -275,9 +276,9 @@ class CompareWidgetVisualPart(QWidget):
             return
         modifier = QtWidgets.QApplication.keyboardModifiers()
         if event.angleDelta().y() < 0:
-            if modifier == Qt.ControlModifier:
+            if modifier == Qt.KeyboardModifier.ControlModifier:
                 self.im_widget.style.OnMouseWheelForward()
         else:
-            if modifier == Qt.ControlModifier:
+            if modifier == Qt.KeyboardModifier.ControlModifier:
                 self.im_widget.style.OnMouseWheelBackward()
 

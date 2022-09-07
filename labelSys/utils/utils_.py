@@ -228,7 +228,7 @@ def resampleSpacing(imgs, old_spacing, new_spacing = [1,1,1]):# {{{
     imgs = scipy.ndimage.interpolation.zoom(imgs, real_resize_factor)
     return imgs, new_spacing
 # }}}
-def overlap_mask(img, mask, color = (255,0,0), alpha = 1):# {{{
+def overlap_mask(img, mask, color = (255,0,0), alpha: float = 1):# {{{
     if img_channel(img) == 1:
         img = gray2rgb_(img)
     if img_channel(mask) == 1:
