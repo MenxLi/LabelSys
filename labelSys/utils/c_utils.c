@@ -181,7 +181,7 @@ void Char2Binary(char * c, int * buffer){
         }/*}}}*/
 }
 
-int str2intArray(char * c, int * int_arr, int bit_len, int str_len){
+void str2intArray(char * c, int * int_arr, int bit_len, int str_len){
         int i;
         // Construct bit array
         int * bi_arr = malloc(str_len*6*sizeof(int));
