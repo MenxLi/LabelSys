@@ -78,5 +78,6 @@ __VERSIONS__ =[ \
         ["1.8.2", "Bug fix: deal with image change while crop panel being opened"],
         ["1.8.3", "Logging update"],
         ["1.8.4", "Bug fix: crash when edit comment"],
+        ["1.9.0", "Using PyQt6!"],
         ]
 __version__, __description__ = __VERSIONS__[-1]
