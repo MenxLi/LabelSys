@@ -251,3 +251,20 @@ class StyleImWidgetBase(StyleBase):
         if self.queryKeyStatus("Space"):
             self.cursor.setShapeClosedHand()
         return super().mouseMoveEvent()
+
+    def wheelForwardEvent(self):
+        if self.keyModifiers("Control"):
+            vtk_widget:VtkWidget = self.main_win.im_widget
+            vtk_widget.style.OnMouseWheelForward()
+        else:
+            self.main_win.prevSlice()
+        return super().wheelForwardEvent()
+
+    def wheelBackwardEvent(self):
+        if self.keyModifiers("Control"):
+            vtk_widget:VtkWidget = self.main_win.im_widget
+            vtk_widget.style.OnMouseWheelBackward()
+        else:
+            self.main_win.nextSlice()
+        return super().wheelBackwardEvent()
+

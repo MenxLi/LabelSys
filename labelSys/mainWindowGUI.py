@@ -933,7 +933,10 @@ Welcome to LabelSys v{version},\n\
             self.im_widget.style.mouseMoveEvent(None, None)
         return super().eventFilter(receiver, event)
 
-    def wheelEvent(self, event):
+    def _wheelEvent_(self, event):
+        # ** DEPRECATED **
+        # The wheel event somehow can't be recognized (With PyQt6?)
+        # re-implemented in interactionStyle.py using eventFilter
         if not self.__cache["data_loaded"]:
             return
         modifier = QtWidgets.QApplication.keyboardModifiers()
