@@ -170,6 +170,13 @@ class DrawContourInteractorStyle(InteractionStyleBase):
 
     @loggedFunction
     def leftButtonReleaseEvent(self, obj, event):
+        def reInit():
+            # Re initialize
+            for actor in self.lines:
+                self.widget.ren.RemoveActor(actor)
+            self.widget.ren_win.Render()
+            self._reinitState()
+
         if self.__mode == "Drawing":
             # Interpolate between raw points
             full_curve = [self.pts_raw[0]]
@@ -182,7 +189,9 @@ class DrawContourInteractorStyle(InteractionStyleBase):
             try:
                 self.pts = self._sampleCurve(full_curve, self.sample_step)
             except ValueError as e:
-                self.logger.warn("An error occured while resampling the curve", str(e))
+                self.logger.warn("An error occured while resampling the curve")
+                self.logger.debug(str(e))
+                reInit()
                 return
             if np.linalg.norm(np.array(self.pts[-1]) - np.array(full_curve[-1])) > self.sample_step * 0.4:
                 # when last point is too far from initialization, add last point
@@ -200,11 +209,7 @@ class DrawContourInteractorStyle(InteractionStyleBase):
             # Construct contour
             self.widget.constructContour(self.pts)
 
-            # Re initialize
-            for actor in self.lines:
-                self.widget.ren.RemoveActor(actor)
-            self.widget.ren_win.Render()
-            self._reinitState()
+            reInit()
 
     def forceDrawing(self):
         self.__mode = "Drawing"
