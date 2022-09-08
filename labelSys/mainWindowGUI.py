@@ -376,7 +376,7 @@ Welcome to LabelSys v{version},\n\
     @loggedFunction
     def setSettings(self):
         self.settings_dialog = SettingsDialog(self)
-        self.settings_dialog.exec_()
+        self.settings_dialog.exec()
         #self.settings_dialog.show()
 
     def changeComboSeries(self, entry):

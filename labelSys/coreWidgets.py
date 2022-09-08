@@ -38,7 +38,7 @@ class WidgetCore():
 
     def _warnDialog(self, message, info_msg = ""):
         msg_box = QMessageBox()
-        msg_box.setIcon(QMessageBox.icon.Warning)
+        msg_box.setIcon(QMessageBox.Icon.Warning)
         msg_box.setText(message)
         msg_box.setInformativeText(info_msg)
         msg_box.setWindowTitle("Warning")
@@ -47,7 +47,7 @@ class WidgetCore():
 
     def _warnDialogCritical(self, message, info_msg = "Please restart the program"):
         msg_box = QMessageBox()
-        msg_box.setIcon(QMessageBox.icon.Critical)
+        msg_box.setIcon(QMessageBox.Icon.Critical)
         msg_box.setText(message)
         msg_box.setInformativeText(info_msg)
         msg_box.setWindowTitle("Critical warning")
