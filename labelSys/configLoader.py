@@ -6,16 +6,47 @@
 #
 import json
 import os, shutil
+from typing import TypedDict, Dict, List
 from .argParse import args
+
+class _ConfLabelType(TypedDict):
+    color: List[float]
+    mode: int
+    draw: int
+    label_step: float
+
+_ConfClassificationType = TypedDict(
+    "_ConfClassificationType",
+    {
+        "full_name": str,
+        "class": List[str],
+        "description": str
+    }
+)
+
+ConfType = TypedDict(
+    "ConfType",
+    {
+        "Labels": Dict[str, _ConfLabelType],
+        "Classifications": Dict[str, _ConfClassificationType],
+        "Loading_mode": int,
+        "2D_preview_mag": int,
+        "Default_series": str,
+        "Default_label": str,
+        "Max_im_height": int
+    }
+)
+
 
 _CURR_DIR = os.path.dirname(__file__)
 if args.config_file:
+    # provided by argParse
     CONF_PATH = args.config_file
 else:
     CONF_PATH = os.path.join(_CURR_DIR, "conf.json")
 
 with open(CONF_PATH, "r", encoding="utf-8") as f:
-    CONF = json.load(f)
+    CONF: ConfType = json.load(f)
 _HOME_DIR = os.path.expanduser("~")
 _UI_DIR = os.path.join(_CURR_DIR, "ui")
 _DOC_DIR = os.path.join(_CURR_DIR, "docs")

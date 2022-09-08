@@ -4,8 +4,7 @@
 # This file is part of LabelSys
 # (see https://bitbucket.org/Mons00n/mrilabelsys/).
 #
-# import{{{
-from typing import List, Union, Optional
+from typing import List, Union, Optional, TypedDict, Any, Dict, Tuple
 from .utils.base64ImageConverter import imgEncodeB64, imgDecodeB64
 from .configLoader import *
 import os
@@ -17,13 +16,28 @@ import copy
 from threading import Thread
 import datetime
 import re
-# }}}
+
+class HeaderData(TypedDict):
+    Labeler: str
+    Time: str
+    Spacing: List[float]
+    Series: str
+    Version: str
+    Config: Dict[str, Any]
+
+class SliceLabelDataTypeSingle(TypedDict):
+    # This represents a contour
+    Open: bool
+    Points: List[Tuple[float, float, float]]    # VTK nodes
+    Contour: List[Tuple[int, int]]              # Full contour in VTK coordinate
+
+SliceLabelDataType = List[SliceLabelDataTypeSingle]
 
 class LabelHolder:
     """
     HOlding the label result
     """
-    def __init__(self):# {{{
+    def __init__(self):
         """
         self.data: List[dict]:
             main data, list of dictionary:
@@ -38,15 +52,15 @@ class LabelHolder:
                 "SOPInstanceUID": str                               # Will remove in the future Only appear on version < 1.6.7
             }
         """
-        self.data: Optional[List[dict]] = None
+        self.data: Optional[List[Dict[str, SliceLabelDataType]]] = None
         self.SAVED: bool = True
         self.uids: List[str]
         self.comments: List[Union[None, str]]
         self.class_comments: List[Union[None, str]]
-# }}}
-    def initialize(self, entries, SOPInstanceUIDs):# {{{
+
+    def initialize(self, entries, SOPInstanceUIDs):
         self.data = []
-        self.uids = []      # For future version
+        self.uids = []          # For future version
         self.SAVED = True
         for ids in SOPInstanceUIDs:
             self.data.append({})
@@ -56,15 +70,24 @@ class LabelHolder:
             self.uids.append(ids)
         self.comments = [None]*len(self.data)
         self.class_comments = [None]*len(self.data)
-# }}}
-    def loadFile(self, path):# {{{
+
+    def loadFile(self, path):
         imgs = []
         data = []
         uids = []
         comments = []
         class_comments = []
+        # A default header data, in case of HEAD_0.json not found
+        header_data: HeaderData = {
+            "Labeler": "Unknown",
+            "Time": "Unknown",
+            "Spacing": [1,1,1],
+            "Series": "Unknown",
+            "Config": {"Unknown": None},
+            "Version": "0.0.0"
+        }
         file_list = [x for x in os.listdir(path) if x.endswith('.json')]
-        for file_name in sorted(file_list, key = lambda x : int(re.findall('\d+|$', x)[0])):
+        for file_name in sorted(file_list, key = lambda x : int(re.findall(r'\d+|$', x)[0])):
             # Sort according to slice number "SliceXXX.json"
             file_path = os.path.join(path, file_name)
             if file_name == "HEAD_0.json":
@@ -101,8 +124,9 @@ class LabelHolder:
         self.class_comments = class_comments
         self.SAVED = True
         return  header_data, imgs
-# }}}
-    def saveToFile(self, path, imgs, head_info):# {{{
+
+
+    def saveToFile(self, path, imgs, head_info):
         """
         - path: directory to store all the data for current patient
         Note: the x,y coordinate is in vtk coordinate
@@ -121,12 +145,13 @@ class LabelHolder:
 
         thread = Thread(target = self.__threadSaveToFile, args = (path, imgs.copy(),))
         thread.start()
-# }}}
-    def __threadSaveToFile(self, path, imgs):# {{{
+
+    def __threadSaveToFile(self, path, imgs):
         for i in range(len(imgs)):
             print("Saving...{}/{}".format(i+1, len(imgs)))
             file_name = "Slice_"+str(i+1)+".json"
             img_name = "Slice_"+str(i+1)+".npz"
+            assert self.data    # type checking
             js_data = {
                     "Data": self.data[i],
                     "Comment": self.comments[i],
@@ -137,20 +162,19 @@ class LabelHolder:
                 json.dump(js_data, f)
             np.savez_compressed(os.path.join(path, img_name), img = imgs[i])
         print("Exporting finished!\nDestination: ", path)
-# }}}
-    def __getBackNpCoord(self, x, y, img_shape):# {{{
+
+    def __getBackNpCoord(self, x, y, img_shape):
         """Get coordinate in (row, col)
         - img_shape: (W, H)"""
         return img_shape[1]-1-y, x
-# }}}
-    def __getBackCvCoord(self, x, y, img_shape):# {{{
+
+    def __getBackCvCoord(self, x, y, img_shape):
         """Get coordinate in (col, row)
         - img_shape: (W, H)"""
         return x, img_shape[1]-1-y
-# }}}
-    def __creatThreadFunction(self, func, *args, start = False, deamon = False):# {{{
+
+    def __creatThreadFunction(self, func, *args, start = False, deamon = False):
         thread = Thread(target = func, args = args)
         if start:
             thread.start()
         return thread
-# }}}
