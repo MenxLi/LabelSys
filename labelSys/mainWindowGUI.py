@@ -57,7 +57,8 @@ class MainWindow(MainWindowGUI, WidgetCore):
         self.tb_console.setStyleSheet("color: white; background-color:black;")
 
         # UI change
-        self.showFullScreen(); self.__screen_mode = 2
+        # self.showFullScreen(); self.__screen_mode = 2
+        self.showMaximized(); self.__screen_mode = 1
         self.setWindowTitle("LabelSys "+__version__)
         self.setFocus()
         self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
