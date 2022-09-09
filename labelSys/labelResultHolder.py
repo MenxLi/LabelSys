@@ -77,6 +77,7 @@ class LabelHolder:
             self.uids.append(ids)
         self.comments = [None]*len(self.data)
         self.class_comments = [None]*len(self.data)
+        self.drawer.init()
 
     def loadFile(self, path):
         imgs = []
@@ -130,6 +131,7 @@ class LabelHolder:
         self.comments = comments
         self.class_comments = class_comments
         self.SAVED = True
+        self.drawer.init()
         return  header_data, imgs
 
 
@@ -152,6 +154,11 @@ class LabelHolder:
 
         thread = Thread(target = self.__threadSaveToFile, args = (path, imgs.copy(),))
         thread.start()
+
+    def clearContourData(self, idx: int, lbl: str):
+        if self.data:
+            self.data[idx][lbl] = []
+            self.drawer.onModifyContour(idx, lbl)
 
     def __threadSaveToFile(self, path, imgs):
         for i in range(len(imgs)):
@@ -187,18 +194,57 @@ class LabelHolder:
         return thread
 
 class LabelDrawer:
+    CECHE_MASK = True
     def __init__(self, holder: LabelHolder) -> None:
-        self.init(holder)
-
-    def init(self, holder: LabelHolder):
         self._holder = holder
+
+    def init(self):
+        # To cache mask
+        self.__binary_masks: List[Dict[str, Optional[np.ndarray]]] = []
+        if not self.data:
+            return
+
+        for d in self.data:
+            mask_dict = dict()
+            for lbl in d.keys():
+                mask_dict[lbl] = None
+            self.__binary_masks.append(mask_dict)
 
     @property
     def data(self) -> Optional[ContourDataT]:
         return self._holder.data
 
+    @property
+    def lbl_keys(self) -> List[str]:
+        if self.data:
+            return list(self.data[0].keys())
+        else:
+            return []
+
+    @property
+    def binary_masks(self):
+        return self.__binary_masks
+
+    def onModifyContour(self, idx: int, lbl: Optional[str] = None):
+        """
+        Delete cached contour masks
+        """
+        if lbl:
+            self.__binary_masks[idx][lbl] = None
+        else:
+            mask_dict = dict()
+            for k in self.lbl_keys:
+                mask_dict[k] = None
+            self.binary_masks[idx] = mask_dict
+
     def getSingleMask(self, idx: int, label: str, im_hw: Tuple[int, int]) -> np.ndarray:
         assert self.data
+        if self.CECHE_MASK:
+            # Check if there are cached mask
+            cached_mask = self.binary_masks[idx][label]
+            if isinstance(cached_mask, np.ndarray) and cached_mask.shape[0] == im_hw[0] and cached_mask.shape[1] == im_hw[1]:
+                return cached_mask
+
         mask = np.zeros(im_hw, np.uint8)
         cnts_data = self.data[idx][label]
         if cnts_data == []:
@@ -212,9 +258,13 @@ class LabelDrawer:
                 cv_cnt = np.array([[arr] for arr in F.removeDuplicate2d(all_pts)])
                 cv.fillPoly(mask, pts = [cv_cnt], color = 1)
         mask = mask.astype(np.uint8)
+
+        if self.CECHE_MASK:
+            self.__binary_masks[idx][label] = mask
         return mask
 
     def getColorMask(self, idx: int, im_hw: Tuple[int, int], label_colors: Dict[str, Tuple[int, int, int]]) -> np.ndarray:
+
         #  masks = np.array((len(label_colors), im_hw[0], im_hw[1]), np.uint8)
         masks = list()
         color_list = []

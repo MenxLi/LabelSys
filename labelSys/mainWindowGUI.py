@@ -532,7 +532,7 @@ Welcome to LabelSys v{version},\n\
         self.tb_console.verticalScrollBar().setValue(self.tb_console.verticalScrollBar().maximum())
 
     def clearCurrentSlice(self):
-        self.lbl_holder.data[self.slice_id][self.curr_lbl] = []
+        self.lbl_holder.clearContourData(self.slice_id, self.curr_lbl)
         self.__updateImg()
 
     def interpCurrentSlice(self):
@@ -544,17 +544,20 @@ Welcome to LabelSys v{version},\n\
         elif type(prev_mask) == type(None):
             print("Copied from next slice")
             self.lbl_holder.data[self.slice_id] = copy.deepcopy(self.lbl_holder.data[self.slice_id+1])
+            self.lbl_holder.drawer.onModifyContour(idx = self.slice_id)
             self.lbl_holder.SAVED = False
             self.__updateImg()
         elif type(next_mask) == type(None):
             print("Copied from previous slice")
             self.lbl_holder.data[self.slice_id] = copy.deepcopy(self.lbl_holder.data[self.slice_id-1])
+            self.lbl_holder.drawer.onModifyContour(idx = self.slice_id)
             self.lbl_holder.SAVED = False
             self.__updateImg()
         else:
             """should be improved in the futute"""
             print("Copied from previous slice")
             self.lbl_holder.data[self.slice_id] = copy.deepcopy(self.lbl_holder.data[self.slice_id-1])
+            self.lbl_holder.drawer.onModifyContour(idx = self.slice_id)
             self.lbl_holder.SAVED = False
             self.__updateImg()
 
@@ -662,6 +665,7 @@ Welcome to LabelSys v{version},\n\
         called by vtkClass
         """
         self.lbl_holder.data[self.slice_id][self.curr_lbl] = cnts_data
+        self.lbl_holder.drawer.onModifyContour(self.slice_id, self.curr_lbl)
         # self.lbl_holder.data[self.slice_id]["SOPInstanceUID"] = self.uids[self.slice_id]
         self.lbl_holder.uids[self.slice_id] = self.uids[self.slice_id]
         self.lbl_holder.SAVED = False
@@ -792,7 +796,7 @@ Welcome to LabelSys v{version},\n\
         label_colors = {}
         for label, color in zip(self.config["labels"], self.config["label_colors"]):
             label_colors[label] = tuple((np.array(color)*255).astype(np.uint8))
-        im = self.lbl_holder.drawer.getColorMarkdImg(im, idx, label_colors)
+        im = self.lbl_holder.drawer.getColorMarkdImg(im, idx, label_colors, alpha=0.3)
         return im.copy()
 
     def __updateComboSeries(self):
