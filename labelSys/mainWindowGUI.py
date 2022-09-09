@@ -789,11 +789,10 @@ Welcome to LabelSys v{version},\n\
         im = F.map_mat_255(self.imgs[idx])
         if F.img_channel(im) == 1:
             im = F.gray2rgb_(F.map_mat_255(im))
+        label_colors = {}
         for label, color in zip(self.config["labels"], self.config["label_colors"]):
-            mask = self.__getSingleMask(idx, label)
-            if mask is None:
-                continue
-            im = F.overlap_mask(im, mask, np.array(color)*255, alpha = 0.3)
+            label_colors[label] = tuple((np.array(color)*255).astype(np.uint8))
+        im = self.lbl_holder.drawer.getColorMarkdImg(im, idx, label_colors)
         return im.copy()
 
     def __updateComboSeries(self):

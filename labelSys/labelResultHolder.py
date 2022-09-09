@@ -6,6 +6,7 @@
 #
 from typing import List, Union, Optional, TypedDict, Any, Dict, Tuple
 from .utils.base64ImageConverter import imgEncodeB64, imgDecodeB64
+from .utils import utils_ as F
 from .configLoader import *
 import os
 import vtk
@@ -16,6 +17,8 @@ import copy
 from threading import Thread
 import datetime
 import re
+
+from .clib.wrapper import MergeMasks
 
 class HeaderData(TypedDict):
     Labeler: str
@@ -32,6 +35,9 @@ class SliceLabelDataTypeSingle(TypedDict):
     Contour: List[Tuple[int, int]]              # Full contour in VTK coordinate
 
 SliceLabelDataType = List[SliceLabelDataTypeSingle]
+
+# Contour data type in holder.data
+ContourDataT = List[Dict[str, SliceLabelDataType]]
 
 class LabelHolder:
     """
@@ -52,11 +58,12 @@ class LabelHolder:
                 "SOPInstanceUID": str                               # Will remove in the future Only appear on version < 1.6.7
             }
         """
-        self.data: Optional[List[Dict[str, SliceLabelDataType]]] = None
+        self.data: Optional[ContourDataT] = None
         self.SAVED: bool = True
         self.uids: List[str]
         self.comments: List[Union[None, str]]
         self.class_comments: List[Union[None, str]]
+        self.drawer = LabelDrawer(self)
 
     def initialize(self, entries, SOPInstanceUIDs):
         self.data = []
@@ -178,3 +185,58 @@ class LabelHolder:
         if start:
             thread.start()
         return thread
+
+class LabelDrawer:
+    def __init__(self, holder: LabelHolder) -> None:
+        self.init(holder)
+
+    def init(self, holder: LabelHolder):
+        self._holder = holder
+
+    @property
+    def data(self) -> Optional[ContourDataT]:
+        return self._holder.data
+
+    def getSingleMask(self, idx: int, label: str, im_hw: Tuple[int, int]) -> np.ndarray:
+        assert self.data
+        mask = np.zeros(im_hw, np.uint8)
+        cnts_data = self.data[idx][label]
+        if cnts_data == []:
+            return mask
+        for cnt_data in cnts_data:
+            all_pts = cnt_data["Contour"] # All the points position on the contour, in CV coordinate
+            if cnt_data["Open"] == True:
+                cv_cnt = np.array([arr for arr in F.removeDuplicate2d(all_pts)])
+                cv.polylines(mask,[cv_cnt],False,1)
+            else:
+                cv_cnt = np.array([[arr] for arr in F.removeDuplicate2d(all_pts)])
+                cv.fillPoly(mask, pts = [cv_cnt], color = 1)
+        mask = mask.astype(np.uint8)
+        return mask
+
+    def getColorMask(self, idx: int, im_hw: Tuple[int, int], label_colors: Dict[str, Tuple[int, int, int]]) -> np.ndarray:
+        #  masks = np.array((len(label_colors), im_hw[0], im_hw[1]), np.uint8)
+        masks = list()
+        color_list = []
+        for i, k in enumerate(label_colors.keys()):
+            color_list.append(label_colors[k])
+            #  masks[i, ...] = self.getSingleMask(idx, k, im_hw)
+            masks.append(self.getSingleMask(idx, k, im_hw))
+        return MergeMasks.mergeBool2Color2D(np.array(masks, np.uint8), colors = color_list)
+
+    def getColorMarkdImg(self, img: np.ndarray, idx: int, label_colors: Dict[str, Tuple[int, int, int]], alpha = 0.5):
+        assert len(img.shape) == 3 and img.shape[2] == 3
+        color_mask = self.getColorMask(idx, img.shape[:2], label_colors)
+
+        msk = color_mask == np.array([0, 0, 0], dtype = np.uint8)
+        msk = 1 - msk.all(axis = -1)
+        msk = F.gray2rgb_(msk)
+
+        img = img.astype(float)
+        msk = msk.astype(float)
+        
+        color_mask = color_mask.astype(float)
+        im = img*(1-msk) + img*(1-alpha)*msk + color_mask*alpha*msk
+        return im.astype(np.uint8)
+
+
