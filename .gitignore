@@ -14,3 +14,7 @@ dist/
 *.spec
 *.egg-info
 
+# Binary file
+labelSys/clib/*.dylib
+labelSys/clib/*.so
+labelSys/clib/*.dll
