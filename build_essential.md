@@ -6,8 +6,15 @@
 ```Python
 data_path = [
 ( "labelSys/ui/*", "./labelSys/ui" ),
+
+# Binaries
 ( "labelSys/utils/*.dll", "./labelSys/utils" ),
 ( "labelSys/utils/*.so", "./labelSys/utils" ),
+( "labelSys/utils/*.dylib", "./labelSys/utils" ),
+( "labelSys/clib/*.so", "./labelSys/clib" ),
+( "labelSys/clib/*.dll", "./labelSys/clib" ),
+( "labelSys/clib/*.so", "./labelSys/clib" ),
+
 ( "labelSys/docs", "./labelSys/docs" ),
 ( "labelSys/conf.json", "./labelSys" ),
 

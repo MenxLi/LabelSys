@@ -6,3 +6,8 @@ recursive-include labelSys/icons *
 recursive-include labelSys/Pics *
 recursive-include labelSys/utils *.so
 recursive-include labelSys/utils *.dll
+recursive-include labelSys/utils *.dylib
+
+recursive-include labelSys/clib *.so
+recursive-include labelSys/clib *.dll
+recursive-include labelSys/clib *.dylib
