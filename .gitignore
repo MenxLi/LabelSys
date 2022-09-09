@@ -15,6 +15,6 @@ dist/
 *.egg-info
 
 # Binary file
-labelSys/clib/*.dylib
-labelSys/clib/*.so
-labelSys/clib/*.dll
+# labelSys/clib/*.dylib
+# labelSys/clib/*.so
+# labelSys/clib/*.dll
