@@ -73,7 +73,6 @@ class InteractionStyleBase(vtkInteractorStyleImage):
 
     def keyPressEvent(self, obj, event):
         key = self.widget.iren.GetKeySym()
-        print(key)
         if key == "v": # Zoom in
             self.OnMouseWheelForward()
         elif key == "c": # Zoom out
