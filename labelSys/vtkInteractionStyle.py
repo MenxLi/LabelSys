@@ -1,11 +1,16 @@
 # import vtk
+from __future__ import annotations
 import numpy as np
-from typing import List, Tuple, Union
+from typing import List, Tuple, Union, TYPE_CHECKING
 import time, logging
 from vtkmodules.vtkRenderingCore import vtkPropPicker
 from vtkmodules.vtkInteractionWidgets import vtkContourWidget
 from vtkmodules.vtkInteractionStyle import vtkInteractorStyleImage
 from .coreWidgets import loggedFunction
+
+if TYPE_CHECKING:
+    from .vtkClass import VtkWidget
+
 
 
 class InteractionStyleBase(vtkInteractorStyleImage):
@@ -13,7 +18,7 @@ class InteractionStyleBase(vtkInteractorStyleImage):
     logger = logging.getLogger("labelSys")
     def __init__(self, widget):
         super().__init__()
-        self.widget = widget
+        self.widget: VtkWidget = widget
         self.picker = vtkPropPicker()
 
         # Right button for move
@@ -68,12 +73,15 @@ class InteractionStyleBase(vtkInteractorStyleImage):
 
     def keyPressEvent(self, obj, event):
         key = self.widget.iren.GetKeySym()
+        print(key)
         if key == "v": # Zoom in
             self.OnMouseWheelForward()
         elif key == "c": # Zoom out
             self.OnMouseWheelBackward()
         elif key == "r": # Reset camera
             self.widget.resetCamera()
+        elif key == "Delete":
+            self.widget._endInteraction(None, None)
 
 class PtContourInteractorStyle(InteractionStyleBase):
     def __init__(self, widget):

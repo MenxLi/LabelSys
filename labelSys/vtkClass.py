@@ -200,7 +200,7 @@ class VtkWidget(QVTKRenderWindowInteractor, WidgetCore):
             # for compare_win
             color = self.parent._getColor(self.parent.parent.combo_label.currentText())
 
-        contour_widget = self.contourWidget(color = color, contourWidgetEndInteraction = self.__endInteraction)
+        contour_widget = self.contourWidget(color = color, contourWidgetEndInteraction = self._endInteraction)
         contour_widget.On()
         contour_widget.Initialize(pd,1)
         contour_widget.Render()
@@ -210,7 +210,7 @@ class VtkWidget(QVTKRenderWindowInteractor, WidgetCore):
         if save:
             # save on drawing contour but not save when loading contour with
             # self.loadContour
-            self.__endInteraction(None, None)
+            self._endInteraction(None, None)
         return contour_widget
 
     def loadContour(self, pts, open_curve):
@@ -241,7 +241,7 @@ class VtkWidget(QVTKRenderWindowInteractor, WidgetCore):
             step *= self.im.shape[0]/STEP_SHAPE_MODIFIER
             self.style._setSampleStep(step)
 
-    def __endInteraction(self, obj, event):
+    def _endInteraction(self, obj, event):
         data = []
         for contour in self.contours:
             rep = contour.GetContourRepresentation()
