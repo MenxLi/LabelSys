@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 from labelSys.clib.wrapper import MergeMasks
 from labelSys.utils.utils_ import gray2rgb_
 from monsoonToolBox.logtools import Timer
+import numba
 
 
 def getCircleMsk(im_w, im_h, center: Tuple[int, int], radius: float, val: int):
@@ -56,22 +57,48 @@ def overlapPyLoop(msks: List[np.ndarray], colors: List[Tuple[int, int, int]]):
                     break
     return dst
 
+def overlapPyLoopJIT(msks: List[np.ndarray], colors: List[Tuple[int, int, int]]): 
+    msks_np = np.array(msks, np.uint8)
+    colors_np = np.array(colors, np.uint8)
+
+    assert len(msks_np.shape) == 3
+
+    N, H, W = msks_np.shape
+    dst = np.zeros((H, W, 3), np.uint8)
+
+    @numba.jit(nopython=True)
+    def loopMsk(msks_np, colors_np, dst, N, H, W):
+        for row in range(H):
+            for col in range(W):
+
+                for m in range(N):
+                    if msks_np[m][row][col] == 1:
+                        dst[row][col] = colors_np[m]
+                        break
+    loopMsk(msks_np, colors_np, dst, N, H, W)
+    return dst
 
 
-with Timer("Numpy"):
-    out0 = simpleOverlapNP(msks, colors)
 
 with Timer("Python-loop"):
-    out1 = overlapPyLoop(msks, colors)
+    out0 = overlapPyLoop(msks, colors)
+
+with Timer("Numpy"):
+    out1 = simpleOverlapNP(msks, colors)
+
+with Timer("JIT"):
+    out2 = overlapPyLoopJIT(msks, colors)
 
 with Timer("C-loop"):
     msks = np.array(msks)
-    out2 = MergeMasks.mergeBool2Color2D(msks, colors)
+    out3 = MergeMasks.mergeBool2Color2D(msks, colors)
 
-plt.subplot(131)
+plt.subplot(141)
 plt.imshow(out0)
-plt.subplot(132)
+plt.subplot(142)
 plt.imshow(out1)
-plt.subplot(133)
+plt.subplot(143)
 plt.imshow(out2)
+plt.subplot(144)
+plt.imshow(out3)
 plt.show()
