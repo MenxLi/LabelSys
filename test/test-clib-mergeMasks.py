@@ -1,6 +1,6 @@
 
 import random
-from typing import Tuple
+from typing import Tuple, List
 import numpy as np
 import cv2 as cv
 import matplotlib.pyplot as plt
@@ -24,8 +24,8 @@ for i in range(5):
         color = [random.randint(50, 220) for _ in range(3) ]
         colors.append(color)
 
-H = 1000
-W = 2000
+H = 1000//2
+W = 2000//2
 
 msks = []
 for c in cs:
@@ -38,15 +38,40 @@ def simpleOverlapNP(msks, colors):
         msk_new = (1-msk_3c)*msk_new + msk_3c * np.array(color)
     return msk_new
 
+def overlapPyLoop(msks: List[np.ndarray], colors: List[Tuple[int, int, int]]): 
+    msks_np = np.array(msks, np.uint8)
+    colors_np = np.array(colors, np.uint8)
+
+    assert len(msks_np.shape) == 3
+
+    N, H, W = msks_np.shape
+    dst = np.zeros((H, W, 3), np.uint8)
+
+    for row in range(H):
+        for col in range(W):
+
+            for m in range(N):
+                if msks_np[m][row][col] == 1:
+                    dst[row][col] = colors_np[m]
+                    break
+    return dst
+
+
+
 with Timer("Numpy"):
     out0 = simpleOverlapNP(msks, colors)
 
-with Timer("Self"):
-    msks = np.array(msks)
-    out1 = MergeMasks.mergeBool2Color2D(msks, colors)
+with Timer("Python-loop"):
+    out1 = overlapPyLoop(msks, colors)
 
-plt.subplot(121)
+with Timer("C-loop"):
+    msks = np.array(msks)
+    out2 = MergeMasks.mergeBool2Color2D(msks, colors)
+
+plt.subplot(131)
 plt.imshow(out0)
-plt.subplot(122)
+plt.subplot(132)
 plt.imshow(out1)
+plt.subplot(133)
+plt.imshow(out2)
 plt.show()
