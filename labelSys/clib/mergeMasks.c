@@ -1,8 +1,6 @@
 
-#define TRUE 1
-#define FALSE 0
+# include "common.h"
 
-typedef unsigned char bool;
 typedef unsigned char arr_t;
 typedef unsigned char msk_t;
 typedef int coord_t;
@@ -16,7 +14,7 @@ typedef int coord_t;
  * colors - aim colors with length n_msks*3
  *
  * */
-void mergeBool2Color2D( arr_t * dest, msk_t * msks, arr_t * colors, int im_h, int im_w, int n_msks ){
+EXPORT void mergeBool2Color2D( arr_t * dest, msk_t * msks, arr_t * colors, int im_h, int im_w, int n_msks ){
 
     arr_t * dst;
     arr_t * color;

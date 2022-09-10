@@ -1,12 +1,9 @@
+# include "common.h"
 
 #define COORD_MAX 999999
 #define COORD_MIN 0
-#define FALSE 0
-#define TRUE 1
 
 /* #include <stdio.h> */
-
-typedef unsigned char bool;
 
 typedef unsigned char arr_t;
 typedef int coord_t;
@@ -165,7 +162,7 @@ bool checkLineRelation(
 
   Assume OpenCV coordinates
  */
-void cnts2msk(
+EXPORT void cnts2msk(
         arr_t * msk, coord_t H, coord_t W, 
         coord_t * contour,
         unsigned int n_cnt, unsigned int * cnt_lens,

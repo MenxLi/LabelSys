@@ -5,7 +5,7 @@ import ctypes
 from sys import platform
 import os
 
-root_path = os.path.dirname(os.path.abspath(__file__))
+from ..configLoader import _BIN_DIR
 
 if platform == "linux" or platform == "linux2":
     # linux
@@ -18,7 +18,9 @@ elif platform == "win32":
     dll_ext = ".dll"
 
 def loadLibrary(lib_name: str):
-    return ctypes.cdll.LoadLibrary(os.path.join(root_path, lib_name + dll_ext))
+    lib_path = os.path.join(_BIN_DIR, lib_name + dll_ext)
+    lib_path = os.path.abspath(lib_path)
+    return ctypes.cdll.LoadLibrary(lib_path)
 
 class Contour2Mask:
     """

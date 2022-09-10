@@ -18,3 +18,4 @@ dist/
 labelSys/clib/*.dylib
 labelSys/clib/*.so
 labelSys/clib/*.dll
+labelSys/bin/*

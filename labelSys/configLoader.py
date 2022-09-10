@@ -52,6 +52,9 @@ _UI_DIR = os.path.join(_CURR_DIR, "ui")
 _DOC_DIR = os.path.join(_CURR_DIR, "docs")
 _ICON_DIR = os.path.join(_CURR_DIR, "icons")
 _TMP_DIR = os.path.join(_CURR_DIR, ".TempDir")
+_BIN_DIR = os.path.join(_CURR_DIR, "bin")
+if not os.path.exists(_BIN_DIR):
+    os.mkdir(_BIN_DIR)
 
 LOG_FILE = os.path.join(_HOME_DIR, ".labelSys.log")
 

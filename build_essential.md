@@ -11,9 +11,8 @@ data_path = [
 ( "labelSys/utils/*.dll", "./labelSys/utils" ),
 ( "labelSys/utils/*.so", "./labelSys/utils" ),
 ( "labelSys/utils/*.dylib", "./labelSys/utils" ),
-( "labelSys/clib/*.so", "./labelSys/clib" ),
-( "labelSys/clib/*.dll", "./labelSys/clib" ),
-( "labelSys/clib/*.so", "./labelSys/clib" ),
+
+( "labelSys/bin/*", "./labelSys/bin" ),
 
 ( "labelSys/docs", "./labelSys/docs" ),
 ( "labelSys/conf.json", "./labelSys" ),
