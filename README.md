@@ -1,8 +1,6 @@
-# README #
+# README
 
-Module requirement are in ***requirements.txt***
-
-To use API:
+To use label reading API:
 ```python
 import typing
 from labelSys.utils import LabelSysReader
@@ -14,3 +12,15 @@ reader = LabelSysReader(label_dirs)
 data_i = reader[i]
 ```
 
+## Installation
+
+```bash
+pip install .
+```
+
+## Usage
+```bash
+labelSys [config_file_path]
+```
+
+For CLI arguments see: `labelSys -h`

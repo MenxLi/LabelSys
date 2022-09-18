@@ -10,9 +10,12 @@ cv_spec = importlib.util.find_spec("cv2")
 if cv_spec is None:
     install_requires.append("opencv-python")
 
+# Compile binaries
 __this_dir = os.path.abspath(os.path.dirname(__file__))
 C_LIB_PTH = os.path.join(__this_dir, "labelSys", "clib")
-
+BIN_PTH = os.path.join(__this_dir, "labelSys", "bin")
+if not os.path.exists(BIN_PTH):
+    os.mkdir(BIN_PTH)
 print("Compile binaries...")
 os.chdir(C_LIB_PTH)
 os.system("make")
