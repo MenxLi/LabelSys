@@ -585,7 +585,7 @@ Welcome to LabelSys v{version},\n\
             # When there is file loaded in main window. Get output file path
             try:
                 # Opening dicom file
-                folder_name = "Label-"+Path(self.fl.getPath()).stem + "-" + self.labeler_name.replace(" ", "_")
+                folder_name = "Label-"+Path(self.fl.curr_path).stem + "-" + self.labeler_name.replace(" ", "_")
             except:
                 # Loading labeled data
                 folder_name = Path(self.__cache["load_path"]).stem
@@ -737,7 +737,7 @@ Welcome to LabelSys v{version},\n\
             return ""
         try:
             # Opening dicom file
-            folder_name = "Label-"+Path(self.fl.getPath()).stem + "-" + self.labeler_name.replace(" ", "_")
+            folder_name = "Label-"+Path(self.fl.curr_path).stem + "-" + self.labeler_name.replace(" ", "_")
         except:
             # Loading labeled data
             folder_name = Path(self.__cache["load_path"]).stem
@@ -827,7 +827,7 @@ Welcome to LabelSys v{version},\n\
             self.combo_label.setCurrentText(self.config["default_label"])
         except KeyError:pass
         if not self.__cache["output_set"]:
-            self.output_path = os.path.abspath( self.fl.getPath() )
+            self.output_path = os.path.abspath( self.fl.curr_path )
             self.__updateQLabelText()
         self.CheckShapeCompatibility()
 
@@ -967,8 +967,9 @@ Welcome to LabelSys v{version},\n\
 
     def dropEvent(self, a0: QtGui.QDropEvent) -> None:
         files = [u.toLocalFile() for u in a0.mimeData().urls()]
-        if len(files)==1 and checkLabeledFolderEligibility(files[0]):
-            self.loadLabeledFile(files[0])
+        if len(files)==1: 
+            if checkLabeledFolderEligibility(files[0]):
+                self.loadLabeledFile(files[0])
         return super().dropEvent(a0)
 
     def resizeEvent(self, a0) -> None:

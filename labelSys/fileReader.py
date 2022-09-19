@@ -5,7 +5,9 @@
 # (see https://bitbucket.org/Mons00n/mrilabelsys/).
 #
 # {{{ Import
+from abc import ABC, abstractmethod
 from glob import glob
+from typing import Iterable, List, Union, TypedDict
 import numpy as np
 import pydicom
 import os
@@ -18,7 +20,12 @@ from .configLoader import MAX_IM_HEIGHT
 
 # Pydicom reading reference: https://pydicom.github.io/pydicom/stable/tutorials/dataset_basics.html
 
-class LoaderBase:# {{{
+class SeriesImgT(TypedDict):
+    Images: Iterable[np.ndarray]
+    UIDs: Iterable[str]
+    Spacing: Iterable[float]
+
+class LoaderBase(ABC):# {{{
     """
     Base class for different file type readers
     Define APIs
@@ -31,7 +38,9 @@ class LoaderBase:# {{{
     def __init__(self, file_path):
         self.path = file_path
         self.series = dict()
-    def getSeriesImg(self, entry = None, series = None):
+
+    @abstractmethod
+    def getSeriesImg(self, entry = None, series = None) -> SeriesImgT:
         """
         - entry: image series name to load - str
         - series: dictionary to classify images based on entries - dict
@@ -40,6 +49,7 @@ class LoaderBase:# {{{
         """
         if series == None and self.series == dict():
             raise Exception("Series haven't been set")
+
     def getEntries(self):
         """
         Return all entries' name
@@ -107,7 +117,7 @@ class DicomLoader(LoaderBase):# {{{
     def getEntries(self):
         """Return series entries"""
         return self.series.keys()
-    def getSeriesImg(self, entry, series = None):
+    def getSeriesImg(self, entry, series = None) -> SeriesImgT:
         """
         @ series: a dictionary of classified FileDataset
         @ entry: entry for the series
@@ -117,10 +127,10 @@ class DicomLoader(LoaderBase):# {{{
             series = self.series
         scan = series[entry]
         images = np.stack([s.pixel_array for s in scan])
-        UIDs = [s['SOPInstanceUID'].value for s in series[entry]]
+        UIDs: List[ str ] = [s['SOPInstanceUID'].value for s in series[entry]]
         spacing = [scan[0].SliceThickness, *scan[0].PixelSpacing]
         spacing = [float(s) for s in spacing]
-        data = {
+        data: SeriesImgT = {
                 "Images": images,
                 "UIDs": UIDs,
                 "Spacing": spacing
@@ -179,12 +189,12 @@ class GeneralImageLoader(LoaderBase):# {{{
         if arr != []:
             self.series[self.entry_base] = arr
         return
-    def getSeriesImg(self, entry = None, series = None):
+    def getSeriesImg(self, entry = None, series = None) -> SeriesImgT:
         super().getSeriesImg(entry, series)
         if series == None and self.series != dict():
             series = self.series
         images = series[entry]
-        data = {
+        data: SeriesImgT = {
             "Images": images,
             # "UIDs": [self.SOPInstanceUID_base]*len(images),
             "UIDs": [F.ssUUID() for _ in range(len(images))],
@@ -223,12 +233,12 @@ class GeneralVideoLoader(LoaderBase):# {{{
         cap.release()
         self.series[self.entry_base] = imgs
         return imgs
-    def getSeriesImg(self, entry = None, series = None):
+    def getSeriesImg(self, entry = None, series = None) -> SeriesImgT:
         super().getSeriesImg(entry, series)
         if series == None and self.series != dict():
             series = self.series
         images = series[entry]
-        data = {
+        data: SeriesImgT = {
             "Images": images,
             # "UIDs": [self.SOPInstanceUID_base]*len(images),
             "UIDs": [F.ssUUID() for _ in range(len(images))],
@@ -236,7 +246,7 @@ class GeneralVideoLoader(LoaderBase):# {{{
         }
         return data# }}}
 
-class FolderLoader:# {{{
+class FolderLoader:
     """
     Load data folder
     Data type has to be specified when loading
@@ -253,44 +263,56 @@ class FolderLoader:# {{{
         _LOADER_ID_IMAGE: GeneralImageLoader,
         _LOADER_ID_VIDEO: GeneralVideoLoader
     }
-    def __init__(self, parent_dir, mode = 0):
+    def __init__(self, src: Union[List[str], str, Path], mode = 0):
         """
-        - parent_dir: directory to store data
+        - src: 
+            (str) if is a single path, it should be the parent directory of data from multiple patients
+            (list[str]) if is a list of paths, each one should be data from a single patient
         - mode:
             0 - DICOM (default)
             1 - Image
             2 - Video
         """
         self.paths = []
-        self.parent_dir = parent_dir # folder that contains folders of dicom file
         self.curr_patient = None        # Loader class
         self.ptr = 0
         self.__mode = mode
-        for i in os.listdir(parent_dir):
-            curr_path = os.path.join(parent_dir, i)
+
+        if isinstance(src, str) or isinstance(src, Path):
+            parent_dir = src            # folder that contains subfolders/videos
+            aims = [ os.path.join(parent_dir, i) for i in os.listdir(parent_dir) ]
+        else:
+            aims = src
+
+        for curr_path in aims:
             if mode == 0 or mode == 1:
                 # DICOM or image files should be put in subfolders
                 if os.path.isdir(curr_path):
                     self.paths.append(curr_path)
             elif mode == 2:
-                # Video can be place as single file
+                # Video can be a single file
                 if os.path.isfile(curr_path):
                     self.paths.append(curr_path)
+
         self.loadData(self.ptr)
-    def loadData(self, id):
+
+    def loadData(self, id: int):
         self.curr_patient = self.LOADER_CASES[self.__mode](self.paths[id])
 
-    def next(self):
+    def next(self) -> bool:
         if self.ptr < len(self.paths)-1:
             self.ptr += 1
             self.loadData(self.ptr)
-            return 1
-        else: return 0
-    def previous(self):
+            return True
+        else: return False 
+
+    def previous(self) -> bool:
         if self.ptr > 0:
             self.ptr -= 1
             self.loadData(self.ptr)
-            return 1
-        else: return 0
-    def getPath(self):
-        return self.paths[self.ptr]# }}}
+            return True
+        else: return False
+
+    @property
+    def curr_path(self) -> str:
+        return self.paths[self.ptr]
