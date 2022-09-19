@@ -4,7 +4,7 @@
 # This file is part of LabelSys
 # (see https://bitbucket.org/Mons00n/mrilabelsys/).
 #
-from typing import List, Optional, Sequence
+from typing import List, Optional, Sequence, Union
 import webbrowser
 from pathlib import Path
 import os,sys, platform
@@ -254,24 +254,30 @@ Welcome to LabelSys v{version},\n\
 
     # Load images{{{
     @loggedFunction
-    def loadPatients(self, fname: Optional[str] = None):
-        """Load patients folder, and call initPanelAct() to initialize the panel"""
-        if fname is None:
-            fname = QFileDialog.getExistingDirectory(self, "Select data directory to open")
-        if fname == "":
-            return 1
-        file_path = Path(fname)
+    def loadPatients(self, fpath: Optional[Union[str, List[str]]] = None):
+        """
+        Load patients folder, and initialize the panel
+         - fpath: 
+            (None): prompt user choice
+            (str): directory contains many subfolders/videos of patients' data
+            (list[str]): list of patients data
+        """
+        if fpath is None:
+            fpath = QFileDialog.getExistingDirectory(self, "Select data directory to open")
+        if isinstance(fpath, str):
+            if fpath == "":
+                return 1
 
         if not self.args.dev:
             # Do not quit when error occur while opening files
             try:
-                self.fl = FolderLoader(file_path, mode = self.config["loading_mode"])
+                self.fl = FolderLoader(fpath, mode = self.config["loading_mode"])
                 self.__updatePatient()
             except Exception as excp:
                 print("An error happend when opening files: ", excp)
                 return 1
         else:
-            self.fl = FolderLoader(file_path, mode = self.config["loading_mode"])
+            self.fl = FolderLoader(fpath, mode = self.config["loading_mode"])
             self.__updatePatient()
 
 
@@ -966,10 +972,15 @@ Welcome to LabelSys v{version},\n\
         return super().dragEnterEvent(a0)
 
     def dropEvent(self, a0: QtGui.QDropEvent) -> None:
+        # Drag-n-drop to load patient or labeled data
         files = [u.toLocalFile() for u in a0.mimeData().urls()]
         if len(files)==1: 
             if checkLabeledFolderEligibility(files[0]):
                 self.loadLabeledFile(files[0])
+            else:
+                self.loadPatients(files)
+        elif files:
+            self.loadPatients(files)
         return super().dropEvent(a0)
 
     def resizeEvent(self, a0) -> None:
