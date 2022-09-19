@@ -16,6 +16,7 @@ from .utils.labelReader import checkFolderEligibility
 from .configLoader import *
 from .utils import utils_ as F
 from .utils import specificUtils as SU
+from .utils.labelReaderV2 import checkFolderEligibility as checkLabeledFolderEligibility
 from .labelResultHolder import LabelHolder
 from .previewGUI import Preview3DWindow, Preview2DWindow
 from .settingsGUI import SettingsDialog
@@ -29,7 +30,7 @@ from .interactionStyle import StyleImWidgetBase
 from .ui._mainWindowGUI import MainWindowGUI
 
 import numpy as np
-from PyQt6 import QtWidgets, QtCore
+from PyQt6 import QtWidgets, QtCore, QtGui
 from PyQt6.QtWidgets import *
 from PyQt6.QtCore import Qt, QEvent
 from PyQt6.QtGui import QIcon
@@ -45,6 +46,8 @@ class MainWindow(MainWindowGUI, WidgetCore):
     def __init__(self,args):
         super().__init__()
         self.setWindowIcon(QIcon(os.path.join(_ICON_DIR, "main.ico")))
+        self.setAcceptDrops(True)
+
         if not args.dev:
             sys.stdout = EmittingStream(textWritten = self.stdoutStream)
             sys.stderr = EmittingStream(textWritten = self.stdoutStream)
@@ -954,6 +957,19 @@ Welcome to LabelSys v{version},\n\
                 self.im_widget.style.OnMouseWheelBackward()
             else:
                 self.nextSlice()
+
+    def dragEnterEvent(self, a0: QtGui.QDragEnterEvent) -> None:
+        if a0.mimeData().hasUrls():
+            a0.accept()
+        else:
+            a0.ignore()
+        return super().dragEnterEvent(a0)
+
+    def dropEvent(self, a0: QtGui.QDropEvent) -> None:
+        files = [u.toLocalFile() for u in a0.mimeData().urls()]
+        if len(files)==1 and checkLabeledFolderEligibility(files[0]):
+            self.loadLabeledFile(files[0])
+        return super().dropEvent(a0)
 
     def resizeEvent(self, a0) -> None:
         self.resized.emit()
