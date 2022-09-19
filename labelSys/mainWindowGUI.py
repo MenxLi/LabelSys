@@ -163,7 +163,11 @@ Welcome to LabelSys v{version},\n\
         self.act_2D_preview.setShortcut("Ctrl+P")
         self.act_3D_preview.triggered.connect(lambda: self.previewLabels3D())
         self.act_check_preview.triggered.connect(lambda : self.check_preview.setChecked(not self.check_preview.isChecked()))
-        self.act_check_preview.setShortcut("Ctrl+Space")
+        if sys.platform == "darwin":
+            # command/control+space in mac usually has been assigned
+            self.act_check_preview.setShortcut("Shift+Space")
+        else:
+            self.act_check_preview.setShortcut("Ctrl+Space")
 
         # Operation
         self.act_op_next_slice.triggered.connect(lambda: self.nextSlice())
