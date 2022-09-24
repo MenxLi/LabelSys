@@ -37,7 +37,7 @@ data_path = [
 ( "../immarker/immarker/docs/*", "./immarker/docs" ),
 ]
 
-cmd = ["pyinstaller", "--noconfirm", "--collect-submodules=pydicom", "-i", "./labelSys/icons/main.ico", "./run.py"]
+cmd = ["pyinstaller", "-w", "--noconfirm", "--collect-submodules=pydicom", "-i", "./labelSys/icons/main.ico", "./run.py"]
 
 for himp in hiddenimports:
     cmd += ["--hidden-import", himp]
