@@ -3,7 +3,24 @@
 Compile binary with pyinstaller
 """
 
-import subprocess, platform, os
+import subprocess, platform, os, argparse, tempfile, shutil
+
+parser = argparse.ArgumentParser(description="Build labelSys binary")
+parser.add_argument("-c", "--config", default="")
+args = parser.parse_args()
+
+# specifiying configuration file
+if args.config:
+    _conf_src = "confs" + os.sep + "conf_" + args.config + ".json"
+    _tmp_dir = tempfile.mkdtemp()
+    conf_src = os.path.join(_tmp_dir, "conf.json")
+    shutil.copy2(_conf_src, conf_src)
+    print("Created temporary configuration file: ", conf_src)
+else:
+    conf_src = "labelSys/conf.json"
+if not os.path.exists(conf_src):
+    print("Configuration file not exists: ", conf_src)
+    exit()
 
 __this_dir = os.path.abspath(os.path.dirname(__file__))
 C_LIB_PTH = os.path.join(__this_dir, "labelSys", "clib")
@@ -31,7 +48,8 @@ data_path = [
 ( "labelSys/bin/*", "./labelSys/bin" ),
 
 ( "labelSys/docs", "./labelSys/docs" ),
-( "labelSys/conf.json", "./labelSys" ),
+# ( "labelSys/conf.json", "./labelSys" ),
+( conf_src, "./labelSys" ),
 
 ( "../immarker/immarker/icons/*", "./immarker/icons" ),
 ( "../immarker/immarker/docs/*", "./immarker/docs" ),
