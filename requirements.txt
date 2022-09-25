@@ -5,3 +5,4 @@ PyQt6>=6.3
 PyQt6-sip
 scipy
 vtk>9
+json5

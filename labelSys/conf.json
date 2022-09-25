@@ -1,7 +1,20 @@
 {
+    //This is a template configuration file for labelSys
     "Labels":{
+        /*
+        Labels defines label types, avaliable attributes:
+        - color: Preview color [default: [255, 0, 0]]
+        - mode:
+            0 - close contour; [default]
+            1 - open contour
+        - draw: draw / point(click) mode to initialize contour
+            0 - point mode;
+            1 - draw mode [default]
+        - label_step: contour resample step size, 
+                only work in draw mode [default : 1]
+        */
         "Label1" :{
-            "color": [0.0, 1.0, 1.0], 
+            "color": [0.0, 1.0, 1.0],
             "mode": 0,
             "draw": 1,
             "label_step":1
@@ -14,6 +27,9 @@
         "Label3" :{ }
     },
     "Classifications":{
+        /*
+        Classifications defines image level classification
+        */
         "Class0":{
             "full_name": "Image quality",
             "class": ["Good", "fair"],
@@ -25,22 +41,23 @@
             "description": "This is a image classification"
         }
     },
+    // Loading mode: 0: DICOM; 1: Image; 2: Video
     "Loading_mode": 1,
+
+    // 2D Preview magification (float number), no need to change it
     "2D_preview_mag":1,
+
+    // Default_series will be chosen on changing patients; 
+    // Only work on DICOM files with "SeriesDiscription [0x0020, 0x0011]" entry
+    // set to "" to not trigger series change on changing slices
     "Default_series":"SAG PD",
+
+    // Default_label will be chosen on changing slices; 
+    // set to "" to not trigger label change on changing slices
     "Default_label":"",
-    "Max_im_height":1024,
 
-    "-----------Below are comments for your understanding--------":
-    "---------------------don't change them----------------------",
-
-    "__Contour_mode": {"Close": 0, "Open": 1},
-    "__Draw_contour": {"Click mode": 0, "Draw mode": 1},
-    "__Loading_mode": {"DICOMs":0, "Images":1, "Video":2},
-    "__Others":{
-        "0": "Label step only work when Draw contour is 1",
-        "1": "Default series only work with MRI",
-        "2": "Classifications are image wide"
-    }
+    // Any image with hight more than Max_im_height will be resized to Max_im_height
+    // Set to -1 to not impose image resizing
+    "Max_im_height":1024
 }
 

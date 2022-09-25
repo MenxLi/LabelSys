@@ -4,7 +4,7 @@
 # This file is part of LabelSys
 # (see https://bitbucket.org/Mons00n/mrilabelsys/).
 #
-import json
+import json5 as json
 import os, shutil
 from typing import TypedDict, Dict, List
 from .argParse import args
