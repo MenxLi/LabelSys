@@ -1,5 +1,6 @@
 
 # include "common.h"
+# include <stdlib.h>
 
 typedef unsigned char arr_t;
 typedef unsigned char msk_t;
@@ -13,6 +14,9 @@ typedef int coord_t;
  *
  * */
 void fuseColor(int n_color, arr_t ** colors, arr_t * dest){
+    // no color situation
+    if (n_color == 0){ return; }
+
     // single color situation
     if (n_color == 1){
         for (int c = 0; c<3; c++){
@@ -21,6 +25,7 @@ void fuseColor(int n_color, arr_t ** colors, arr_t * dest){
         return;
     }
 
+    // multi-color situation
     int sum_color[3] = {0, 0, 0};
     // traverse colors
     for (int i = 0; i<n_color; i++){
@@ -50,7 +55,7 @@ EXPORT void mergeBool2Color2D( arr_t * dest, msk_t * msks, arr_t * colors, int i
     // selected colors at certain pixel
     // the selected colors will be fused to get final color on the mask
     unsigned int n_sel_colors;
-    arr_t * sel_colors[n_msks];
+    arr_t ** sel_colors = malloc( sizeof(arr_t*) * n_msks );
 
     // traverse all pixels
     for (int row = 0; row<im_h; row++){
@@ -76,4 +81,5 @@ EXPORT void mergeBool2Color2D( arr_t * dest, msk_t * msks, arr_t * colors, int i
             fuseColor(n_sel_colors, sel_colors, dst);
         }
     }
+    free(sel_colors);
 }
