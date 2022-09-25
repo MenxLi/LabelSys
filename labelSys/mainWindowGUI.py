@@ -108,7 +108,8 @@ class MainWindow(MainWindowGUI, WidgetCore):
 
         if args.file:
             if args.load:
-                self.loadLabeledFile(args.file)
+                assert len(args.file) == 1, "Only one file can be loaded in loading mode"
+                self.loadLabeledFile(args.file[0])
             else:
                 self.loadPatients(args.file)
 

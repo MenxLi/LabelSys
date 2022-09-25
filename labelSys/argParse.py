@@ -24,7 +24,7 @@ parser.add_argument("-d", "--dev", action = "store_true", default = False, \
                     "Otherwise, they will be stored in the log file.")
 parser.add_argument("-l", "--load", action = "store_true", default = False, \
     help = "Loading mode, should be used in conjugation with -f, i.e.: -lf <labeled file path>")
-parser.add_argument("-f", "--file", type = str, default = "", \
+parser.add_argument("-f", "--file", type = str, nargs="*", \
     help = "File path to open for labeling (use -f) or load labeled path (use -lf option)")
 parser.add_argument("-m", "--loading_mode", type = int, \
     help = "(**Deprecated**) Set the loading mode, please use configuration file instead")
