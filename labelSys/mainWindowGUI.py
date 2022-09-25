@@ -751,7 +751,7 @@ Welcome to LabelSys v{version},\n\
             folder_name = "Label-"+Path(self.fl.curr_path).stem + "-" + self.labeler_name.replace(" ", "_")
         except:
             # Loading labeled data
-            folder_name = Path(self.__cache["load_path"]).stem
+            folder_name = os.path.basename(self.__cache["load_path"])
         file_path = os.path.join(self.output_path, folder_name)
         return file_path
 
