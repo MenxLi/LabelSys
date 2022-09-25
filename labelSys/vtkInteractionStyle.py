@@ -185,6 +185,12 @@ class DrawContourInteractorStyle(InteractionStyleBase):
             self._reinitState()
 
         if self.__mode == "Drawing":
+            if not self.pts_raw:
+                # May somehow be triggered after Re-inited points
+                self.logger.debug("Blank pts list, reinit drawing")
+                reInit()
+                return
+
             # Interpolate between raw points
             full_curve = [self.pts_raw[0]]
             for i in range(1, len(self.pts_raw)):
@@ -207,10 +213,8 @@ class DrawContourInteractorStyle(InteractionStyleBase):
             if len(self.pts) < 2:
                 # if the line is too short to construct 2 points for the
                 # contour, then just abort this line and allow re-draw
-                for actor in self.lines:
-                    self.widget.ren.RemoveActor(actor)
-                self.widget.ren_win.Render()
-                self._reinitState()
+                self.logger.debug("To few points, reinit drawing")
+                reInit()
                 return
 
             # Construct contour
@@ -221,7 +225,7 @@ class DrawContourInteractorStyle(InteractionStyleBase):
     def forceDrawing(self):
         self.__mode = "Drawing"
 
-    def _sampleCurve(self, curve: List[Tuple[int, int]], sample_step: int) -> List[Tuple[int, int]]:
+    def _sampleCurve(self, curve: Union[List[Tuple[int, int]], np.ndarray], sample_step: int) -> List[Tuple[int, int]]:
         """Sample a curve in equally distributed interval of intergral curvature
 
         Args:
