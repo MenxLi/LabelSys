@@ -1,6 +1,6 @@
 import requests, zipfile, shutil, os, argparse, json
 
-DOWNLOAD_URL = "http://limengxun.com/files/src/labelSys.zip"
+DOWNLOAD_URL = "http://limengxun.com/files/src/labelSysSrc.zip"
 CURR_DIR = os.path.abspath(os.path.realpath(os.path.dirname(__file__)))
 
 def main():
