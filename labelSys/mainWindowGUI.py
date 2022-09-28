@@ -448,6 +448,7 @@ Welcome to LabelSys v{version},\n\
             data = self.lbl_holder.data[self.slice_id]
             data[item] += data[self.curr_lbl]
             data[self.curr_lbl] = []
+            self.lbl_holder.drawer.onModifyContour(idx = self.slice_id, lbl = self.curr_lbl)
             self.combo_label.setCurrentText(item)
         else:
             self._warnDialog("Failed.")
