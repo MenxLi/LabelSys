@@ -341,7 +341,10 @@ Welcome to LabelSys v{version},\n\
         self.output_path = Path(fname).parent
         self.__cache["load_path"] = fname
         self.__updateQLabelText()
-        self.resize_record.loadFromFile(os.path.join(fname, "resize_data.pkl"))
+        try:
+            self.resize_record.loadFromFile(os.path.join(fname, "resize_data.pkl"))
+        except:
+            print("warning: no 'resize_data'")
         print("Data loaded")
 
     def quitApp(self):

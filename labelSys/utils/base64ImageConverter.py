@@ -8,20 +8,21 @@ import numpy as np
 import ctypes
 from sys import platform
 import os
-
-root_path = os.path.dirname(os.path.abspath(__file__))
+from ..configLoader import _BIN_DIR
 
 if platform == "linux" or platform == "linux2":
     # linux
-    dll_name = "c_utils.so"
+    dll_name = "b64enc.so"
 elif platform == "darwin":
     # OS X
-    dll_name = "c_utils.dylib"
+    dll_name = "b64enc.dylib"
 elif platform == "win32":
     # Windows...
-    dll_name = "c_utils.dll"
+    dll_name = "b64enc.dll"
+else:
+    raise Exception("Invalid platform - {}".format(platform))
 
-clib = ctypes.cdll.LoadLibrary(os.path.join(root_path, dll_name))
+clib = ctypes.cdll.LoadLibrary(os.path.join(_BIN_DIR, dll_name))
 
 B64_TABLE =[
     "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z",\
