@@ -2,12 +2,12 @@
 *_temp*
 $TempDir$
 *.TempDir
-*.ipynb
 # cache files
 __pycache__
 *.swp
 .vscode
-.ipynb_checkpoints
+*.ipynb
+**.ipynb_checkpoints
 # build file
 build/
 dist/
@@ -15,8 +15,11 @@ dist/
 *.egg-info
 .DS_Store
 
-# Binary file
+# Binary files
 labelSys/clib/*.dylib
 labelSys/clib/*.so
 labelSys/clib/*.dll
+# Keep empty bin directory
+!labelSys/bin
 labelSys/bin/*
+!labelSys/bin/.gitkeep
