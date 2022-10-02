@@ -8,7 +8,6 @@ import numpy as np
 import ctypes
 from sys import platform
 import os
-from ..configLoader import _BIN_DIR
 
 if platform == "linux" or platform == "linux2":
     # linux
@@ -22,6 +21,9 @@ elif platform == "win32":
 else:
     raise Exception("Invalid platform - {}".format(platform))
 
+# import _BIN_DIR from configloader may somehow cause error when building with pyinstaller
+# from ..configLoader import _BIN_DIR
+_BIN_DIR = os.path.join(os.path.dirname(__file__), "..", "bin")
 clib = ctypes.cdll.LoadLibrary(os.path.join(_BIN_DIR, dll_name))
 
 B64_TABLE =[
