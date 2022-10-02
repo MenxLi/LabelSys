@@ -5,17 +5,17 @@
 # (see https://bitbucket.org/Mons00n/mrilabelsys/).
 #
 from typing import List, Union, Optional, TypedDict, Any, Dict, Tuple
+
+from immarker.core.globalVar import logging
 from .utils.base64ImageConverter import imgEncodeB64, imgDecodeB64
+from .utils.labelReaderV2 import checkFolderEligibility
 from .utils import utils_ as F
 from .configLoader import *
 import os
-import vtk
 import cv2 as cv
 import numpy as np
 import json
-import copy
 from threading import Thread
-import datetime
 import re
 
 from .clib.wrapper import MergeMasks
@@ -43,6 +43,7 @@ class LabelHolder:
     """
     HOlding the label result
     """
+    logger = logging.getLogger("labelSys")
     def __init__(self):
         """
         self.data: List[dict]:
@@ -141,8 +142,13 @@ class LabelHolder:
         Note: the x,y coordinate is in vtk coordinate
         """
         if os.path.exists(path):
+            # prevent accidentally deleting wrong folder...
+            assert checkFolderEligibility(path), f"Not an eligiable labeled folder: {path}"
+
             print("Overwriting...", path)
+            self.logger.debug("Cleaning directory: {}".format(path))
             for file in os.listdir(path):
+                self.logger.debug("Deleting file... {}".format(file))
                 os.remove(os.path.join(path, file))
         else:
             print("Saving to file ", path)

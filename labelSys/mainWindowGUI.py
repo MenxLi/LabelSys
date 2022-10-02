@@ -302,6 +302,7 @@ Welcome to LabelSys v{version},\n\
         if not checkFolderEligibility(fname):
             print("The selected folder is not eligiable: ", fname)
             return 1
+        self.logger.debug("Loaded labeled file: " + fname)
         self.central_widget.setEnabled(True)
         self.setWidgetsEnabled(False, *self.loading_disable_list)
         self.fl = None  # prevent lbl_holder initialize when changing series and alter saving behaviour
@@ -750,10 +751,10 @@ Welcome to LabelSys v{version},\n\
     def _getOutputPath(self) -> str:
         if not self.__cache["data_loaded"]:
             return ""
-        try:
-            # Opening dicom file
+        if self.fl is not None:
+            # Opening mode
             folder_name = "Label-"+Path(self.fl.curr_path).stem + "-" + self.labeler_name.replace(" ", "_")
-        except:
+        else:
             # Loading labeled data
             folder_name = os.path.basename(self.__cache["load_path"])
         file_path = os.path.join(self.output_path, folder_name)
@@ -985,7 +986,12 @@ Welcome to LabelSys v{version},\n\
         files = [u.toLocalFile() for u in a0.mimeData().urls()]
         if len(files)==1: 
             if checkLabeledFolderEligibility(files[0]):
-                self.loadLabeledFile(files[0])
+                f_path = files[0]
+                # Make sure f_path ends without os.sep
+                # otherwise will lead to false result when called by os.path.basename(...)
+                if f_path.endswith(os.sep):
+                    f_path = f_path[:-1]
+                self.loadLabeledFile(f_path)
             else:
                 self.loadPatients(files)
         elif files:

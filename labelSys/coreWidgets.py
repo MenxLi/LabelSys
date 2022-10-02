@@ -18,6 +18,7 @@ def loggedFunction(func: CallVar) -> CallVar:
 
 class WidgetCore():
 
+    logger = logging.getLogger("labelSys")
     def setMainWindow(self, main_win):
         self.__main_win = main_win
 
