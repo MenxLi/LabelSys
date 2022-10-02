@@ -81,5 +81,6 @@ __VERSIONS__ =[ \
         ["1.9.0", "Using PyQt6!"],
         ["1.9.1", "Optimize 2D color preview speed; drag and drop to open/load; extention hooks"],
         ["1.9.2", "Jsonc as configuration file; build update; bug fixes"],
+        ["1.9.3", "Update source script; Bug fix: drag-and-dropped label file may be unable to save"],
         ]
 __version__, __description__ = __VERSIONS__[-1]
