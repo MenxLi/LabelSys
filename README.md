@@ -14,9 +14,15 @@ data_i = reader[i]
 
 ## Installation
 
+### install with pip
 ```bash
 make
 pip install .
+```
+
+### Binary distribution
+```bash
+python build.py
 ```
 
 ## Usage

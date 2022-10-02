@@ -36,10 +36,6 @@ data_path = [
 ( "labelSys/ui/*", "./labelSys/ui" ),
 
 # Binaries
-( "labelSys/utils/*.dll", "./labelSys/utils" ),
-( "labelSys/utils/*.so", "./labelSys/utils" ),
-( "labelSys/utils/*.dylib", "./labelSys/utils" ),
-
 ( "labelSys/bin/*", "./labelSys/bin" ),
 
 ( "labelSys/docs", "./labelSys/docs" ),
