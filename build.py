@@ -22,13 +22,8 @@ if not os.path.exists(conf_src):
     print("Configuration file not exists: ", conf_src)
     exit()
 
-__this_dir = os.path.abspath(os.path.dirname(__file__))
-C_LIB_PTH = os.path.join(__this_dir, "labelSys", "clib")
-
 print("Compile binaries...")
-os.chdir(C_LIB_PTH)
 subprocess.check_call(["make"])
-os.chdir(__this_dir)
 
 hiddenimports=[
     'vtkmodules','vtkmodules.all',

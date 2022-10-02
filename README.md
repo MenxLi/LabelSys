@@ -15,6 +15,7 @@ data_i = reader[i]
 ## Installation
 
 ```bash
+make
 pip install .
 ```
 
