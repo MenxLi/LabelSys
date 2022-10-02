@@ -7,6 +7,11 @@ DLLEXT := .dll
 
 # Starting of the complie line
 CC_PARTIAL := clang
+# don't need -lm in windows, if using math library
+always:
+	$(CC_PARTIAL) -Wall -O2 $(SRC_PTH)/contour2Mask.c -shared -o $(BIN_PTH)/contour2Mask$(DLLEXT)
+	$(CC_PARTIAL) -Wall -O2 $(SRC_PTH)/mergeMasks.c -shared -o $(BIN_PTH)/mergeMasks$(DLLEXT)
+	$(CC_PARTIAL) -Wall -O2 $(SRC_PTH)/b64enc.c -shared -o $(BIN_PTH)/b64enc$(DLLEXT)
 
 else
 # Linux or mac
@@ -20,10 +25,9 @@ endif
 
 # Starting of the complie line
 CC_PARTIAL := cc -fPIC
-
-endif
-
 always:
 	$(CC_PARTIAL) -Wall -O2 $(SRC_PTH)/contour2Mask.c -shared -o $(BIN_PTH)/contour2Mask$(DLLEXT)
 	$(CC_PARTIAL) -Wall -O2 $(SRC_PTH)/mergeMasks.c -shared -o $(BIN_PTH)/mergeMasks$(DLLEXT)
 	$(CC_PARTIAL) -Wall -O2 $(SRC_PTH)/b64enc.c -shared -lm -o $(BIN_PTH)/b64enc$(DLLEXT)
+endif
+
