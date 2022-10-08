@@ -93,13 +93,19 @@ class PtContourInteractorStyle(InteractionStyleBase):
     def leftButtonPressEvent(self, obj, event):
         if self.__mode == "Drawing":
             if self.tmp_cnt:
+                # maybe remove duplicated first point on tmp_cnt
                 cnt_pts = self.__getPtsInCnt(self.tmp_cnt)
                 if cnt_pts[0] == cnt_pts[1]:
                     cnt_pts.pop(0)
                 self.pts = cnt_pts
-            self.pts.append(self._getMousePos())
+            click_pos = self._getMousePos()
+            if click_pos == (0.0, 0.0, 0):
+                # out of the boundary
+                return
+            self.pts.append(click_pos)
             self.__removeTmpCnt()
             if len(self.pts) == 1:
+                # creates a duplicated point to construct contour when there is only a single point
                 self.tmp_cnt = self.widget.constructContour(self.pts*2, open_curve = True, tmp_contour = True)
             else:
                 self.tmp_cnt = self.widget.constructContour(self.pts, open_curve = True, tmp_contour = True)
