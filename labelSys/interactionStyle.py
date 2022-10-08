@@ -3,15 +3,18 @@ from typing import Callable, Dict, Literal, NewType, Tuple, List, TypedDict, TYP
 from PyQt6.QtWidgets import QWidget, QApplication
 from PyQt6.QtCore import Qt, QObject, QEvent
 from PyQt6.QtGui import QCursor, QPixmap
+from . import utils
+import numpy as np
 import logging
 
 if TYPE_CHECKING:
     from .mainWindowGUI import MainWindow
+    from .labelResultHolder import LabelHolder
     from .vtkClass import VtkWidget
     from .vtkInteractionStyle import InteractionStyleBase as vtkInteractionStyle
 
 qlogger = logging.getLogger("qlogger")
-labelsys_logger = logging.getLogger("labelsys_logger")
+labelsys_logger = logging.getLogger("labelSys")
 
 class KeyRecord(TypedDict):
     callback: Callable[[], None]
@@ -235,7 +238,65 @@ class StyleImWidgetBase(StyleBase):
                          callback = self.startImMov)
         self.registerKey("Space", mode = "release", \
                          callback = self.endImMov)
+
+        # Press alt key to select label on image by mouse click
+        self.registerKey("Alt", mode = "press", \
+                         callback = self.startSelectLabelStatus)
+        self.registerKey("Alt", mode = "release", \
+                         callback = self.endSelectLabelStatus)
+
         self.watchKeyStatus("Space")
+
+    @property
+    def lbl_holder(self) -> LabelHolder:
+        return self.main_win.lbl_holder
+
+    @property
+    def imgs(self) -> List[np.ndarray]:
+        return self.main_win.imgs
+
+    @property
+    def slice_id(self) -> int:
+        return self.main_win.slice_id
+
+    @property
+    def mouse_im_pos(self) -> Tuple[float, float]:
+        """
+        Get mouse position on the image
+        return position in opencv coordinate
+        """
+        vtk_widget:VtkWidget = self.main_win.im_widget
+        vtk_pos = vtk_widget.style._getMousePos()
+        return tuple(utils.vtk2CvCoord(vtk_pos[0], vtk_pos[1], vtk_widget.im.shape))
+
+    @property
+    def vtk_style(self):
+        vtk_widget:VtkWidget = self.main_win.im_widget
+        return vtk_widget.style
+
+    def leftButtonPressEvent(self):
+        """
+        Click to select the label
+        """
+        if self.keyModifiers("Alt"):
+            if self.vtk_style.is_drawing:
+                print("Can't select item now")
+                return
+
+            im_hw = tuple(self.imgs[self.slice_id].shape[:2])
+            lbl = self.lbl_holder.getLabelNameByPosition(self.slice_id, self.mouse_im_pos, im_hw)
+            if lbl:
+                self.main_win.combo_label.setCurrentText(lbl)
+
+    def startSelectLabelStatus(self):
+        self.cursor.setShapeCross()
+        if self.vtk_style.is_drawable:
+            # Prevent vtk_style drawing events
+            # maybe unnecessary?
+            self.vtk_style.disableDrawing()
+
+    def endSelectLabelStatus(self):
+        self.cursor.setShapeArrow()
 
     def startImMov(self):
         vtk_widget:VtkWidget = self.main_win.im_widget
@@ -267,4 +328,3 @@ class StyleImWidgetBase(StyleBase):
         else:
             self.main_win.nextSlice()
         return super().wheelBackwardEvent()
-

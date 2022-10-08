@@ -5,7 +5,7 @@
 # (see https://bitbucket.org/Mons00n/mrilabelsys/).
 #
 # import{{{
-from typing import List, Tuple, Type
+from typing import List, Tuple, Type, Any
 from vtkmodules.vtkCommonCore import \
     VTK_INT, VTK_UNSIGNED_CHAR, VTK_UNSIGNED_INT, VTK_UNSIGNED_SHORT, \
     VTK_UNSIGNED_LONG, VTK_CHAR, VTK_SHORT, VTK_FLOAT, VTK_DOUBLE, VTK_UNSIGNED_LONG_LONG, VTK_LONG_LONG, \
@@ -22,6 +22,7 @@ from PyQt6.QtWidgets import *
 import numpy as np
 import cv2 as cv
 from .utils import utils_ as F
+from . import utils
 from .configLoader import *
 import os, sys
 from .vtkInteractionStyle import InteractionStyleBase, PtContourInteractorStyle, DrawContourInteractorStyle
@@ -322,10 +323,11 @@ class VtkWidget(QVTKRenderWindowInteractor, WidgetCore):
         # - img_shape: (W, H)"""
         # return np.array([img_shape[1]-1-y, x])
 # 
-    def __getBackCvCoord(self, x_vtk, y_vtk, img_shape):
+    def __getBackCvCoord(self, x_vtk, y_vtk, img_shape) -> Any:
         """Get coordinate in (col, row)
         - img_shape: (W, H)"""
-        return np.array([x_vtk+1, img_shape[0]-2-y_vtk])
+        return utils.vtk2CvCoord(x_vtk, y_vtk, img_shape)
+        #  return np.array([x_vtk+1, img_shape[0]-2-y_vtk])
 
     def __clearCanvas(self):
         self.contours = []

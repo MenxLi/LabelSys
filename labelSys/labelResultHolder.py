@@ -20,6 +20,8 @@ import re
 
 from .clib.wrapper import MergeMasks
 
+number = Union[float, int]
+
 class HeaderData(TypedDict):
     Labeler: str
     Time: str
@@ -62,15 +64,17 @@ class LabelHolder:
         self.data: Optional[ContourDataT] = None
         self.SAVED: bool = True
         self.uids: List[str]
+        self.aval_labels : List[str]
         self.comments: List[Union[None, str]]
         self.class_comments: List[Union[None, str]]
         self.drawer = LabelDrawer(self)
 
-    def initialize(self, entries, SOPInstanceUIDs):
+    def initialize(self, entries: List[str], unique_ids: List[str]):
         self.data = []
-        self.uids = []          # For future version
+        self.uids = []
         self.SAVED = True
-        for ids in SOPInstanceUIDs:
+        self.aval_labels = entries
+        for ids in unique_ids:
             self.data.append({})
             for entry in entries:
                 self.data[-1][entry] = []
@@ -101,7 +105,7 @@ class LabelHolder:
             file_path = os.path.join(path, file_name)
             if file_name == "HEAD_0.json":
                 with open(file_path, "r") as f_:
-                    header_data = json.load(f_)
+                    header_data: HeaderData = json.load(f_)
             else:
                 with open(file_path, "r") as f_:
                     slice_data = json.load(f_)
@@ -127,6 +131,12 @@ class LabelHolder:
                 else:                           # Older version compatablility (<1.7.0)
                     uid = slice_data["Data"]["SOPInstanceUID"]      
                 uids.append(uid)
+
+        if "labels" in header_data["Config"]:
+            self.aval_labels = header_data["Config"]["labels"]
+        else:
+            self.logger.error("Missing labels in header_data, aval_labels can't be set")
+            self.aval_labels = []
         self.data = data
         self.uids = uids
         self.comments = comments
@@ -183,6 +193,17 @@ class LabelHolder:
         self.drawer.onModifyContour(idx = idx, lbl = src_lbl)
         self.drawer.onModifyContour(idx = idx, lbl = dst_lbl)
 
+    def getLabelNameByPosition(self, idx: int, pos: Tuple[number, number], im_hw: Tuple[int, int]) -> Optional[str]:
+        """
+        pos is in cv coordinate
+        """
+        for lbl in self.aval_labels:
+            msk = self.drawer.getSingleMask(idx, lbl, im_hw)
+            x = int(pos[0])
+            y = int(pos[1])
+            if msk[y][x]:
+                return lbl
+        return None
 
     def clearContourData(self, idx: int, lbl: str):
         if self.data:

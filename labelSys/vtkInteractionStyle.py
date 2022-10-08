@@ -1,7 +1,8 @@
 # import vtk
 from __future__ import annotations
+from abc import abstractproperty, abstractmethod
 import numpy as np
-from typing import List, Tuple, Union, TYPE_CHECKING
+from typing import List, Tuple, Union, TYPE_CHECKING, Literal
 import time, logging
 from vtkmodules.vtkRenderingCore import vtkPropPicker
 from vtkmodules.vtkInteractionWidgets import vtkContourWidget
@@ -50,6 +51,30 @@ class InteractionStyleBase(vtkInteractorStyleImage):
 
     def forceDrawing(self):
         """Should be called when add another contour/bbox"""
+        self.enableDrawing()
+
+    @abstractmethod
+    def enableDrawing(self):
+        """Should be called when add a contour/bbox"""
+        raise NotImplementedError
+
+    @abstractmethod
+    def disableDrawing(self):
+        """Should be called when finish adding a contour/bbox"""
+        raise NotImplementedError
+
+    @abstractproperty
+    def is_drawable(self) -> bool:
+        """
+        Determine if a label could be added
+        """
+        raise NotImplementedError
+
+    @abstractproperty
+    def is_drawing(self) -> bool:
+        """
+        Determine if is in the middle of adding a label
+        """
         raise NotImplementedError
     
     def mouseMoveEvent(self, obj, event):
@@ -88,10 +113,25 @@ class PtContourInteractorStyle(InteractionStyleBase):
         self.pts: List[Tuple[float, float, float]] = []
         self.tmp_cnt: Union[None, vtkContourWidget] = None
         self._reinitState()
+        self.__mode: Literal["Drawing", "Revising"]
+
+    @property
+    def is_drawable(self):
+        return self.__mode == "Drawing"
+
+    @property
+    def is_drawing(self) -> bool:
+        return not self.tmp_cnt is None
     
+    def enableDrawing(self):
+        self.__mode = "Drawing"
+
+    def disableDrawing(self):
+        self.__mode = "Revising"
+
     @loggedFunction
     def leftButtonPressEvent(self, obj, event):
-        if self.__mode == "Drawing":
+        if self.is_drawable:
             if self.tmp_cnt:
                 # maybe remove duplicated first point on tmp_cnt
                 cnt_pts = self.__getPtsInCnt(self.tmp_cnt)
@@ -119,9 +159,6 @@ class PtContourInteractorStyle(InteractionStyleBase):
             self.widget.constructContour(self.pts)
             self._reinitState()
         
-    def forceDrawing(self):
-        self.__mode = "Drawing"
-
     def _reinitState(self):
         if self.widget.contours == []:
             self.__mode = "Drawing"
@@ -152,9 +189,23 @@ class DrawContourInteractorStyle(InteractionStyleBase):
         self.pts_raw = []
         self.pts = []
         self.lines = []
-        self.__mode = "Drawing"
+        self.__mode: Literal["Drawing", "Revising"] = "Drawing"
         self.__drawing = False
         self.__prev_pt = None
+
+    @property
+    def is_drawable(self):
+        return self.__mode == "Drawing"
+
+    @property
+    def is_drawing(self):
+        return self.__drawing
+
+    def enableDrawing(self):
+        self.__mode = "Drawing"
+
+    def disableDrawing(self):
+        self.__mode = "Revising"
 
     @loggedFunction
     def leftButtonPressEvent(self, obj, event):
@@ -227,9 +278,6 @@ class DrawContourInteractorStyle(InteractionStyleBase):
             self.widget.constructContour(self.pts)
 
             reInit()
-
-    def forceDrawing(self):
-        self.__mode = "Drawing"
 
     def _sampleCurve(self, curve: Union[List[Tuple[int, int]], np.ndarray], sample_step: int) -> List[Tuple[int, int]]:
         """Sample a curve in equally distributed interval of intergral curvature
