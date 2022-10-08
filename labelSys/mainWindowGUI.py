@@ -42,6 +42,10 @@ from .toothSeg_utils.io import ResizeImageRecord
 
 class MainWindow(MainWindowGUI, WidgetCore):
     resized = QtCore.pyqtSignal()
+
+    # Type hints
+    fl: Optional[FolderLoader]
+
     # Init{{{
     def __init__(self,args):
         super().__init__()
@@ -533,6 +537,9 @@ Welcome to LabelSys v{version},\n\
     def nextPatient(self):
         if self.__querySave() == 1:
             return
+        if self.fl is None:
+            # loading mode
+            return
         if self.fl.next():
             self.__updatePatient()
             return 0
@@ -540,6 +547,9 @@ Welcome to LabelSys v{version},\n\
     @loggedFunction
     def prevPatient(self):
         if self.__querySave() == 1:
+            return
+        if self.fl is None:
+            # loading mode
             return
         if self.fl.previous():
             self.__updatePatient()
