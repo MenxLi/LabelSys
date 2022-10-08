@@ -4,7 +4,7 @@
 # This file is part of LabelSys
 # (see https://bitbucket.org/Mons00n/mrilabelsys/).
 #
-from typing import List, Union, Optional, TypedDict, Any, Dict, Tuple
+from typing import List, Union, Optional, TypedDict, Any, Dict, Tuple, Literal
 
 from immarker.core.globalVar import logging
 from .utils.base64ImageConverter import imgEncodeB64, imgDecodeB64
@@ -160,6 +160,29 @@ class LabelHolder:
 
         thread = Thread(target = self.__threadSaveToFile, args = (path, imgs.copy(),))
         thread.start()
+
+    def internalLabelChange(self, idx: int, src_lbl: str, dst_lbl: str, 
+                            mode: Literal["switch", "add"]):
+        """
+        Change label name while retaining the contours
+        if mode is "add": clear src and add it to dst
+        if mode is "switch": switch src and dst
+        """
+        assert self.data is not None
+        slice_data = self.data[idx]
+        if mode=="add":
+            slice_data[dst_lbl] += slice_data[src_lbl]
+            slice_data[src_lbl] = []
+        elif mode=="switch":
+            tmp_cnt_data = slice_data[dst_lbl]
+            slice_data[dst_lbl] = slice_data[src_lbl]
+            slice_data[src_lbl] = tmp_cnt_data
+        else:
+            raise ValueError(f"internalLabelChange mode must be either switch or add")
+
+        self.drawer.onModifyContour(idx = idx, lbl = src_lbl)
+        self.drawer.onModifyContour(idx = idx, lbl = dst_lbl)
+
 
     def clearContourData(self, idx: int, lbl: str):
         if self.data:

@@ -4,7 +4,7 @@
 # This file is part of LabelSys
 # (see https://bitbucket.org/Mons00n/mrilabelsys/).
 #
-from typing import List, Optional, Sequence, Union
+from typing import List, Optional, Sequence, Union, Literal
 import webbrowser
 from pathlib import Path
 import os,sys, platform
@@ -187,7 +187,8 @@ Welcome to LabelSys v{version},\n\
         self.act_op_change_lbl.setShortcut("Tab")
         self.act_op_change_lbl_reverse.triggered.connect(lambda: self.switchLabelReverse())
         self.act_op_change_lbl_reverse.setShortcut("Shift+Tab")
-        self.act_op_toAnotherLbl.triggered.connect(lambda: self.queryToAnotherLabel())
+        self.act_op_toAnotherLbl.triggered.connect(lambda: self.queryToAnotherLabel(mode="add"))
+        self.act_op_switchToAnotherLbl.triggered.connect(lambda: self.queryToAnotherLabel(mode="switch"))
         self.act_op_change_lbl_reverse.setShortcut("Shift+Tab")
         self.act_op_save.triggered.connect(lambda: self.saveCurrentPatient())
         self.act_op_save.setShortcut("Ctrl+S")
@@ -443,20 +444,22 @@ Welcome to LabelSys v{version},\n\
         except: pass
 
     @loggedFunction
-    def queryToAnotherLabel(self):
-        """Change current label selection while retain the contours,
+    def queryToAnotherLabel(self, mode: Literal["switch", "add"]):
+        """
+        Change current label selection while retaining the contours,
         would be useful if someone did some labeling already,
         and found they are working in a wrong label.
         """
         aval_labels:List[str] = self.config["labels"]
-        item, ok = QInputDialog.getItem(self, "Select label name.", "Avaliable labels", \
+        item, ok = QInputDialog.getItem(self, f"Select label name to {mode} to.", "Avaliable labels", \
             aval_labels, aval_labels.index(self.curr_lbl), False)
         if ok and item!=self.curr_lbl:
             assert self.lbl_holder.data is not None     # Type checking
-            data = self.lbl_holder.data[self.slice_id]
-            data[item] += data[self.curr_lbl]
-            data[self.curr_lbl] = []
-            self.lbl_holder.drawer.onModifyContour(idx = self.slice_id, lbl = self.curr_lbl)
+            #  data = self.lbl_holder.data[self.slice_id]
+            #  data[item] += data[self.curr_lbl]
+            #  data[self.curr_lbl] = []
+            #  self.lbl_holder.drawer.onModifyContour(idx = self.slice_id, lbl = self.curr_lbl)
+            self.lbl_holder.internalLabelChange(self.slice_id, self.curr_lbl, item, mode)
             self.combo_label.setCurrentText(item)
         else:
             self._warnDialog("Failed.")

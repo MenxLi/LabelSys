@@ -542,6 +542,7 @@
     <addaction name="act_op_change_lbl"/>
     <addaction name="act_op_change_lbl_reverse"/>
     <addaction name="act_op_toAnotherLbl"/>
+    <addaction name="act_op_switchToAnotherLbl"/>
     <addaction name="separator"/>
     <addaction name="act_op_interp"/>
     <addaction name="act_op_add_cnt"/>
@@ -724,6 +725,11 @@
   <action name="act_tool_crop">
    <property name="text">
     <string>Crop and rotate</string>
+   </property>
+  </action>
+  <action name="act_op_switchToAnotherLbl">
+   <property name="text">
+    <string>Switch to another label</string>
    </property>
   </action>
  </widget>

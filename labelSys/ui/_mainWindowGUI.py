@@ -48,6 +48,7 @@ class MainWindowGUI(QMainWindow):
     act_op_change_lbl: QAction
     act_op_change_lbl_reverse: QAction
     act_op_toAnotherLbl: QAction
+    act_op_switchToAnotherLbl: QAction
     act_op_save: QAction
     act_op_clear: QAction
     act_op_interp: QAction
