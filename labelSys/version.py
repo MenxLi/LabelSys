@@ -82,5 +82,6 @@ __VERSIONS__ =[ \
         ["1.9.1", "Optimize 2D color preview speed; drag and drop to open/load; extention hooks"],
         ["1.9.2", "Jsonc as configuration file; build update; bug fixes"],
         ["1.9.3", "Update source script; Bug fix: drag-and-dropped label file may be unable to save"],
+        ["1.9.4", "Omit out-of-boundary points in click-label mode; add switch label action; add click-to-select interaction style; disable interp button"],
         ]
 __version__, __description__ = __VERSIONS__[-1]
