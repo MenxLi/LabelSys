@@ -555,6 +555,9 @@ Welcome to LabelSys v{version},\n\
         self.__updateImg()
 
     def interpCurrentSlice(self):
+        # To do in the future
+        self._warnDialog("Not applicable", "This is a function to be added in the future")
+        return
         prev_mask = self.__getSingleMask(self.slice_id-1, self.combo_label.currentText())
         next_mask = self.__getSingleMask(self.slice_id+1, self.combo_label.currentText())
         if type(prev_mask) == type(None) and type(next_mask) == type(None):
