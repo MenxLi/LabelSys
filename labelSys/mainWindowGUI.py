@@ -10,6 +10,8 @@ from pathlib import Path
 import os,sys, platform
 import copy
 
+from labelSys.argParse import CMDArgT
+
 from .version import __version__, __license__, __license_full__
 from .fileReader import FolderLoader
 from .utils.labelReader import checkFolderEligibility
@@ -47,7 +49,7 @@ class MainWindow(MainWindowGUI, WidgetCore):
     fl: Optional[FolderLoader]
 
     # Init{{{
-    def __init__(self,args):
+    def __init__(self,args: CMDArgT):
         super().__init__()
         self.setWindowIcon(QIcon(os.path.join(_ICON_DIR, "main.ico")))
         self.setAcceptDrops(True)
@@ -313,18 +315,20 @@ Welcome to LabelSys v{version},\n\
         self.fl = None  # prevent lbl_holder initialize when changing series and alter saving behaviour
         self.slice_id = 0
         header, self.imgs = self.lbl_holder.loadFile(Path(fname))
-        try:
-            self.config = header["Config"]
-            # To compat oler version (<1.6.0)
-            if "classifications" not in self.config.keys():
-                self.config["classifications"] = [None]*len(self.imgs)
-            if "label_draw" not in self.config.keys():
-                self.config["label_draw"] = [1]*len(self.imgs)
-        except KeyError:
-            # In the older version of this tool header don't contain "config" attribute, Labels
-            # attribute was used instead
-            self.config["labels"] = header["Labels"]
-            print("Warning: The header file does not contain config attribute, maybe this data was labeled with older version of the tool. \n You can ignore this warning if no error occurs, please save this file to overwrite previous one to add config attribute.")
+
+        if not args.freeze_config:
+            try:
+                self.config = header["Config"]
+                # To compat oler version (<1.6.0)
+                if "classifications" not in self.config.keys():
+                    self.config["classifications"] = [None]*len(self.imgs)
+                if "label_draw" not in self.config.keys():
+                    self.config["label_draw"] = [1]*len(self.imgs)
+            except KeyError:
+                # In the older version of this tool header don't contain "config" attribute, Labels
+                # attribute was used instead
+                self.config["labels"] = header["Labels"]
+                print("Warning: The header file does not contain config attribute, maybe this data was labeled with older version of the tool. \n You can ignore this warning if no error occurs, please save this file to overwrite previous one to add config attribute.")
 
         # self.uids = [s["SOPInstanceUID"] for s in self.lbl_holder.data]
         self.uids = self.lbl_holder.uids
@@ -348,7 +352,8 @@ Welcome to LabelSys v{version},\n\
         self.__cache["load_path"] = fname
         self.__updateQLabelText()
         try:
-            self.resize_record.loadFromFile(os.path.join(fname, "resize_data.pkl"))
+            if not args.no_crop:
+                self.resize_record.loadFromFile(os.path.join(fname, "resize_data.pkl"))
         except:
             print("warning: no 'resize_data'")
         print("Data loaded")
@@ -738,7 +743,8 @@ Welcome to LabelSys v{version},\n\
         self.lbl_holder.SAVED = True
 
         print("Exporting resize data.")
-        self.resize_record.export(os.path.join(file_path, "resize_data.pkl"))
+        if not args.no_crop:
+            self.resize_record.export(os.path.join(file_path, "resize_data.pkl"))
         print("done.")
 
     @loggedFunction

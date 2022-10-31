@@ -1,0 +1,47 @@
+{
+    "Labels":{
+        "Disc" :{
+            "color": [1.0, 0.0, 0.0], 
+            "mode": 0,
+            "draw": 1,
+            "label_step":1
+        },
+        "Condyle" :{
+            "color": [1.0, 1.0, 0.0], 
+            "mode": 0,
+            "draw": 1,
+            "label_step": 1.5
+        },
+        "Eminence" :{
+            "color": [0.0, 1.0, 1.0],
+            "mode": 1,
+            "draw": 1,
+            "label_step": 1.5
+        }
+    },
+    "Classifications":{
+         "Disc position":{
+            "short_title":"DP",
+            "class":["normal", "dislocated", "degenerated"],
+            "description":"Disc position"
+        }
+    },
+    "Loading_mode": 0,
+    "2D_preview_mag":1,
+    "Default_series":"SAG PD",
+    "Default_label":"",
+    "Max_im_height":1024,
+
+    "-----------Below are comments for your understanding--------":
+    "---------------------don't change them----------------------",
+
+    "__Contour_mode": {"Close": 0, "Open": 1},
+    "__Draw_contour": {"Click mode": 0, "Draw mode": 1},
+    "__Loading_mode": {"DICOMs":0, "Images":1, "Video":2},
+    "__Others":{
+        "0": "Label step only work when Draw contour is 1",
+        "1": "Default series only work with MRI",
+        "2": "Classifications are image wide"
+    }
+}
+

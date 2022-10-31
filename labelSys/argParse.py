@@ -11,6 +11,17 @@ should be imported at the start of main file
 import argparse
 from .version import __version__, __description__
 
+class CMDArgT(argparse.Namespace):
+    config_file: str
+    dev: bool
+    load: bool
+    file: str
+    loading_mode: int
+    gen_conf: bool
+    show_log: bool
+    freeze_config: bool
+    no_crop: bool
+
 description = "\
     LabelSys v{version}: \n\
     LabelSys is a labeling software developed by Li, Mengxun (mengxunli@whu.edu.cn)\
@@ -32,5 +43,10 @@ parser.add_argument("--gen_conf", action = "store_true", default = False, \
     help = "Generate a configuration file at current working directory, then exit")
 parser.add_argument("--show_log", action = "store_true", default = False, \
     help = "Show log, then exit")
+parser.add_argument("--freeze_config", action = "store_true", default = False, \
+    help = "Set this flag and the application will not use labeled file configuration "
+    "when loading labeled files")
+parser.add_argument("--no_crop", action = "store_true", default=False, \
+    help = "Set this flag and the application will not save nor read crop data")
 
-args = parser.parse_args()
+args: CMDArgT = parser.parse_args(namespace = CMDArgT)
