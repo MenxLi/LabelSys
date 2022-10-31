@@ -50,3 +50,8 @@ parser.add_argument("--no_crop", action = "store_true", default=False, \
     help = "Set this flag and the application will not save nor read crop data")
 
 args: CMDArgT = parser.parse_args(namespace = CMDArgT)
+
+
+# Default options for this project
+args.freeze_config = True
+args.no_crop = True
