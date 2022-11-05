@@ -31,3 +31,7 @@ labelSys [config_file_path]
 ```
 
 For CLI arguments see: `labelSys -h`
+
+## Known issues:
+
+* Saving while another saving thread is running will raise a permission error.
