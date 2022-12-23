@@ -1,5 +1,5 @@
 from warnings import warn
-from typing import List, Tuple, Union, Dict
+from typing import List, Tuple, Union, Dict, Optional
 from collections.abc import Sequence
 
 from .base64ImageConverter import imgDecodeB64
@@ -31,7 +31,7 @@ class LabelData(object):
         self.header: dict = {}
         self.images: List[np.ndarray] = []
         self.masks: List[Dict[str, np.ndarray]] = []
-        self.contours: List[Dict[str, List[List[Tuple[int, int]]]]] = []
+        self.contours: List[Dict[str, Optional[List[List[Tuple[int, int]]]] ]] = []
         self.classifications: List[Dict[str, str]] = []
         self.comments: List[str] = []
         self.uids: List[str] = []
