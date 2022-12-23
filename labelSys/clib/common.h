@@ -4,7 +4,9 @@
 #define FALSE 0
 #define TRUE 1
 
+#ifndef __cplusplus
 typedef unsigned char bool;
+#endif
 typedef unsigned char uint8;
 
 

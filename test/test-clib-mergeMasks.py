@@ -18,15 +18,15 @@ def getCircleMsk(im_w, im_h, center: Tuple[int, int], radius: float, val: int):
 cs = []
 colors = []
 
-for i in range(5):
-    for j in range(5):
+for i in range(10):
+    for j in range(10):
         cs.append((i*200 + 100, j*100 + 50))
         
         color = [random.randint(50, 220) for _ in range(3) ]
         colors.append(color)
 
-H = 1000//2
-W = 2000//2
+H = 1000
+W = 2000
 
 msks = []
 for c in cs:
@@ -80,8 +80,8 @@ def overlapPyLoopJIT(msks: List[np.ndarray], colors: List[Tuple[int, int, int]])
 
 
 
-with Timer("Python-loop"):
-    out0 = overlapPyLoop(msks, colors)
+#  with Timer("Python-loop"):
+#      out0 = overlapPyLoop(msks, colors)
 
 with Timer("Numpy"):
     out1 = simpleOverlapNP(msks, colors)
@@ -89,12 +89,12 @@ with Timer("Numpy"):
 with Timer("JIT"):
     out2 = overlapPyLoopJIT(msks, colors)
 
-with Timer("C-loop"):
+with Timer("C"):
     msks = np.array(msks)
     out3 = MergeMasks.mergeBool2Color2D(msks, colors)
 
-plt.subplot(141)
-plt.imshow(out0)
+#  plt.subplot(141)
+#  plt.imshow(out0)
 plt.subplot(142)
 plt.imshow(out1)
 plt.subplot(143)
