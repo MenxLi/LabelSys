@@ -6,3 +6,4 @@ PyQt6-sip
 scipy
 vtk>9
 json5
+markdown
