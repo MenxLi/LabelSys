@@ -1,10 +1,10 @@
 from __future__ import annotations
 import logging, sys
 from typing import List, TYPE_CHECKING, Union
-from PyQt6.QtWidgets import QApplication
-from PyQt6.QtCore import QCoreApplication
 if TYPE_CHECKING:
     from .extensionCore import HookCallbackHolder, HookEventRecord
+    from PyQt6.QtWidgets import QApplication
+    from PyQt6.QtCore import QCoreApplication
 
 #  global int_uid
 #  global logger
@@ -34,6 +34,7 @@ def init():
 
 
 def getQApp(args: List) -> Union[QApplication, QCoreApplication]:
+    from PyQt6.QtWidgets import QApplication
     global _qapp
     thismodule = sys.modules[__name__]
     if not hasattr(thismodule, "_qapp"):
