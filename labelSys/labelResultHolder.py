@@ -6,12 +6,11 @@
 #
 from typing import List, Union, Optional, TypedDict, Any, Dict, Tuple, Literal
 
-from immarker.core.globalVar import logging
 from .utils.base64ImageConverter import imgEncodeB64, imgDecodeB64
 from .utils.labelReaderV2 import checkFolderEligibility
 from .utils import utils_ as F
 from .configLoader import *
-import os
+import os, logging
 import cv2 as cv
 import numpy as np
 import json
@@ -19,27 +18,9 @@ from threading import Thread
 import re
 
 from .clib.wrapper import MergeMasks
+from .types import LabelHeaderT, ContourDataT
 
 number = Union[float, int]
-
-class HeaderData(TypedDict):
-    Labeler: str
-    Time: str
-    Spacing: List[float]
-    Series: str
-    Version: str
-    Config: Dict[str, Any]
-
-class SliceLabelDataTypeSingle(TypedDict):
-    # This represents a contour
-    Open: bool
-    Points: List[Tuple[float, float, float]]    # VTK nodes
-    Contour: List[Tuple[int, int]]              # Full contour in VTK coordinate
-
-SliceLabelDataType = List[SliceLabelDataTypeSingle]
-
-# Contour data type in holder.data
-ContourDataT = List[Dict[str, SliceLabelDataType]]
 
 class LabelHolder:
     """
@@ -91,7 +72,7 @@ class LabelHolder:
         comments = []
         class_comments = []
         # A default header data, in case of HEAD_0.json not found
-        header_data: HeaderData = {
+        header_data: LabelHeaderT = {
             "Labeler": "Unknown",
             "Time": "Unknown",
             "Spacing": [1,1,1],
@@ -105,7 +86,7 @@ class LabelHolder:
             file_path = os.path.join(path, file_name)
             if file_name == "HEAD_0.json":
                 with open(file_path, "r") as f_:
-                    header_data: HeaderData = json.load(f_)
+                    header_data: LabelHeaderT = json.load(f_)
             else:
                 with open(file_path, "r") as f_:
                     slice_data = json.load(f_)
@@ -146,7 +127,7 @@ class LabelHolder:
         return  header_data, imgs
 
 
-    def saveToFile(self, path, imgs, head_info):
+    def saveToFile(self, path, imgs, head_info: LabelHeaderT):
         """
         - path: directory to store all the data for current patient
         Note: the x,y coordinate is in vtk coordinate

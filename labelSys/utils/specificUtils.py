@@ -13,9 +13,10 @@ import cv2 as cv
 import numpy as np
 from decimal import Decimal
 from ..version import __version__
+from ..types import LabelHeaderT
 
-def createHeader(labeler, series, config,  time = str(datetime.datetime.now()), spacing = (1,1,1)):
-    head_info = {
+def createHeader(labeler, series, config,  time = str(datetime.datetime.now()), spacing = (1,1,1)) -> LabelHeaderT:
+    head_info: LabelHeaderT = {
             "Labeler":labeler,
             "Time":time,
             "Spacing":spacing,
