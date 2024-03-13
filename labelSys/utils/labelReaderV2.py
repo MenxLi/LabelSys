@@ -202,7 +202,7 @@ def readDataSlice(file_path: str, magnification: Union[int, float] = 1, line_thi
         im_channel = 1
     elif len(img_ori.shape) == 3:
         im_channel = img_ori.shape[2]
-    new_im_size = (np.array(img_ori.shape[:2])*magnification).astype(np.int).tolist() # H, W
+    new_im_size = (np.array(img_ori.shape[:2])*magnification).astype(np.int16).tolist() # H, W
     if USE_SKIMAGE:
         if im_channel == 1:
             img = skimage.transform.resize(img_ori, new_im_size)
@@ -262,7 +262,7 @@ def _readOneLabel(ori_im_size, data, magnification, line_thickness):
     - data: data from one label
     return one mask
     """
-    new_im_size = (np.array(ori_im_size)*magnification).astype(np.int)
+    new_im_size = (np.array(ori_im_size)*magnification).astype(np.int16)
     mask = np.zeros(new_im_size[:2], np.uint8)
     cnts = []
     for d in data:
