@@ -31,7 +31,7 @@ def getLabelColors(n_colors):
     for c in range(n_colors):
         colors.append([int(180/n_colors* c), 255,255])
     colors = _rearrangeColors(colors)
-    colors = cv.cvtColor(np.array([colors], np.uint8), cv.COLOR_HSV2RGB).astype(np.float)
+    colors = cv.cvtColor(np.array([colors], np.uint8), cv.COLOR_HSV2RGB).astype(np.float32)
     colors = colors/255
     return np.squeeze(colors)
 def _rearrangeColors(colors):

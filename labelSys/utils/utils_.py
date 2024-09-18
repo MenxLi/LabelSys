@@ -131,7 +131,7 @@ def normalize_mat(mat, minimum = "mean"):# {{{
         return (mat - mat.mean())/(mat.max() - mat.min())
 # }}}
 def map_mat_255(img):# {{{
-    img = img.astype(np.float)
+    img = img.astype(np.float32)
     if (img == 0).all():
         return img.astype(np.uint8)
     result = normalize_mat(img, minimum = "zero")*255
@@ -234,7 +234,7 @@ def overlap_mask(img, mask, color = (255,0,0), alpha: float = 1):# {{{
     if img_channel(mask) == 1:
         mask = gray2rgb_(mask)
     im = img.astype(float)
-    channel = np.ones(img.shape[:2], np.float)
+    channel = np.ones(img.shape[:2], np.float32)
     color_ = np.concatenate((channel[:,:,np.newaxis]*color[0],channel[:,:,np.newaxis]*color[1],channel[:,:,np.newaxis]*color[2]), axis = 2)
     f_im = im*(1-mask) + im*mask*(1-alpha) + color_*alpha*mask
     return f_im.astype(np.uint8)

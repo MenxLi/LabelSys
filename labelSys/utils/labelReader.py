@@ -184,7 +184,7 @@ def inspectOneSlice(slice_path):# {{{
         im_channel = 1
     elif len(img.shape) == 3:
         im_channel = img.shape[2]
-    mask = np.zeros(img.shape[:2], np.float)
+    mask = np.zeros(img.shape[:2], np.float32)
     value = 0
     for label, _mask in masks.items():
         value += 1
