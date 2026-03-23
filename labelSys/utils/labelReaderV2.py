@@ -88,6 +88,8 @@ class LabelSysReader(Sequence):
     MAGNIFICATION = 1
     LINE_THICKNESS = 1
     def __init__(self, folder_list: List[str]) -> None:
+        if not isinstance(folder_list, list):
+            raise TypeError("Input should be a list of folder paths.")
         self.fl = folder_list
 
     def __getitem__(self, key)->LabelData:

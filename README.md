@@ -42,17 +42,19 @@ For CLI arguments see: `labelSys -h`
 
 ## Reading labeled data using API
 ```python
-from labelSysReader.labelReaderV2 import LabelSysReader, recursivelyFindLabelDir
+from labelSys.utils.labelReaderV2 import LabelSysReader
 
-label_dirs = recursivelyFindLabelDir(root_dir)
-reader = LabelSysReader(label_dirs)
+label_directories: list[str]
+reader = LabelSysReader(label_directories)
+
+# get the first data
+i = 0
 
 data_i = reader[i]
-
 print(f"Total Data count: {len(reader)}")
 print(f"Number of images for this data: {len(data_i)}")
 print(f"Avaliable labels: \n\t{data_i.avalLabels()}")
 
-for (image, label, image_cls) in zip(data_i.images, data_i.masks, data_i.image_classes):
+for (image, mask_dict, cls_dict) in zip(data_i.images, data_i.masks, data_i.classifications):
     ...
 ```
