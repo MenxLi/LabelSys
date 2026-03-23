@@ -1,6 +1,10 @@
-import os
-from setuptools import setup, find_packages
 import importlib
+import os
+
+import numpy as np
+from pybind11.setup_helpers import Pybind11Extension, build_ext
+from setuptools import find_packages, setup
+
 from labelSys.version import __version__
 
 # Do not install opencv if any of cv variation exists
@@ -10,9 +14,17 @@ cv_spec = importlib.util.find_spec("cv2")
 if cv_spec is None:
     install_requires.append("opencv-python")
 
-# Compile binaries
-print("Compile binaries...")
-os.system("make")
+extra_compile_args = ["/O2"] if os.name == "nt" else ["-O3"]
+
+ext_modules = [
+    Pybind11Extension(
+        "labelSys.clib._native",
+        ["labelSys/clib/native.cpp"],
+        include_dirs=[np.get_include()],
+        cxx_std=17,
+        extra_compile_args=extra_compile_args,
+    )
+]
 
 setup(
     name="LabelSys",
@@ -40,6 +52,10 @@ setup(
     include_package_data = True,
 
     install_requires = install_requires,
+
+    ext_modules = ext_modules,
+    cmdclass = {"build_ext": build_ext},
+    zip_safe = False,
 
     entry_points = {
         "console_scripts":[

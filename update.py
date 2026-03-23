@@ -1,4 +1,4 @@
-import requests, zipfile, shutil, os, argparse, json, subprocess
+import requests, zipfile, shutil, os, argparse, json, subprocess, sys
 
 DOWNLOAD_URL = "http://limengxun.com/files/src/labelSysSrc.zip"
 CURR_DIR = os.path.abspath(os.path.realpath(os.path.dirname(__file__)))
@@ -39,8 +39,7 @@ def main():
     if args.install:
         print("Installing...")
         os.chdir(CURR_DIR)
-        subprocess.check_call("make")
-        os.system("pip install -e .")
+        subprocess.check_call([sys.executable, "-m", "pip", "install", "-e", "."])
 
 if __name__ == "__main__":
     main()

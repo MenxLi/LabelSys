@@ -4,8 +4,5 @@ recursive-include labelSys/docs *
 recursive-include labelSys/ui *
 recursive-include labelSys/icons *
 recursive-include labelSys/Pics *
-recursive-include labelSys/utils *.so
-recursive-include labelSys/utils *.dll
-recursive-include labelSys/utils *.dylib
-
-recursive-include labelSys/bin *
+recursive-include labelSys/clib *.cpp
+recursive-include labelSys/clib *.h

@@ -16,8 +16,12 @@ data_i = reader[i]
 
 ### install with pip
 ```bash
-make
-pip install .
+python -m pip install .
+```
+
+### build native extension in place
+```bash
+python setup.py build_ext --inplace
 ```
 
 ### Binary distribution

@@ -5,7 +5,7 @@
 # (see https://bitbucket.org/Mons00n/mrilabelsys/).
 #
 
-import sys, os, logging
+import sys, os, logging, importlib
 # Import MainWindow will somehow change this enviroment variable to improprate path
 # Export it manually before starting the program will not work as it will change after import
 # So, save it here for later useage
@@ -14,27 +14,39 @@ try:
 except KeyError:
     # if not export enviroment variable before the program start
     QT_QPA_PLATFORM_PLUGIN_PATH = None
-from PyQt6.QtGui import QFont
-from PyQt6.QtWidgets import QApplication
-from PyQt6.QtCore import QStringConverter
-from .mainWindowGUI import MainWindow
-from .configLoader import _UI_DIR, LOG_FILE
-from .argParse import parser, args
 from logging.handlers import RotatingFileHandler
 
-if not QT_QPA_PLATFORM_PLUGIN_PATH is None:
-    os.environ["QT_QPA_PLATFORM_PLUGIN_PATH"] = QT_QPA_PLATFORM_PLUGIN_PATH
 
-class Application(QApplication):
-    def __init__(self, *args):
-        super().__init__(*args)
-    def notify(self, receiver, e):
-        try:
-            return QApplication.notify(self, receiver, e)
-        except Exception as exp:
-            print("An exception occured: ", exp)
-            return 1
+def _load_gui_runtime():
+    importlib.import_module("labelSys.clib._native")
+
+    from PyQt6.QtGui import QFont
+    from PyQt6.QtWidgets import QApplication
+
+    from .argParse import parser, args
+    from .configLoader import _UI_DIR, LOG_FILE
+    from .mainWindowGUI import MainWindow
+
+    if QT_QPA_PLATFORM_PLUGIN_PATH is not None:
+        os.environ["QT_QPA_PLATFORM_PLUGIN_PATH"] = QT_QPA_PLATFORM_PLUGIN_PATH
+
+    class Application(QApplication):
+        def __init__(self, *app_args):
+            super().__init__(*app_args)
+
+        def notify(self, a0, a1):
+            try:
+                return QApplication.notify(self, a0, a1)
+            except Exception as exp:
+                print("An exception occured: ", exp)
+                return True
+
+    return Application, QFont, MainWindow, parser, args, _UI_DIR, LOG_FILE
+
+
 def main():
+    Application, QFont, MainWindow, parser, args, _UI_DIR, LOG_FILE = _load_gui_runtime()
+
     logger = logging.getLogger("labelSys")
     logger.setLevel(logging.DEBUG)
 

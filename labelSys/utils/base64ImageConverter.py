@@ -5,26 +5,8 @@
 # (see https://bitbucket.org/Mons00n/mrilabelsys/).
 #
 import numpy as np
-import ctypes
-from sys import platform
-import os
 
-if platform == "linux" or platform == "linux2":
-    # linux
-    dll_name = "b64enc.so"
-elif platform == "darwin":
-    # OS X
-    dll_name = "b64enc.dylib"
-elif platform == "win32":
-    # Windows...
-    dll_name = "b64enc.dll"
-else:
-    raise Exception("Invalid platform - {}".format(platform))
-
-# import _BIN_DIR from configloader may somehow cause error when building with pyinstaller
-# from ..configLoader import _BIN_DIR
-_BIN_DIR = os.path.join(os.path.dirname(__file__), "..", "bin")
-clib = ctypes.cdll.LoadLibrary(os.path.join(_BIN_DIR, dll_name))
+from ..clib import _native
 
 B64_TABLE =[
     "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z",\
@@ -35,17 +17,6 @@ B64_TABLE =[
 DECODE_DIC = {}
 for i in range(len(B64_TABLE)):
     DECODE_DIC[B64_TABLE[i]] = i
-
-def getIntPtr(arr):
-    if not arr.dtype == np.dtype(np.intc):
-        print("data type error")
-    cIntP= ctypes.POINTER(ctypes.c_int)
-    return arr.ctypes.data_as(cIntP)
-def getCharPtr(arr):
-    #  if not arr.dtype == np.dtype(np.int32):
-        #  print("data type error")
-    cCharP= ctypes.POINTER(ctypes.c_char)
-    return arr.ctypes.data_as(cCharP)
 
 class Base64_2DImageEncoder:
     OPERATOR = np.array([2**i for i in range(6)][::-1])
@@ -83,23 +54,11 @@ class Base64_2DImageEncoder:
 
     def encode1Channel_accelerate(self, im):
         """Encode one channel image"""
-        # Using ctypes
-        bi_arr = np.array([])
-        step = 800      #chunk image
-        flattened_im = im.ravel()
-        for i in range(0, im.size, step):
-            chunk = flattened_im[i:i+step].astype(np.intc)
-            bi_chunk = np.zeros(len(chunk)*self.bit, np.intc)
-            clib.intArray2Bool(getIntPtr(chunk), ctypes.c_int(len(chunk)),
-                               ctypes.c_int(self.bit), getIntPtr(bi_chunk))
-            bi_arr = np.concatenate((bi_arr, bi_chunk))
-
-        bi_len = int(np.ceil(len(bi_arr)/6))*6
-        bi_arr_append = np.concatenate((bi_arr, np.array([0]*(bi_len-len(bi_arr))) )).astype(np.intc)
-        char_arr = np.array([chr(0).encode("ascii")]*int(bi_len/6))
-        clib.biArray2B64Str(getIntPtr(bi_arr_append), getCharPtr(char_arr),
-                            ctypes.c_int(bi_len))
-        return "".join([c.decode("ascii") for c in char_arr])
+        bi_arr = _native.intArray2Bool(np.ascontiguousarray(im.ravel(), dtype=np.intc), self.bit)
+        bi_len = int(np.ceil(len(bi_arr) / 6)) * 6
+        if bi_len != len(bi_arr):
+            bi_arr = np.concatenate((bi_arr, np.zeros(bi_len - len(bi_arr), dtype=np.intc)))
+        return _native.biArray2B64Str(np.ascontiguousarray(bi_arr, dtype=np.intc))
 
     def encode1Channel(self, im):
         """Encode one channel image"""
@@ -220,14 +179,8 @@ class Base64_2DImageDecoder:
         return im
 
     def decode1Channel_accelerate(self, im_b64):
-        # Use Ctypes
-        im_size = self.H * self.W
-        im_plain = np.zeros(im_size, np.intc)
-        im_b64_arr = np.array(im_b64.encode("ascii"))
-        clib.str2intArray(getCharPtr(im_b64_arr), getIntPtr(im_plain),
-                          ctypes.c_int(self.bit), len(im_b64))
-        im = im_plain.reshape((self.H, self.W))
-        return im
+        im_plain = _native.str2intArray(im_b64, self.bit)
+        return im_plain[:self.H * self.W].reshape((self.H, self.W))
 
     def __call__(self, accelerate = False):
         if accelerate:

@@ -7,13 +7,6 @@
 data_path = [
 ( "labelSys/ui/*", "./labelSys/ui" ),
 
-# Binaries
-( "labelSys/utils/*.dll", "./labelSys/utils" ),
-( "labelSys/utils/*.so", "./labelSys/utils" ),
-( "labelSys/utils/*.dylib", "./labelSys/utils" ),
-
-( "labelSys/bin/*", "./labelSys/bin" ),
-
 ( "labelSys/docs", "./labelSys/docs" ),
 ( "labelSys/conf.json", "./labelSys" ),
 
@@ -24,3 +17,5 @@ data_path = [
 ```
 hiddenimports=['vtkmodules','vtkmodules.all','vtkmodules.qt.QVTKRenderWindowInteractor','vtkmodules.util','vtkmodules.util.vtkImageImportFromArray','vtkmodules.util.numpy_support','vtkmodules.numpy_interface', 'vtkmodules.numpy_interface.dataset_adapter']
 ```
+
+Use `--collect-binaries=labelSys` so PyInstaller bundles the compiled pybind11 extension.

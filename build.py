@@ -3,7 +3,13 @@
 Compile binary with pyinstaller
 """
 
-import subprocess, platform, os, argparse, tempfile, shutil
+import argparse
+import os
+import platform
+import shutil
+import subprocess
+import sys
+import tempfile
 
 parser = argparse.ArgumentParser(description="Build labelSys binary")
 parser.add_argument("-c", "--config", default="")
@@ -23,7 +29,7 @@ if not os.path.exists(conf_src):
     exit()
 
 print("Compile binaries...")
-subprocess.check_call(["make"])
+subprocess.check_call([sys.executable, "setup.py", "build_ext", "--inplace"])
 
 hiddenimports=[
     'vtkmodules','vtkmodules.all',
@@ -35,9 +41,6 @@ hiddenimports=[
 data_path = [
 ( "labelSys/ui/*", "./labelSys/ui" ),
 
-# Binaries
-( "labelSys/bin/*", "./labelSys/bin" ),
-
 ( "labelSys/docs", "./labelSys/docs" ),
 # ( "labelSys/conf.json", "./labelSys" ),
 ( conf_src, "./labelSys" ),
@@ -46,7 +49,7 @@ data_path = [
 ( "../immarker/immarker/docs/*", "./immarker/docs" ),
 ]
 
-cmd = ["pyinstaller", "-w", "--noconfirm", "--collect-submodules=pydicom", "-i", "./labelSys/icons/main.ico", "./run.py"]
+cmd = ["pyinstaller", "-w", "--noconfirm", "--collect-submodules=pydicom", "--collect-binaries=labelSys", "-i", "./labelSys/icons/main.ico", "./run.py"]
 
 for himp in hiddenimports:
     cmd += ["--hidden-import", himp]

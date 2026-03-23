@@ -52,8 +52,7 @@ class VtkWidget(QVTKRenderWindowInteractor, WidgetCore):
         self.camera_set = False
         self.ren_win.AddRenderer(self.ren)
         self.iren = self.ren_win.GetInteractor()
-        self.ren_win.Render()
-        self.iren.Initialize()
+        self._interactor_ready = False
 
         # Attribute
         self.colors = vtkNamedColors()
@@ -61,6 +60,17 @@ class VtkWidget(QVTKRenderWindowInteractor, WidgetCore):
 
         self.setStyleAuto()
         self.style: InteractionStyleBase
+
+    def _ensureInteractorReady(self):
+        if self._interactor_ready:
+            return
+        self.ren_win.Render()
+        self.iren.Initialize()
+        self._interactor_ready = True
+
+    def showEvent(self, event):
+        super().showEvent(event)
+        self._ensureInteractorReady()
     
     def setStyleAuto(self):
         is_draw = self.__isDraw()
@@ -92,6 +102,8 @@ class VtkWidget(QVTKRenderWindowInteractor, WidgetCore):
         Read numpy array and display in the window
         - txt: text to be shown on the screen
         """
+        self._ensureInteractorReady()
+
         if clear_canvas:
             self.__clearCanvas()
 
@@ -115,6 +127,7 @@ class VtkWidget(QVTKRenderWindowInteractor, WidgetCore):
         self.updateText(txt)
 
     def updateText(self, txt: str):
+        self._ensureInteractorReady()
         if txt is None:
             return
         try:
@@ -147,11 +160,13 @@ class VtkWidget(QVTKRenderWindowInteractor, WidgetCore):
         self.ren_win.Render()
 
     def resetCamera(self):
+        self._ensureInteractorReady()
         self.ren.ResetCamera()
         self.ren_win.Render()
         
     def contourWidget(self, color=[1, 0, 0], contourWidgetEndInteraction=None):
         """Create a template widget for drawing contours"""
+        self._ensureInteractorReady()
         contourRep = vtkOrientedGlyphContourRepresentation()
         contourRep.GetLinesProperty().SetColor(color)
         contourRep.GetLinesProperty().SetLineWidth(3)
@@ -219,6 +234,7 @@ class VtkWidget(QVTKRenderWindowInteractor, WidgetCore):
         self.style._reinitState()
 
     def drawLine(self, pt0, pt1, color = [0.5,1,1], lw = 4):
+        self._ensureInteractorReady()
         line_source = vtkLineSource()
         line_source.SetPoint1(pt0)
         line_source.SetPoint2(pt1)
