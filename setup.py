@@ -1,15 +1,26 @@
 import importlib
 import os
+from pathlib import Path
 
 import numpy as np
 from pybind11.setup_helpers import Pybind11Extension, build_ext
 from setuptools import find_packages, setup
 
-from labelSys.version import __version__
+
+def read_version() -> str:
+    version_ns = {}
+    version_file = Path(__file__).parent / "labelSys" / "version.py"
+    exec(version_file.read_text(encoding="utf-8"), version_ns)
+    return version_ns["__version__"]
 
 # Do not install opencv if any of cv variation exists
 # e.g. opencv-headless, opencv-contrib
-install_requires = ["PyQt6", "PyQt6-sip", "numpy", "pydicom", "vtk", "scipy", "json5"]
+install_requires = [
+    "PyQt6", "PyQt6-sip", 
+    "numpy", "scipy", 
+    "pydicom", "vtk", 
+    "json5"
+    ]
 cv_spec = importlib.util.find_spec("cv2")
 if cv_spec is None:
     install_requires.append("opencv-python")
@@ -28,7 +39,7 @@ ext_modules = [
 
 setup(
     name="LabelSys",
-    version=__version__,
+    version=read_version(),
     author="Mengxun Li",
     author_email="mengxunli@whu.edu.cn",
     description="A segmentation labeling software",
